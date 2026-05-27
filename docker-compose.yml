@@ -1,0 +1,62 @@
+# HR-Suite Development Stack
+# - postgres: application + (later) flowable schemas
+# - minio:    S3-compatible object storage (form attachments)
+# - mailpit:  SMTP sink + web UI for outbound mail testing
+#
+# Backbone-only in this initial cut. The application service (`app`) and a
+# Liquibase init service will be added with the first deployable module per
+# ADR-006 (Container-First, Compose-Helm-Symmetrie). Until then this file is
+# the local equivalent of the platform's backing services and stays in lockstep
+# with the future Helm chart's topology.
+#
+# An OIDC IdP stub (dex) will be added once the identity-sp module starts.
+# Until then, authentication is mocked at the application layer.
+
+name: hr-suite-dev
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: hrsuite-postgres
+    environment:
+      POSTGRES_DB: hrsuite
+      POSTGRES_USER: hrsuite
+      POSTGRES_PASSWORD: dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hrsuite -d hrsuite"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: hrsuite-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: hrsuite
+      MINIO_ROOT_PASSWORD: devdevdev
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # Console
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: hrsuite-mailpit
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Web UI
+
+volumes:
+  postgres-data:
+  minio-data:
