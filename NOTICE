@@ -1,0 +1,19 @@
+HR-Suite
+Copyright 2026 HR-Suite Contributors.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may obtain a copy of the License in the LICENSE file in this repository
+or at http://www.apache.org/licenses/LICENSE-2.0.
+
+This project includes or references the following third-party software:
+
+- Apache Flowable (Apache License 2.0)        — https://flowable.com
+- Spring Framework / Spring Boot (Apache 2.0) — https://spring.io
+- bpmn-io (MIT License)                        — https://bpmn.io
+- PostgreSQL (PostgreSQL License)              — https://www.postgresql.org
+- MinIO (AGPL-3.0 server / Apache-2.0 client)  — https://min.io
+- Mailpit (MIT License)                        — https://github.com/axllent/mailpit
+
+This NOTICE file will be updated as additional dependencies are introduced.
+See https://github.com/manormachine2207/HR-Suite-notes for full architecture
+context and decision records.

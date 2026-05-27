@@ -1,0 +1,42 @@
+# --- Java / Maven ---
+target/
+*.class
+hs_err_pid*
+
+# --- Node / Frontend ---
+node_modules/
+dist/
+.vite/
+.cache/
+.next/
+
+# --- IDE ---
+.idea/
+*.iml
+.vscode/
+.fleet/
+*.swp
+*.swo
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- Env ---
+.env
+.env.local
+.env.*.local
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Coverage ---
+coverage/
+*.lcov
+*.exec
+jacoco.exec
+
+# --- Build-Tooling ---
+.gradle/
+.mvn/wrapper/maven-wrapper.jar
