@@ -1,0 +1,41 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate aggregator and compose
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Validate Maven aggregator
+        run: mvn -B -ntp validate
+
+      - name: Validate docker-compose
+        run: docker compose -f docker-compose.yml config -q
+
+      - name: Verify required files
+        run: |
+          test -f LICENSE
+          test -f NOTICE
+          test -f README.md
+          test -f CLAUDE.md
+          test -f AI_CONTEXT.md
+          test -f .gitignore
+          echo "All required scaffold files present."
