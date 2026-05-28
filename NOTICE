@@ -9,6 +9,11 @@ This project includes or references the following third-party software:
 
 - Apache Flowable (Apache License 2.0)        — https://flowable.com
 - Spring Framework / Spring Boot (Apache 2.0) — https://spring.io
+- Liquibase (Apache License 2.0)              — https://www.liquibase.org
+- HikariCP (Apache License 2.0)               — https://github.com/brettwooldridge/HikariCP
+- uuid-creator (MIT License)                  — https://github.com/f4b6a3/uuid-creator
+- PostgreSQL JDBC Driver (BSD-2-Clause)       — https://jdbc.postgresql.org
+- Testcontainers (MIT License, test only)     — https://testcontainers.org
 - bpmn-io (MIT License)                        — https://bpmn.io
 - PostgreSQL (PostgreSQL License)              — https://www.postgresql.org
 - MinIO (AGPL-3.0 server / Apache-2.0 client)  — https://min.io

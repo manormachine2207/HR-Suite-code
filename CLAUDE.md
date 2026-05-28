@@ -42,16 +42,21 @@ Bei Spec-/Decision-Aenderungen: zuerst Vault. Bei Code-/Build-Aenderungen: zuers
 
 ## Build-Quick-Reference
 
-Aktueller Stand: Skeleton — Aggregator-pom ohne Module, Dev-Compose-Stack mit Backing-Services, CI-Workflow.
+Aktueller Stand: Erstes Frontend-Skelett (Angular 21 + Oblique) und erstes
+Backend-Modul (`application/`, Spring Boot 3.4, `core/tenant`) gelandet.
+Aggregator-pom mit Modul `application`, Dev-Compose-Stack (Backing-Services +
+`app` + `backend`), CI mit `validate` + Backend-`verify` + Frontend.
 
 Container-First-Disziplin (per BDR-007): App laeuft im Container, lokales Maven ist optional.
 
 **Run the app locally:**
 
 ```bash
-docker compose up -d        # builds frontend container automatically, starts all backing services
+docker compose up -d        # builds frontend + backend containers, starts all backing services
 # App:           http://localhost:8080
 # Healthcheck:   http://localhost:8080/healthz
+# Backend:       http://localhost:8081
+# Backend health http://localhost:8081/actuator/health
 # Mailpit UI:    http://localhost:8025
 # MinIO Console: http://localhost:9001
 docker compose down         # stop everything
@@ -83,7 +88,24 @@ npx ng test --watch=false             # Unit-Tests (Vitest in Angular 21 default
 # npx ng lint                         # not yet wired — follow-up cut adds @angular-eslint
 ```
 
-Module-Build (Multi-Stage-Dockerfile per ADR-006) kommt mit ersten Modulen (`core/*`).
+**Backend (`application/`, Spring Boot 3.4) — ohne lokales Maven:**
+
+```bash
+# Docker-Maven-Runner (BuildKit-m2-Cache im Volume hrsuite-m2)
+mvnd() { docker run --rm \
+  -v "$HOME/Desktop/Git Repos/HR-Suite-code":/work -w /work \
+  -v hrsuite-m2:/root/.m2 maven:3.9-eclipse-temurin-21 mvn -ntp "$@"; }
+
+mvnd -pl application -am test     # Surefire: Unit-/Slice-Tests (kein Docker noetig)
+mvnd -pl application -am verify   # + Failsafe: *IT via Testcontainers (Docker noetig)
+mvnd -pl application -am package -DskipTests   # JAR bauen
+
+# Container-Build (Multi-Stage per ADR-006, Reactor-Root = ./pom.xml):
+docker build -f application/Dockerfile -t hr-suite-application:dev .
+```
+
+`*IT`-Tests (z. B. `TenantIT`) brauchen einen laufenden Docker-Daemon
+(Testcontainers) und laufen unter Failsafe in `verify` bzw. in CI.
 
 ## Pflichten bei Code-Aenderungen
 
@@ -126,15 +148,23 @@ Aenderungen am Vault werden in `HR-Suite-notes` committet — nicht hier.
 Wenn du in diesem Repo arbeitest und dabei eine Vault-Aenderung noetig wird,
 mache zwei Commits in zwei Repos.
 
-## Tests (sobald sie existieren)
+## Tests
+
+`mvnd` = Docker-Maven-Runner aus der Build-Quick-Reference oben (oder lokales
+`mvn`, falls vorhanden).
 
 ```bash
-# Alle Tests
-mvn -B test
+# Unit-/Slice-Tests (Surefire) — kein Docker-Daemon noetig
+mvnd -pl application -am test
 
-# Ein bestimmtes Modul
-mvn -B test -pl core/tenant
+# + Integrationstests (Failsafe, *IT via Testcontainers) — Docker noetig
+mvnd -pl application -am verify
 ```
+
+Test-Konventionen: `@WebMvcTest`-Slices + `@MockitoBean` (Boot 3.4, nicht
+`@MockBean`), `@SpringBootTest` + Testcontainers + `@DynamicPropertySource`
+fuer `*IT`. Security-Slices nutzen den `spring-security-test`
+`jwt()`-Post-Processor.
 
 ## i18n-Pflicht
 
@@ -148,14 +178,15 @@ Jede API-Aenderung MUSS die OpenAPI-Spec mitaktualisieren. Living-Spec unter
 
 ## Aktuelle Out-of-Scope-Punkte
 
-In diesem Skeleton-Cut absichtlich NICHT enthalten:
+Aktuell absichtlich NICHT enthalten:
 
-- Anwendungscode (Module kommen einzeln)
-- Spring Boot BOM (kommt mit erstem Modul)
-- Frontend (kommt im eigenen Cut)
+- **RLS-Policies + TenantContext-AOP-Aspekt** (`SET app.tenant_id`) — kommen
+  mit der ersten mandantenbezogenen Geschaeftstabelle; `tenant` selbst ist
+  System-Root und bleibt ausserhalb RLS (siehe ADR-008).
+- **Spring Modulith** — kommt mit dem zweiten Backend-Modul.
 - CONTRIBUTING.md / CODE_OF_CONDUCT.md / SECURITY.md (vor Public-Switch)
-- Pre-Push-Lints (kommen mit Frontend + Backend-Modulen)
-- Dex/OIDC-Stub im Compose (kommt mit identity-sp)
+- `ng lint` / Pre-Push-Lints (Follow-up-Cut, `@angular-eslint`)
+- Dex/OIDC-Stub im Compose (kommt mit identity-sp; dev nutzt Mock-Decoder)
 - Helm-Charts (kommen in `HR-Suite-infra`)
 
 Siehe Vault `13-Roadmap.md` fuer Phasen-Plan.

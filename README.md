@@ -1,6 +1,6 @@
 # HR-Suite
 
-> **Status:** Skeleton (pre-alpha, no application code yet)
+> **Status:** Pre-alpha — first backend module (core/tenant) landed
 > **License:** [Apache License 2.0](./LICENSE)
 > **Spec & decisions:** [HR-Suite-notes](https://github.com/manormachine2207/HR-Suite-notes)
 
@@ -46,13 +46,22 @@ with similar request-based HR processes can use it too.
 
 ## Status
 
-This repository currently contains the **scaffolding only**:
+**Pre-alpha.** Scaffolding plus the first frontend and backend slices are in
+place:
 
 - Apache 2.0 license + NOTICE
 - Maven aggregator parent POM (Java 21)
-- Docker Compose dev stack (Postgres, MinIO, Mailpit)
-- Minimal CI workflow
+- Docker Compose dev stack (Postgres, MinIO, Mailpit, app, backend)
+- CI workflow (validate + backend `verify` + frontend build/test)
 - Repo-level documentation (`CLAUDE.md`, `AI_CONTEXT.md`)
+- **Frontend skeleton** — Angular 21 + Oblique 15.3 app shell (DE/FR/IT/EN,
+  runtime config, OIDC config, eCH-0059 stub), served via nginx at `:8080`
+- **Backend module `core/tenant`** — Spring Boot 3.4 application module:
+  tenant onboarding REST API (`/api/v1/tenant`), PostgreSQL + Liquibase,
+  jsonb i18n display names, UUIDv7 ids, OAuth2 resource-server security
+  (OIDC), Testcontainers integration test. Tenant isolation follows
+  [ADR-008](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/ADR-008-Tenant-Isolation-Postgres-RLS.md)
+  (Postgres RLS); `tenant` itself is the system root and stays outside RLS.
 
 Application code is being added module-by-module. Track progress via
 [HR-Suite-notes Roadmap](https://github.com/manormachine2207/HR-Suite-notes/blob/main/13-Roadmap.md).
@@ -95,11 +104,32 @@ Endpoints (local):
 
 - **App (Angular + Oblique):** `http://localhost:8080`
 - **Healthcheck:** `http://localhost:8080/healthz`
+- **Backend (Spring Boot):** `http://localhost:8081`
+- **Backend health:** `http://localhost:8081/actuator/health`
 - Postgres: `localhost:5432` (db=`hrsuite`, user=`hrsuite`, password=`dev` — override via `.env`)
 - MinIO API: `http://localhost:9000` (user=`hrsuite`, password=`devdevdev` — override via `.env`)
 - MinIO Console: `http://localhost:9001`
 - Mailpit SMTP: `localhost:1025`
 - Mailpit Web UI: `http://localhost:8025`
+
+### Try the tenant API (dev)
+
+In compose the backend runs the `dev` profile, which uses a **mock** JWT
+decoder that accepts the literal bearer token `dev-platform-admin` as a
+platform administrator. This is for local development only — production uses
+real OIDC via `OIDC_ISSUER_URI`.
+
+```bash
+# Create a tenant (201 Created + Location header)
+curl -sS -X POST http://localhost:8081/api/v1/tenant \
+  -H 'Authorization: Bearer dev-platform-admin' \
+  -H 'Content-Type: application/json' \
+  -d '{"code":"BIT","subdomain":"bit","displayName":{"de":"Bundesamt für Informatik","fr":"Office fédéral de l'\''informatique"}}'
+
+# List tenants
+curl -sS http://localhost:8081/api/v1/tenant \
+  -H 'Authorization: Bearer dev-platform-admin'
+```
 
 Stop the stack:
 

@@ -46,6 +46,7 @@ Im Vault unter `Entscheidungen/`:
 | ADR | ADR-005-Monorepo-Layout | Code in einem Repo, Infra separat |
 | ADR | ADR-006-Container-Build-Migration-Image-Tags | Multi-Stage-Dockerfile, Liquibase per Profil, SHA+Semver-Tags |
 | ADR | ADR-007-Frontend-Stack-Switch-Angular-Oblique | Angular 21 + Oblique 15.3 + ngx-translate + angular-oauth2-oidc |
+| ADR | ADR-008-Tenant-Isolation-Postgres-RLS | RLS mit FORCE pro Geschaeftstabelle; `tenant`-Root ausserhalb RLS |
 | SDR | SDR-001-OIDC-SAML-Generisch | OIDC Phase 1, SAML als Plugin Phase 2 |
 | SDR | SDR-002-Audit-SIEM-Standard | Structured Logs, Audit-Tabelle, Syslog-Forwarder |
 | SDR | SDR-003-Accessibility-WCAG-eCH-0059 | WCAG 2.1 AA + eCH-0059 verbindlich, axe-core + Lighthouse |
@@ -66,6 +67,15 @@ Im Vault unter `Entscheidungen/`:
 - **Phase 2 Outlook**: Underperformance Management und Lohnfindung
   (Lohnschluessel mit variablen Mechanismen fuer Rollen/Lohnklassen). Beide
   in spaeteren Plan-Cuts mit eigenen BDR/ADRs (siehe Vault `13-Roadmap`).
+- **Implementierungsstand (2026-05-29)**: Frontend-Skelett (Angular 21 +
+  Oblique, App-Shell, i18n, OIDC-Config) und erstes Backend-Modul
+  `application/` (`hr-suite-application`, Spring Boot 3.4, `core/tenant`)
+  gelandet. core/tenant liefert das Tenant-Onboarding-REST-API
+  (`POST/GET /api/v1/tenant`), Liquibase-Schema mit jsonb-i18n-`display_name`,
+  UUIDv7-IDs und OAuth2-Resource-Server-Security. Der `tenant`-Root ist
+  System-Root und bleibt ausserhalb RLS; die RLS-Policies + der
+  `SET app.tenant_id`-AOP-Aspekt kommen mit der ersten mandantenbezogenen
+  Geschaeftstabelle (ADR-008). Spring Modulith folgt mit dem zweiten Modul.
 
 ## Security-Kontext
 
