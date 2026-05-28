@@ -15,7 +15,9 @@ RUN --mount=type=cache,target=/root/.npm \
     npx ng build --configuration=production
 
 # ===== Stage 2: runtime =====
-FROM nginx:alpine AS runtime
+# Official non-root nginx image (USER 101, listens on 8080) per SDR-002
+# discipline + K8s securityContext: runAsNonRoot: true expectations.
+FROM nginxinc/nginx-unprivileged:alpine AS runtime
 
 # Custom nginx config (SPA-Fallback, gzip, security, /healthz)
 COPY nginx.conf /etc/nginx/conf.d/default.conf
@@ -23,10 +25,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Built Angular app
 COPY --from=build /workspace/dist/hr-suite-frontend/browser /usr/share/nginx/html
 
-# Keep root user for nginx to manage all necessary directories
-# (Explicit non-root would require additional setup for /run and /var/log permissions)
-
-EXPOSE 80
+EXPOSE 8080
 
 HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget -qO- http://127.0.0.1/healthz || exit 1
+    CMD wget -qO- http://127.0.0.1:8080/healthz || exit 1
