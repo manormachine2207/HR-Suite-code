@@ -5,10 +5,10 @@
 #
 # Frontend `app` service serves the Angular/Oblique SPA on http://localhost:8080
 # (per FCT2 + FCT3, ADR-006 Multi-Stage build + nginx-unprivileged runtime).
-# The Liquibase init service and backend application service still wait
-# for the first deployable backend module per ADR-006 + BDR-007 (Container-
-# First, Compose-Helm-Symmetrie). The file mirrors the future Helm chart
-# topology 1:1.
+# The `backend` service runs the Spring Boot application (core/tenant);
+# Liquibase migrations run in-process on startup per ADR-006. The file
+# mirrors the future Helm chart topology 1:1 (BDR-007, Compose-Helm-
+# Symmetrie). The frontend `app` calls the backend at :8081 in dev.
 #
 # An OIDC IdP stub (dex) will be added once the identity-sp module starts.
 # Until then, authentication is mocked at the application layer.
@@ -72,6 +72,29 @@ services:
       timeout: 3s
       retries: 3
       start_period: 5s
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: .
+      dockerfile: application/Dockerfile
+    image: hr-suite-application:dev
+    container_name: hrsuite-backend
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://postgres:5432/hrsuite
+      DB_USERNAME: hrsuite
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-dev}
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/actuator/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 40s
     depends_on:
       postgres:
         condition: service_healthy
