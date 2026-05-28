@@ -121,10 +121,10 @@ The dev server opens on `http://localhost:4200`. Tests:
 npx ng test --watch=false
 ```
 
-Lint:
+Lint (not yet wired — see TODO in `.github/workflows/build.yml`; will be added via `ng add @angular-eslint/schematics` in a follow-up cut):
 
 ```bash
-npx ng lint
+# npx ng lint   # not yet available
 ```
 
 Production build (artifacts under `dist/hr-suite-frontend/`):
