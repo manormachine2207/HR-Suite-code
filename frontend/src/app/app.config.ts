@@ -1,9 +1,10 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, APP_INITIALIZER, inject, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideObliqueConfiguration, ObHttpApiInterceptor } from '@oblique/oblique';
 
 import { routes } from './app.routes';
+import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -11,6 +12,14 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled' })),
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: ObHttpApiInterceptor, multi: true },
+    {
+      provide: APP_INITIALIZER,
+      multi: true,
+      useFactory: () => {
+        const svc = inject(RuntimeConfigService);
+        return () => svc.load();
+      },
+    },
     provideObliqueConfiguration({
       accessibilityStatement: {
         applicationName: 'HR-Suite',
