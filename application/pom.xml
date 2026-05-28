@@ -88,6 +88,19 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <!--
+                  classifier=exec: emit the bootable fat jar as
+                  hr-suite-application-<ver>-exec.jar and LEAVE the plain thin jar as
+                  the main artifact. Without this, repackage replaces the main artifact
+                  with the fat jar, which then lands on the failsafe (*IT) classpath:
+                  app classes move under BOOT-INF/classes (breaks @SpringBootConfiguration
+                  auto-search) and BOOT-INF/lib duplicates Spring on the classpath (breaks
+                  @BootstrapWith annotation merge). Keeping the thin jar as main keeps the
+                  IT classpath clean. The Dockerfile copies the -exec.jar.
+                -->
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

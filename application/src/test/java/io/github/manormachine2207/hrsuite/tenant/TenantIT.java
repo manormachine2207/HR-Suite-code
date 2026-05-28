@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.tenant;
 
+import io.github.manormachine2207.hrsuite.HrSuiteApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +20,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+// classes is named explicitly so context discovery never depends on classpath/packaging
+// quirks of the integration-test phase (this *IT runs under failsafe, after package).
+// The build keeps the IT classpath clean via the spring-boot-maven-plugin exec classifier
+// — see application/pom.xml — so plain @SpringBootConfiguration auto-search would also work;
+// pinning the class is just deterministic belt-and-suspenders.
+@SpringBootTest(classes = HrSuiteApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("dev")   // activates DevSecurityConfig mock decoder; datasource overridden below
 @Testcontainers
 class TenantIT {

@@ -12,7 +12,9 @@ RUN --mount=type=cache,target=/root/.m2 \
 COPY application/src ./application/src
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -ntp -pl application -am package -DskipTests
-RUN cp application/target/hr-suite-application-*.jar /build/app.jar
+# Copy only the bootable fat jar (repackage emits it with the -exec classifier;
+# the plain thin jar is the non-bootable main artifact and must be ignored here).
+RUN cp application/target/hr-suite-application-*-exec.jar /build/app.jar
 
 # --- Runtime stage ---
 FROM eclipse-temurin:21-jre-alpine AS runtime

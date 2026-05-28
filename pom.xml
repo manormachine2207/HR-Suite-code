@@ -97,6 +97,22 @@
                     <artifactId>maven-enforcer-plugin</artifactId>
                     <version>${maven-enforcer-plugin.version}</version>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven-failsafe-plugin.version}</version>
+                </plugin>
+                <!--
+                  Pinned to the Boot version: the spring-boot-dependencies BOM import
+                  manages dependency versions but NOT plugin versions. Without this pin
+                  Maven resolves spring-boot-maven-plugin to repo "latest", which can be a
+                  wrong major (e.g. a Boot 4.x RC) whose repackage breaks the failsafe IT.
+                -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring-boot.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
