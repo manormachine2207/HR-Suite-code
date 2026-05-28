@@ -23,8 +23,8 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Built Angular app
 COPY --from=build /workspace/dist/hr-suite-frontend/browser /usr/share/nginx/html
 
-# Run as non-root nginx user (already default in nginx:alpine, but explicit)
-USER nginx
+# Keep root user for nginx to manage all necessary directories
+# (Explicit non-root would require additional setup for /run and /var/log permissions)
 
 EXPOSE 80
 
