@@ -5,9 +5,16 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/hrsuite}
     username: ${DB_USERNAME:hrsuite}
     password: ${DB_PASSWORD:dev}
-    hikari:
-      # ADR-008: clears session-level app.tenant_id when a connection returns to the pool.
-      connection-test-query: "RESET ALL; SELECT 1;"
+    # NOTE (ADR-008): intentionally NO Hikari connection-test-query here.
+    # The per-connection reset of the session GUC app.tenant_id will be done
+    # by TenantContextAspect (clear-after-use) once the first tenant-scoped
+    # table + RLS land. It must NOT be smuggled into connection-test-query:
+    # Spring Boot's actuator DataSourceHealthIndicator reuses that query as its
+    # liveness/readiness DB probe and runs it through JdbcTemplate, which
+    # requires a ResultSet. A leading "RESET ALL" returns none, which throws
+    # and forces the db health contributor (hence readiness) DOWN. With no
+    # custom query, Hikari validates via JDBC4 isValid() and the actuator probe
+    # falls back to a plain "SELECT 1" — both green.
   jpa:
     hibernate:
       ddl-auto: validate   # Liquibase owns the schema; Hibernate only validates entity<->table drift.
