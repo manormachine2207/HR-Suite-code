@@ -1,0 +1,21 @@
+{
+  "app": {
+    "title": "HR-Suite",
+    "subtitle": "Piattaforma di richieste dell'amministrazione federale"
+  },
+  "nav": {
+    "home": "Pagina iniziale",
+    "conformite": "Dichiarazione di accessibilità",
+    "language": "Lingua"
+  },
+  "footer": {
+    "legal": "Note legali",
+    "privacy": "Protezione dei dati",
+    "imprint": "Colofone",
+    "accessibility": "Accessibilità"
+  },
+  "errors": {
+    "notFound": "Pagina non trovata",
+    "loadFailed": "Impossibile caricare il contenuto"
+  }
+}

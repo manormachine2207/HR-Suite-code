@@ -1,0 +1,21 @@
+{
+  "app": {
+    "title": "HR-Suite",
+    "subtitle": "Plate-forme de demandes de l'administration fédérale"
+  },
+  "nav": {
+    "home": "Accueil",
+    "conformite": "Déclaration d'accessibilité",
+    "language": "Langue"
+  },
+  "footer": {
+    "legal": "Mentions légales",
+    "privacy": "Protection des données",
+    "imprint": "Mentions légales",
+    "accessibility": "Accessibilité"
+  },
+  "errors": {
+    "notFound": "Page introuvable",
+    "loadFailed": "Le contenu n'a pas pu être chargé"
+  }
+}

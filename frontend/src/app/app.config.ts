@@ -2,9 +2,11 @@ import { ApplicationConfig, APP_INITIALIZER, inject, provideBrowserGlobalErrorLi
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideObliqueConfiguration, ObHttpApiInterceptor } from '@oblique/oblique';
+import { provideTranslateService } from '@ngx-translate/core';
 
 import { routes } from './app.routes';
 import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
+import { translateHttpLoaderFactory } from './core/i18n/translate-http-loader.factory';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,6 +31,10 @@ export const appConfig: ApplicationConfig = {
         contact: [{ email: 'hr-suite@example.org' }]
       },
       hasLanguageInUrl: false
-    })
+    }),
+    provideTranslateService({
+      defaultLanguage: 'de',
+    }),
+    ...translateHttpLoaderFactory()
   ]
 };

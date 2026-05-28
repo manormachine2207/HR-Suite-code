@@ -1,0 +1,21 @@
+{
+  "app": {
+    "title": "HR-Suite",
+    "subtitle": "Antrags-Plattform der Bundesverwaltung"
+  },
+  "nav": {
+    "home": "Startseite",
+    "conformite": "Erklärung zur Barrierefreiheit",
+    "language": "Sprache"
+  },
+  "footer": {
+    "legal": "Rechtliches",
+    "privacy": "Datenschutz",
+    "imprint": "Impressum",
+    "accessibility": "Barrierefreiheit"
+  },
+  "errors": {
+    "notFound": "Seite nicht gefunden",
+    "loadFailed": "Inhalt konnte nicht geladen werden"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "app": {
+    "title": "HR-Suite",
+    "subtitle": "Request platform of the Swiss Federal Administration"
+  },
+  "nav": {
+    "home": "Home",
+    "conformite": "Accessibility Statement",
+    "language": "Language"
+  },
+  "footer": {
+    "legal": "Legal",
+    "privacy": "Privacy",
+    "imprint": "Imprint",
+    "accessibility": "Accessibility"
+  },
+  "errors": {
+    "notFound": "Page not found",
+    "loadFailed": "Content could not be loaded"
+  }
+}
