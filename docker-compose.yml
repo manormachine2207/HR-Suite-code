@@ -3,11 +3,12 @@
 # - minio:    S3-compatible object storage (form attachments)
 # - mailpit:  SMTP sink + web UI for outbound mail testing
 #
-# Backbone-only in this initial cut. The application service (`app`) and a
-# Liquibase init service will be added with the first deployable module per
-# ADR-006 (Container-First, Compose-Helm-Symmetrie). Until then this file is
-# the local equivalent of the platform's backing services and stays in lockstep
-# with the future Helm chart's topology.
+# Frontend `app` service serves the Angular/Oblique SPA on http://localhost:8080
+# (per FCT2 + FCT3, ADR-006 Multi-Stage build + nginx-unprivileged runtime).
+# The Liquibase init service and backend application service still wait
+# for the first deployable backend module per ADR-006 + BDR-007 (Container-
+# First, Compose-Helm-Symmetrie). The file mirrors the future Helm chart
+# topology 1:1.
 #
 # An OIDC IdP stub (dex) will be added once the identity-sp module starts.
 # Until then, authentication is mocked at the application layer.
@@ -56,6 +57,24 @@ services:
     ports:
       - "1025:1025"   # SMTP
       - "8025:8025"   # Web UI
+
+  app:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    image: hr-suite-frontend:dev
+    container_name: hrsuite-app
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres-data:
