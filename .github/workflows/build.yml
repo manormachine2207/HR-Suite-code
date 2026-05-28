@@ -38,4 +38,37 @@ jobs:
           test -f CLAUDE.md
           test -f AI_CONTEXT.md
           test -f .gitignore
+          test -f frontend/angular.json
+          test -f frontend/package.json
+          test -f frontend/src/main.ts
           echo "All required scaffold files present."
+
+  frontend:
+    name: Build & test frontend
+    runs-on: ubuntu-latest
+    needs: validate
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      # ng lint is not yet wired (no @angular-eslint installed by ng new in Angular 21).
+      # TODO: add `ng add @angular-eslint/schematics` in a follow-up cut, then enable here.
+
+      - name: Unit tests
+        run: npx ng test --watch=false
+
+      - name: Build
+        run: npx ng build --configuration=production
