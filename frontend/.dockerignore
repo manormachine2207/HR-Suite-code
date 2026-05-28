@@ -1,0 +1,8 @@
+node_modules
+dist
+.angular
+.idea
+.vscode
+.fleet
+*.log
+coverage
