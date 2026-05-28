@@ -93,6 +93,8 @@ docker compose ps
 
 Endpoints (local):
 
+- **App (Angular + Oblique):** `http://localhost:8080`
+- **Healthcheck:** `http://localhost:8080/healthz`
 - Postgres: `localhost:5432` (db=`hrsuite`, user=`hrsuite`, password=`dev` — override via `.env`)
 - MinIO API: `http://localhost:9000` (user=`hrsuite`, password=`devdevdev` — override via `.env`)
 - MinIO Console: `http://localhost:9001`

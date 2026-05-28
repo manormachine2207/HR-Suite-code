@@ -46,6 +46,17 @@ Aktueller Stand: Skeleton — Aggregator-pom ohne Module, Dev-Compose-Stack mit 
 
 Container-First-Disziplin (per BDR-007): App laeuft im Container, lokales Maven ist optional.
 
+**Run the app locally:**
+
+```bash
+docker compose up -d        # builds frontend container automatically, starts all backing services
+# App:           http://localhost:8080
+# Healthcheck:   http://localhost:8080/healthz
+# Mailpit UI:    http://localhost:8025
+# MinIO Console: http://localhost:9001
+docker compose down         # stop everything
+```
+
 ```bash
 # --- Variante A: Maven lokal vorhanden ---
 mvn -B validate
