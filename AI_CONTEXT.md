@@ -38,14 +38,17 @@ Im Vault unter `Entscheidungen/`:
 | BDR | BDR-005-Mehrsprachigkeit-DE-FR-IT-EN | UI und Inhalte 4-sprachig |
 | BDR | BDR-006-OSS-Lizenz-Apache-2 | Apache License 2.0 |
 | BDR | BDR-007-Container-First-Compose-Helm-Symmetrie | Container-First, 12-Factor, Compose=Helm |
-| ADR | ADR-001-Modular-Monolith-mit-BPMN-Engine | Spring Modulith + Flowable + bpmn-io |
+| BDR | BDR-008-UI-folgt-CI-Bund-und-Oblique | CD Bund + Oblique 15.3 als verbindlicher UI-Standard |
+| ADR | ADR-001-Modular-Monolith-mit-BPMN-Engine | Spring Modulith + Flowable + bpmn-io (Frontend-Anteil partial-superseded) |
 | ADR | ADR-002-SF-Integration-pro-Antragstyp-konfigurierbar | SF-Aktionen als Workflow-Bausteine |
 | ADR | ADR-003-Cloud-Agnostik | Postgres, S3, OIDC; keine Hyperscaler-Bindung |
 | ADR | ADR-004-Workflow-Engine-Flowable | Flowable 7.x embedded |
 | ADR | ADR-005-Monorepo-Layout | Code in einem Repo, Infra separat |
 | ADR | ADR-006-Container-Build-Migration-Image-Tags | Multi-Stage-Dockerfile, Liquibase per Profil, SHA+Semver-Tags |
+| ADR | ADR-007-Frontend-Stack-Switch-Angular-Oblique | Angular 21 + Oblique 15.3 + ngx-translate + angular-oauth2-oidc |
 | SDR | SDR-001-OIDC-SAML-Generisch | OIDC Phase 1, SAML als Plugin Phase 2 |
 | SDR | SDR-002-Audit-SIEM-Standard | Structured Logs, Audit-Tabelle, Syslog-Forwarder |
+| SDR | SDR-003-Accessibility-WCAG-eCH-0059 | WCAG 2.1 AA + eCH-0059 verbindlich, axe-core + Lighthouse |
 
 ## Architekturkontext (Stand 2026-05-27)
 
