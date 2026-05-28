@@ -4,12 +4,11 @@ import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@a
 import { importProvidersFrom } from '@angular/core';
 import { provideObliqueConfiguration, ObHttpApiInterceptor } from '@oblique/oblique';
 import { provideTranslateService } from '@ngx-translate/core';
-import { OAuthModule, AuthConfig, OAuthService } from 'angular-oauth2-oidc';
+import { OAuthModule, OAuthService } from 'angular-oauth2-oidc';
 
 import { routes } from './app.routes';
 import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
 import { translateHttpLoaderFactory } from './core/i18n/translate-http-loader.factory';
-import { authConfigFactory } from './core/auth/auth-config.factory';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,28 +16,25 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled' })),
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: ObHttpApiInterceptor, multi: true },
+    importProvidersFrom(OAuthModule.forRoot()),
     {
       provide: APP_INITIALIZER,
       multi: true,
       useFactory: () => {
         const svc = inject(RuntimeConfigService);
-        return () => svc.load();
-      },
-    },
-    importProvidersFrom(OAuthModule.forRoot()),
-    {
-      provide: AuthConfig,
-      useFactory: authConfigFactory,
-      deps: [RuntimeConfigService],
-    },
-    {
-      provide: APP_INITIALIZER,
-      multi: true,
-      useFactory: () => {
         const oauthService = inject(OAuthService);
-        const cfg = inject(AuthConfig);
-        return () => {
-          oauthService.configure(cfg);
+        return async () => {
+          await svc.load();
+          const oidc = svc.get().oidc;
+          oauthService.configure({
+            issuer: oidc.issuer,
+            clientId: oidc.clientId,
+            redirectUri: oidc.redirectUri,
+            responseType: 'code',
+            scope: oidc.scope,
+            showDebugInformation: false,
+            requireHttps: false,
+          });
         };
       },
     },
