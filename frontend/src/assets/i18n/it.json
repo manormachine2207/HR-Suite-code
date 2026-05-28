@@ -17,5 +17,14 @@
   "errors": {
     "notFound": "Pagina non trovata",
     "loadFailed": "Impossibile caricare il contenuto"
+  },
+  "accessibility": {
+    "title": "Dichiarazione di accessibilità",
+    "statusHeading": "Stato di conformità",
+    "statusBody": "Questa applicazione è in una fase iniziale di sviluppo. Viene sviluppata secondo WCAG 2.1 livello AA e eCH-0059; una valutazione formale di conformità avverrà prima della messa in produzione.",
+    "feedbackHeading": "Segnalare ostacoli",
+    "feedbackBody": "Si prega di segnalare gli ostacoli ai responsabili del progetto tramite il repository pubblico.",
+    "preparationHeading": "Redazione di questa dichiarazione",
+    "preparationBody": "Questa dichiarazione è stata redatta il 28.05.2026 e sarà aggiornata ad ogni rilascio produttivo."
   }
 }

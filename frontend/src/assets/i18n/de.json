@@ -17,5 +17,14 @@
   "errors": {
     "notFound": "Seite nicht gefunden",
     "loadFailed": "Inhalt konnte nicht geladen werden"
+  },
+  "accessibility": {
+    "title": "Erklärung zur Barrierefreiheit",
+    "statusHeading": "Konformitätsstatus",
+    "statusBody": "Diese Anwendung befindet sich in einer frühen Entwicklungsphase. Sie wird gemäß WCAG 2.1 Level AA und eCH-0059 entwickelt; eine formale Konformitätsbewertung erfolgt vor dem produktiven Einsatz.",
+    "feedbackHeading": "Hindernisse melden",
+    "feedbackBody": "Bitte melden Sie Barrieren an die Projektverantwortlichen über das öffentliche Repository.",
+    "preparationHeading": "Erstellung dieser Erklärung",
+    "preparationBody": "Diese Erklärung wurde am 28.05.2026 erstellt und wird mit jeder produktiven Auslieferung aktualisiert."
   }
 }

@@ -17,5 +17,14 @@
   "errors": {
     "notFound": "Page not found",
     "loadFailed": "Content could not be loaded"
+  },
+  "accessibility": {
+    "title": "Accessibility Statement",
+    "statusHeading": "Conformance Status",
+    "statusBody": "This application is in an early development phase. It is being developed in accordance with WCAG 2.1 Level AA and eCH-0059; a formal conformance evaluation will take place before productive use.",
+    "feedbackHeading": "Reporting Barriers",
+    "feedbackBody": "Please report accessibility barriers to the project maintainers via the public repository.",
+    "preparationHeading": "Preparation of this Statement",
+    "preparationBody": "This statement was prepared on 2026-05-28 and will be updated with each productive release."
   }
 }
