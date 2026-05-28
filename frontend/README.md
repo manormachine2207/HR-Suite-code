@@ -1,59 +1,53 @@
-# HrSuiteFrontend
+# HR-Suite Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.13.
+Angular 21 + [Oblique 15.3](https://oblique.bit.admin.ch) (Swiss Confederation CI/CD, maintained by FOITT/BIT) frontend workspace for the HR-Suite request platform.
 
-## Development server
+**For the OSS overview, repository layout, and quick-start (`docker compose up`), see the [repository root README](../README.md).**
 
-To start a local development server, run:
+**For developer conventions and AI-coding rules, see [../CLAUDE.md](../CLAUDE.md) and [../AI_CONTEXT.md](../AI_CONTEXT.md).**
 
-```bash
-ng serve
-```
+## Architectural anchors
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- [BDR-008 — UI follows CI Bund + Oblique](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/BDR/BDR-008-UI-folgt-CI-Bund-und-Oblique.md)
+- [ADR-007 — Frontend stack: Angular 21 + Oblique 15.3](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/ADR-007-Frontend-Stack-Switch-Angular-Oblique.md)
+- [SDR-003 — Accessibility: WCAG 2.1 AA + eCH-0059](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/SDR/SDR-003-Accessibility-WCAG-eCH-0059.md)
+- [BDR-007 — Container-First / Compose-Helm-Symmetrie](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/BDR/BDR-007-Container-First-Compose-Helm-Symmetrie.md)
 
-## Code scaffolding
+## Common commands
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+These commands work with a local Node 22 install. Per [BDR-007](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/BDR/BDR-007-Container-First-Compose-Helm-Symmetrie.md) (Container-First), they also run inside Docker — useful if you don't have Node installed locally:
 
 ```bash
-ng generate --help
+docker run --rm -v "$PWD":/work -w /work --user "$(id -u):$(id -g)" -e HOME=/tmp node:22-alpine <cmd>
 ```
 
-## Building
+| Action | Command |
+|---|---|
+| Install deps | `npm ci` |
+| Dev server (port 4200) | `npx ng serve` |
+| Unit tests (Vitest) | `npx ng test --watch=false` |
+| Production build | `npx ng build --configuration=production` |
+| i18n key-coverage lint | `../scripts/check_i18n_coverage.sh` |
 
-To build the project run:
+For a containerised production preview (nginx on port 8080), use the repository-level `docker compose up -d` — see [../README.md](../README.md).
 
-```bash
-ng build
-```
+## Locale files
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+The HR-Suite frontend uses **two locale-file sources** per language, merged at runtime by a custom `TranslateLoader`:
 
-## Running unit tests
+| Path | Source | Key style | Examples |
+|---|---|---|---|
+| `src/assets/i18n/<lang>.json` | This repo | nested (`app.title`, `nav.home`) | application strings |
+| `assets/i18n/oblique-<lang>.json` (deployed from `node_modules/@oblique/oblique/assets/`) | Oblique 15.3 | flat (`i18n.oblique.accessibility-statement.link`) | Oblique component strings (master-layout, footer, dialogs, notifications, form-validation messages) |
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+Merge happens in `src/app/core/i18n/multi-translate-http-loader.ts`. Both styles coexist in the merged object — ngx-translate handles both lookup patterns.
 
-```bash
-ng test
-```
+When you add a new string to `<lang>.json`, run `../scripts/check_i18n_coverage.sh` from the repo root to ensure all four locales (de/fr/it/en) have identical key trees per [BDR-005](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/BDR/BDR-005-Mehrsprachigkeit-DE-FR-IT-EN.md).
 
-## Running end-to-end tests
+## Out of scope (tracked in HR-Suite-notes roadmap)
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- ESLint setup (`ng add @angular-eslint/schematics`)
+- Bundle-size budget re-evaluation
+- `runtime.json` override via Compose volume / K8s ConfigMap
+- Real OIDC login flow + AuthGuard (kommt mit `identity-sp`-Cut)
+- Backend API integration (kommt mit `core/tenant`-Cut)
