@@ -13,6 +13,15 @@ This project includes or references the following third-party software:
 - PostgreSQL (PostgreSQL License)              — https://www.postgresql.org
 - MinIO (AGPL-3.0 server / Apache-2.0 client)  — https://min.io
 - Mailpit (MIT License)                        — https://github.com/axllent/mailpit
+- Angular (MIT License)                         — https://angular.dev
+- @oblique/oblique (MIT License)                — https://oblique.bit.admin.ch
+- @angular/material (MIT License)               — https://material.angular.io
+- @angular/cdk (MIT License)                    — https://material.angular.io/cdk
+- @ngx-translate/core (MIT License)             — https://github.com/ngx-translate/core
+- angular-oauth2-oidc (MIT License)             — https://github.com/manfredsteyer/angular-oauth2-oidc
+- rxjs (Apache License 2.0)                     — https://rxjs.dev
+- axe-core (MPL-2.0, devDependency only)        — https://github.com/dequelabs/axe-core
+- nginx (BSD-2-Clause)                          — https://nginx.org
 
 This NOTICE file will be updated as additional dependencies are introduced.
 See https://github.com/manormachine2207/HR-Suite-notes for full architecture
