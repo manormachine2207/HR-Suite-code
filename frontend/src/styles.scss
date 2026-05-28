@@ -1,1 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* ===========================================================
+ * HR-Suite Token-Bridge
+ *
+ * Pro BDR-008 und ADR-007: alle HR-Suite-Custom-Klassen
+ * referenzieren ausschliesslich Oblique-Tokens (var(--ob-*))
+ * statt eigener Hex-Farben.
+ * .hr-*-Klassen ohne Token-Bezug sind Verstoesse gegen BDR-008
+ * und werden im A11y-/Style-Review geflagt.
+ * =========================================================== */
+
+:root {
+  /* HR-Suite-spezifische Alias-Tokens (alle als var(--ob-*)-Pass-Through) */
+  --hr-primary:    var(--ob-primary, #dc0018);
+  --hr-text:       var(--ob-text-strong, #000);
+  --hr-background: var(--ob-background, #fff);
+  --hr-border:     var(--ob-border, #ccc);
+}
+
+/* Slot fuer HR-Suite-Custom-Klassen — leer im Skelett. */
