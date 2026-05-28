@@ -62,6 +62,14 @@ docker compose down
 
 # Compose-YAML validieren
 docker compose config -q
+
+# --- Frontend (Angular 21 + Oblique 15.3) ---
+cd frontend
+npm ci                                # Deps installieren (1x oder bei package.json-Aenderung)
+npx ng serve                          # Dev-Server localhost:4200
+npx ng build                          # Production-Build nach dist/
+npx ng test --watch=false             # Unit-Tests (Vitest in Angular 21 default)
+npx ng lint                           # angular-eslint + template-a11y-Regeln
 ```
 
 Module-Build (Multi-Stage-Dockerfile per ADR-006) kommt mit ersten Modulen (`core/*`).

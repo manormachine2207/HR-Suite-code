@@ -44,3 +44,9 @@ jacoco.exec
 # --- Build-Tooling ---
 .gradle/
 .mvn/wrapper/maven-wrapper.jar
+
+# --- Angular Frontend ---
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/coverage/

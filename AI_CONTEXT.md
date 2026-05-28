@@ -89,6 +89,11 @@ Verwenden:
 - Conventional Commits
 - jsonb fuer i18n-Felder
 - UUID v7 fuer IDs
+- Angular Standalone-Components (kein NgModule fuer neue Features)
+- Oblique-Tokens als Single-Source-of-Truth fuer Farben/Spacing/Typo
+- `@ngx-translate/core` mit `assets/i18n/{de,fr,it,en}.json`
+- `angular-oauth2-oidc` fuer Frontend-OIDC (PKCE-Flow)
+- `APP_INITIALIZER` fuer Runtime-Config-Loading (kein Build-Zeit-Hardcoding)
 
 Vermeiden:
 
@@ -100,6 +105,10 @@ Vermeiden:
 - Hartkodierte Hostnamen/Ports/Pfade in application.properties (alles via Env)
 - defensive Programmierung in internen Pfaden (validieren an Systemgrenzen)
 - GPL/AGPL-Dependencies im Kern (siehe LICENSE-Whitelist in NOTICE)
+- NgModule fuer neue Features (Standalone ist Default per Angular-21-Konvention)
+- Build-Zeit-Hardcoding von API-URLs oder OIDC-Issuern (alles in runtime.json)
+- Custom-Form-Komponenten wenn Oblique-/Material-Aequivalent existiert
+- Karma/Jasmine als Test-Stack (Angular 21 nutzt Vitest als Default; Migration zu Jest ist Q-016)
 
 ## Teststrategie
 

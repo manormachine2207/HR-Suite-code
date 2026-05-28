@@ -105,6 +105,34 @@ Stop the stack:
 docker compose down
 ```
 
+### Frontend (Angular)
+
+Prerequisites: Node 22 LTS, npm 10+.
+
+```bash
+cd frontend
+npm ci
+npx ng serve
+```
+
+The dev server opens on `http://localhost:4200`. Tests:
+
+```bash
+npx ng test --watch=false
+```
+
+Lint:
+
+```bash
+npx ng lint
+```
+
+Production build (artifacts under `dist/hr-suite-frontend/`):
+
+```bash
+npx ng build --configuration=production
+```
+
 ## Repository layout
 
 This is a **monorepo** (see [ADR-005](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/ADR-005-Monorepo-Layout.md)):
@@ -114,7 +142,7 @@ HR-Suite-code/
 ├── .github/workflows/    # CI
 ├── core/                 # Generic core modules (Spring Modulith) — to be populated
 ├── plugins/              # Plugin examples (SF connector, OIDC, SMTP, ...) — to be populated
-├── frontend/             # React + TypeScript — to be populated
+├── frontend/             # Angular 21 + Oblique 15.3 (ng new bootstrapped)
 ├── docs/                 # OSS user/admin documentation — to be populated
 ├── examples/             # Example request types (BPMN + form JSON) — to be populated
 ├── tests/                # Cross-module tests — to be populated
