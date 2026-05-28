@@ -60,7 +60,7 @@ place:
   tenant onboarding REST API (`/api/v1/tenant`), PostgreSQL + Liquibase,
   jsonb i18n display names, UUIDv7 ids, OAuth2 resource-server security
   (OIDC), Testcontainers integration test. Tenant isolation follows
-  [ADR-008](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/ADR-008-Tenant-Isolation-Postgres-RLS.md)
+  [ADR-008](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/ADR-008-Tenant-Isolation-RLS.md)
   (Postgres RLS); `tenant` itself is the system root and stays outside RLS.
 
 Application code is being added module-by-module. Track progress via

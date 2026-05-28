@@ -46,7 +46,7 @@ Im Vault unter `Entscheidungen/`:
 | ADR | ADR-005-Monorepo-Layout | Code in einem Repo, Infra separat |
 | ADR | ADR-006-Container-Build-Migration-Image-Tags | Multi-Stage-Dockerfile, Liquibase per Profil, SHA+Semver-Tags |
 | ADR | ADR-007-Frontend-Stack-Switch-Angular-Oblique | Angular 21 + Oblique 15.3 + ngx-translate + angular-oauth2-oidc |
-| ADR | ADR-008-Tenant-Isolation-Postgres-RLS | RLS mit FORCE pro Geschaeftstabelle; `tenant`-Root ausserhalb RLS |
+| ADR | ADR-008-Tenant-Isolation-RLS | RLS mit FORCE pro Geschaeftstabelle; `tenant`-Root ausserhalb RLS |
 | SDR | SDR-001-OIDC-SAML-Generisch | OIDC Phase 1, SAML als Plugin Phase 2 |
 | SDR | SDR-002-Audit-SIEM-Standard | Structured Logs, Audit-Tabelle, Syslog-Forwarder |
 | SDR | SDR-003-Accessibility-WCAG-eCH-0059 | WCAG 2.1 AA + eCH-0059 verbindlich, axe-core + Lighthouse |
