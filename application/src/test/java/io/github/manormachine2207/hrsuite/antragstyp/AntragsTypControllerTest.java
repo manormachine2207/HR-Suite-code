@@ -3,6 +3,7 @@ package io.github.manormachine2207.hrsuite.antragstyp;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 import io.github.manormachine2207.hrsuite.config.MethodSecurityConfig;
 import io.github.manormachine2207.hrsuite.config.SecurityConfig;
+import io.github.manormachine2207.hrsuite.shared.tenant.MissingTenantContextException;
 import io.github.manormachine2207.hrsuite.shared.web.ApiExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,18 @@ class AntragsTypControllerTest {
                         .contentType(MediaType.APPLICATION_JSON).content(CREATE_BODY))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.key").value("sonderurlaub"));
+    }
+
+    @Test
+    void createReturns403WhenNoTenantInContext() throws Exception {
+        // Authenticated hr-designer, but token carried no usable tenant_id claim, so the
+        // service hits an empty TenantContext (ADR-008). Must surface as 403, not 500.
+        when(service.createDefinition(eq("sonderurlaub"), any(), any()))
+                .thenThrow(new MissingTenantContextException("no tenant in context"));
+
+        mvc.perform(post("/api/v1/antragstyp").with(jwt().authorities(role("hr-designer")))
+                        .contentType(MediaType.APPLICATION_JSON).content(CREATE_BODY))
+                .andExpect(status().isForbidden());
     }
 
     // ---- read (any role) --------------------------------------------------
