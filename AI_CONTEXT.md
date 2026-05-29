@@ -76,6 +76,19 @@ Im Vault unter `Entscheidungen/`:
   System-Root und bleibt ausserhalb RLS; die RLS-Policies + der
   `SET app.tenant_id`-AOP-Aspekt kommen mit der ersten mandantenbezogenen
   Geschaeftstabelle (ADR-008). Spring Modulith folgt mit dem zweiten Modul.
+- **Implementierungsstand (2026-05-29, core/antragstyp)**: zweites Modul live —
+  **core/antragstyp** mit ADR-009-Versionierung (`AntragsTyp` + `AntragsTypVersion`,
+  major/minor, `UNIQUE(antragstyp_id, major)`), serverseitigem
+  `CompatibilityClassifier` (MINOR in-place vs. MAJOR neue Zeile, ein Test je
+  Regelzeile), Lifecycle-Service (genau ein `published` Major), REST-API
+  `/api/v1/antragstyp/*` mit `@PreAuthorize` (04-Authorization-Model). **RLS ist
+  jetzt aktiv**: `TenantContextFilter` (JWT-`tenant_id`-Claim) → `TenantContext`
+  → `TenantContextAspect` (`set_config('app.tenant_id', …, is_local:=true)`,
+  `@Order(50)` innerhalb `@EnableTransactionManagement(order=0)`) → Policy
+  `USING`/`WITH CHECK` mit `NULLIF(current_setting('app.tenant_id', true), '')`.
+  Spring Modulith verifiziert Modulgrenzen (`shared`/`config` = OPEN). Das
+  provisorische `form_definition`-Schema ist als Decision-Draft markiert
+  (`Entscheidungen/_drafts/DRAFT-form-definition-schema.md`, Regel #9).
 
 ## Security-Kontext
 

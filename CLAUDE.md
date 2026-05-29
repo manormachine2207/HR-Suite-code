@@ -42,10 +42,7 @@ Bei Spec-/Decision-Aenderungen: zuerst Vault. Bei Code-/Build-Aenderungen: zuers
 
 ## Build-Quick-Reference
 
-Aktueller Stand: Erstes Frontend-Skelett (Angular 21 + Oblique) und erstes
-Backend-Modul (`application/`, Spring Boot 3.4, `core/tenant`) gelandet.
-Aggregator-pom mit Modul `application`, Dev-Compose-Stack (Backing-Services +
-`app` + `backend`), CI mit `validate` + Backend-`verify` + Frontend.
+Aktueller Stand: Zwei Backend-Module live (`application/`: core/tenant + core/antragstyp). Spring Modulith verifiziert die Modulgrenzen; PostgreSQL Row-Level Security ist ab core/antragstyp **aktiv** (erste tenant-scoped Tabellen). Dev-Compose-Stack inkl. Backend, CI-Workflow (validate + backend verify + frontend).
 
 Container-First-Disziplin (per BDR-007): App laeuft im Container, lokales Maven ist optional.
 
@@ -57,6 +54,7 @@ docker compose up -d        # builds frontend + backend containers, starts all b
 # Healthcheck:   http://localhost:8080/healthz
 # Backend:       http://localhost:8081
 # Backend health http://localhost:8081/actuator/health
+# Antragstyp API: http://localhost:8081/api/v1/antragstyp
 # Mailpit UI:    http://localhost:8025
 # MinIO Console: http://localhost:9001
 docker compose down         # stop everything
@@ -180,10 +178,12 @@ Jede API-Aenderung MUSS die OpenAPI-Spec mitaktualisieren. Living-Spec unter
 
 Aktuell absichtlich NICHT enthalten:
 
-- **RLS-Policies + TenantContext-AOP-Aspekt** (`SET app.tenant_id`) — kommen
-  mit der ersten mandantenbezogenen Geschaeftstabelle; `tenant` selbst ist
-  System-Root und bleibt ausserhalb RLS (siehe ADR-008).
-- **Spring Modulith** — kommt mit dem zweiten Backend-Modul.
+- core/antrag (Antrag-Instanz, Major-Pin bei Einreichung, Flowable-
+  Process-Start) — eigener Folge-Cut; ADR-009-Datenmodell traegt `submitted_minor`/
+  `migrated_from_version_id` bereits
+- Antragstyp-Migrations-Engine (Admin-Migration laufender Antraege) — Datenmodell
+  vorhanden, Engine spaeter (ADR-009)
+- Audit-Events (`antragstyp.version.published` etc.) — kommen mit dem audit-Modul
 - CONTRIBUTING.md / CODE_OF_CONDUCT.md / SECURITY.md (vor Public-Switch)
 - `ng lint` / Pre-Push-Lints (Follow-up-Cut, `@angular-eslint`)
 - Dex/OIDC-Stub im Compose (kommt mit identity-sp; dev nutzt Mock-Decoder)

@@ -1,6 +1,6 @@
 # HR-Suite
 
-> **Status:** Pre-alpha — first backend module (core/tenant) landed
+> **Status:** Pre-alpha — versioned request types (core/antragstyp) on multi-tenant RLS
 > **License:** [Apache License 2.0](./LICENSE)
 > **Spec & decisions:** [HR-Suite-notes](https://github.com/manormachine2207/HR-Suite-notes)
 
@@ -62,6 +62,11 @@ place:
   (OIDC), Testcontainers integration test. Tenant isolation follows
   [ADR-008](https://github.com/manormachine2207/HR-Suite-notes/blob/main/Entscheidungen/ADR-008-Tenant-Isolation-RLS.md)
   (Postgres RLS); `tenant` itself is the system root and stays outside RLS.
+- **core/antragstyp**: versioned request-type definitions (major/minor per
+  ADR-009) with a server-side compatibility classifier (breaking change -> new
+  major), lifecycle API (`/api/v1/antragstyp/*`, RBAC per role), and the
+  **first tenant-scoped tables under active PostgreSQL Row-Level Security**
+  (ADR-008) — isolation enforced via a `tenant_id` GUC set per transaction
 
 Application code is being added module-by-module. Track progress via
 [HR-Suite-notes Roadmap](https://github.com/manormachine2207/HR-Suite-notes/blob/main/13-Roadmap.md).
@@ -106,6 +111,7 @@ Endpoints (local):
 - **Healthcheck:** `http://localhost:8080/healthz`
 - **Backend (Spring Boot):** `http://localhost:8081`
 - **Backend health:** `http://localhost:8081/actuator/health`
+- **Request-type admin API:** `http://localhost:8081/api/v1/antragstyp` (RBAC: hr-designer / tenant-admin / hr-reviewer / applicant)
 - Postgres: `localhost:5432` (db=`hrsuite`, user=`hrsuite`, password=`dev` — override via `.env`)
 - MinIO API: `http://localhost:9000` (user=`hrsuite`, password=`devdevdev` — override via `.env`)
 - MinIO Console: `http://localhost:9001`
@@ -129,6 +135,22 @@ curl -sS -X POST http://localhost:8081/api/v1/tenant \
 # List tenants
 curl -sS http://localhost:8081/api/v1/tenant \
   -H 'Authorization: Bearer dev-platform-admin'
+```
+
+Then create a versioned request type (the dev profile mints a tenant-scoped token
+`dev-<role>:<tenant-uuid>`):
+
+```bash
+# Capture a tenant id (from the create above), then act as its hr-designer
+TID=$(curl -s http://localhost:8081/api/v1/tenant \
+  -H 'Authorization: Bearer dev-platform-admin' \
+  | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+
+# Create a request-type definition (201)
+curl -s -X POST http://localhost:8081/api/v1/antragstyp \
+  -H "Authorization: Bearer dev-hr-designer:$TID" \
+  -H 'Content-Type: application/json' \
+  -d '{"key":"sonderurlaub","title":{"de":"Sonderurlaub"}}' -w '\n-> %{http_code}\n'
 ```
 
 Stop the stack:
