@@ -13,6 +13,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -100,7 +102,7 @@ public class AntragsTypVersion {
         this.status = VersionStatus.DRAFT;
         this.formDefinition = formDefinition;
         this.workflowBpmn = workflowBpmn;
-        this.sfActionBindings = sfActionBindings;
+        this.sfActionBindings = sfActionBindings == null ? null : new LinkedHashMap<>(sfActionBindings);
     }
 
     @PrePersist
@@ -119,7 +121,7 @@ public class AntragsTypVersion {
     public void applyMinorEdit(FormDefinition newDefinition, Map<String, Object> changelog) {
         this.formDefinition = newDefinition;
         this.minor = this.minor + 1;
-        this.minorChangelog = changelog;
+        this.minorChangelog = changelog == null ? null : new LinkedHashMap<>(changelog);
     }
 
     /**
@@ -130,7 +132,7 @@ public class AntragsTypVersion {
                                     Map<String, Object> newSfActionBindings) {
         this.formDefinition = newDefinition;
         this.workflowBpmn = newWorkflowBpmn;
-        this.sfActionBindings = newSfActionBindings;
+        this.sfActionBindings = newSfActionBindings == null ? null : new LinkedHashMap<>(newSfActionBindings);
     }
 
     public void publish(UUID publishedBy) {
@@ -139,6 +141,12 @@ public class AntragsTypVersion {
         this.publishedBy = publishedBy;
     }
 
+    /**
+     * Sets the status directly. Intended for deprecation/archival lifecycle
+     * transitions (e.g. PUBLISHED→DEPRECATED, PUBLISHED→ARCHIVED). For the
+     * DRAFT→PUBLISHED promotion prefer {@link #publish(UUID)}, which additionally
+     * sets {@code publishedAt} and {@code publishedBy}.
+     */
     public void setStatus(VersionStatus status) { this.status = status; }
 
     public UUID getId() { return id; }
@@ -149,8 +157,12 @@ public class AntragsTypVersion {
     public VersionStatus getStatus() { return status; }
     public FormDefinition getFormDefinition() { return formDefinition; }
     public String getWorkflowBpmn() { return workflowBpmn; }
-    public Map<String, Object> getSfActionBindings() { return sfActionBindings; }
-    public Map<String, Object> getMinorChangelog() { return minorChangelog; }
+    public Map<String, Object> getSfActionBindings() {
+        return sfActionBindings == null ? null : Collections.unmodifiableMap(sfActionBindings);
+    }
+    public Map<String, Object> getMinorChangelog() {
+        return minorChangelog == null ? null : Collections.unmodifiableMap(minorChangelog);
+    }
     public OffsetDateTime getPublishedAt() { return publishedAt; }
     public UUID getPublishedBy() { return publishedBy; }
     public OffsetDateTime getCreatedAt() { return createdAt; }

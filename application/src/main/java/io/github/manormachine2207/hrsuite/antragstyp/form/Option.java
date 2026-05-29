@@ -9,4 +9,8 @@ import java.util.Map;
 public record Option(
         String value,
         Map<String, String> label) {
+
+    public Option {
+        label = label == null ? null : Map.copyOf(label);
+    }
 }

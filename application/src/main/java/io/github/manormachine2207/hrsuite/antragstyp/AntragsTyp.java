@@ -12,6 +12,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -66,8 +68,8 @@ public class AntragsTyp {
         this.id = id;
         this.tenantId = tenantId;
         this.key = key;
-        this.title = title;
-        this.description = description;
+        this.title = title == null ? null : new LinkedHashMap<>(title);
+        this.description = description == null ? null : new LinkedHashMap<>(description);
         this.status = AntragsTypStatus.DRAFT;
     }
 
@@ -89,13 +91,24 @@ public class AntragsTyp {
     }
 
     public void setCurrentVersionId(UUID versionId) { this.currentVersionId = versionId; }
+
+    /**
+     * Sets the status directly. Intended for deprecation/archival lifecycle
+     * transitions. For the DRAFT→LIVE promotion prefer {@link #markLive(UUID)},
+     * which additionally sets {@code currentVersionId}; calling this method alone
+     * for LIVE leaves the pointer unset.
+     */
     public void setStatus(AntragsTypStatus status) { this.status = status; }
 
     public UUID getId() { return id; }
     public UUID getTenantId() { return tenantId; }
     public String getKey() { return key; }
-    public Map<String, String> getTitle() { return title; }
-    public Map<String, String> getDescription() { return description; }
+    public Map<String, String> getTitle() {
+        return title == null ? null : Collections.unmodifiableMap(title);
+    }
+    public Map<String, String> getDescription() {
+        return description == null ? null : Collections.unmodifiableMap(description);
+    }
     public AntragsTypStatus getStatus() { return status; }
     public UUID getCurrentVersionId() { return currentVersionId; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
