@@ -102,6 +102,15 @@ class AntragsTypServiceTest {
         assertThat(v.getTenantId()).isEqualTo(TENANT);
     }
 
+    @Test
+    void createDraftMajorThrowsNotFoundWhenAntragstypMissing() {
+        UUID missing = UUID.randomUUID();
+        when(antragsTypRepository.findById(missing)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.createDraftMajor(missing, form(text("a", true, 100)), "<bpmn/>", Map.of()))
+                .isInstanceOf(AntragsTypExceptions.NotFound.class);
+    }
+
     // ---- publish ----------------------------------------------------------
     @Test
     void publishFirstVersionMarksAntragsTypLive() {
@@ -176,6 +185,20 @@ class AntragsTypServiceTest {
 
         assertThatThrownBy(() -> service.editInPlaceMinor(v.getId(), form(text("a", true, 200))))
                 .isInstanceOf(AntragsTypExceptions.IllegalState.class);
+    }
+
+    @Test
+    void editInPlaceMinorAppliesOnDeprecatedVersion() {
+        var v = publishedVersion(UUID.randomUUID(),
+                form(new FormField("a", FieldType.TEXT, true, Map.of("de", "Alt"), Map.of(), null, List.of(), null)));
+        v.setStatus(VersionStatus.DEPRECATED);
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+
+        var edited = service.editInPlaceMinor(v.getId(),
+                form(new FormField("a", FieldType.TEXT, true, Map.of("de", "Neu"), Map.of(), null, List.of(), null)));
+
+        assertThat(edited.getMinor()).isEqualTo(1);
+        assertThat(edited.getStatus()).isEqualTo(VersionStatus.DEPRECATED);
     }
 
     // ---- editDraft --------------------------------------------------------

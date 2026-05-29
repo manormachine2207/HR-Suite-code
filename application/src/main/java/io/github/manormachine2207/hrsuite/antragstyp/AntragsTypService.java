@@ -94,7 +94,7 @@ public class AntragsTypService {
                 v.getSfActionBindings(), v.getSfActionBindings());
         if (c.isMajor()) {
             throw new AntragsTypExceptions.BreakingChange(
-                    "change is breaking and requires a new major: " + c.reasons());
+                    "change is breaking and requires a new major (version " + versionId + "): " + c.reasons());
         }
         v.applyMinorEdit(newFormDefinition, Map.of("reasons", c.reasons()));
         return v;
@@ -105,7 +105,14 @@ public class AntragsTypService {
         if (target.getStatus() != VersionStatus.DRAFT) {
             throw new AntragsTypExceptions.IllegalState("only DRAFT versions can be published: " + versionId);
         }
-        // Enforce exactly-one-published invariant: demote the current published major (if any).
+        // Enforce exactly-one-published invariant: demote the current published major (if any)
+        // BEFORE promoting the target. This invariant is held at the service layer, not by a DB
+        // constraint: a `WHERE status='PUBLISHED'` partial-unique index cannot be DEFERRABLE in
+        // PostgreSQL and would break this demote->promote flush ordering. Consequence: two
+        // concurrent publish() calls for the same antragstyp at READ COMMITTED could both observe
+        // the same prior state and both promote, yielding two PUBLISHED majors. Publishing is a
+        // rare single-admin action, so we accept this window for now; fully closing it needs
+        // SERIALIZABLE isolation or a per-antragstyp advisory/row lock (tracked for a later cut).
         versionRepository.findByAntragstypIdAndStatus(target.getAntragstypId(), VersionStatus.PUBLISHED)
                 .ifPresent(prev -> prev.setStatus(VersionStatus.DEPRECATED));
 
@@ -121,6 +128,9 @@ public class AntragsTypService {
         if (v.getStatus() != VersionStatus.PUBLISHED) {
             throw new AntragsTypExceptions.IllegalState("only PUBLISHED versions can be deprecated: " + versionId);
         }
+        // Version-level lifecycle only: the parent AntragsTyp stays LIVE and keeps pointing at
+        // currentVersionId until a new major is published (publish() -> markLive). A deprecated
+        // major may still receive backward-compatible minor edits for already-pinned in-flight requests.
         v.setStatus(VersionStatus.DEPRECATED);
         return v;
     }
