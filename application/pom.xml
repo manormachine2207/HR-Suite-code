@@ -60,9 +60,15 @@
             <artifactId>uuid-creator</artifactId>
         </dependency>
 
+        <!--
+          Annotations only (@ApplicationModule in main-source package-info.java)
+          on the compile classpath. The boundary verifier (ArchUnit etc.) comes
+          via spring-modulith-starter-test on the TEST classpath only, keeping
+          Modulith machinery out of the runtime (plan Task 1 Step 2 intent).
+        -->
         <dependency>
             <groupId>org.springframework.modulith</groupId>
-            <artifactId>spring-modulith-core</artifactId>
+            <artifactId>spring-modulith-api</artifactId>
         </dependency>
 
         <!-- Test -->
