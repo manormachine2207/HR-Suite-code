@@ -1,4 +1,4 @@
-package io.github.manormachine2207.hrsuite.tenant;
+package io.github.manormachine2207.hrsuite.shared.tenant;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
