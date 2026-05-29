@@ -55,7 +55,9 @@ public class CompatibilityClassifier {
         if (!Objects.equals(norm(oldWorkflowBpmn), norm(newWorkflowBpmn))) {
             major.add("workflow/BPMN changed");
         }
-        if (!Objects.equals(oldSfBindings, newSfBindings)) {
+        Map<String, Object> effOldSf = oldSfBindings == null ? Map.of() : oldSfBindings;
+        Map<String, Object> effNewSf = newSfBindings == null ? Map.of() : newSfBindings;
+        if (!Objects.equals(effOldSf, effNewSf)) {
             major.add("sf_action_bindings changed");
         }
 
