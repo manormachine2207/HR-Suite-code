@@ -86,6 +86,8 @@ class AntragsTypVersionTest {
         assertThat(version.getFormDefinition()).isEqualTo(newDef);
         assertThat(version.getWorkflowBpmn()).isEqualTo("<new/>");
         assertThat(version.getSfActionBindings()).isEqualTo(newSf);
+        assertThat(version.getMinor()).isEqualTo(0);
+        assertThat(version.getStatus()).isEqualTo(VersionStatus.DRAFT);
     }
 
     @Test

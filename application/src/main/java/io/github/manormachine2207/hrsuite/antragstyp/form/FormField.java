@@ -30,6 +30,8 @@ public record FormField(
         String defaultValue) {
 
     public FormField {
+        label = label == null ? null : Map.copyOf(label);
+        helpText = helpText == null ? null : Map.copyOf(helpText);
         options = options == null ? List.of() : List.copyOf(options);
     }
 }

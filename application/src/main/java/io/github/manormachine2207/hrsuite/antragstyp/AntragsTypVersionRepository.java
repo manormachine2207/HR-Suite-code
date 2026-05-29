@@ -14,6 +14,15 @@ public interface AntragsTypVersionRepository extends JpaRepository<AntragsTypVer
 
     Optional<AntragsTypVersion> findByAntragstypIdAndMajor(UUID antragstypId, int major);
 
+    /**
+     * Returns the single version for the given antragstyp that matches the given
+     * status. This method is intended for the per-antragstyp-unique {@code PUBLISHED}
+     * lookup (ADR-009: exactly one published major per antragstyp, enforced at the
+     * service layer). Callers must not use it for statuses that may have multiple
+     * rows (DRAFT, DEPRECATED, ARCHIVED) — Spring Data will throw
+     * {@link org.springframework.dao.IncorrectResultSizeDataAccessException} if
+     * more than one row matches.
+     */
     Optional<AntragsTypVersion> findByAntragstypIdAndStatus(UUID antragstypId, VersionStatus status);
 
     @Query("select coalesce(max(v.major), 0) from AntragsTypVersion v where v.antragstypId = :antragstypId")
