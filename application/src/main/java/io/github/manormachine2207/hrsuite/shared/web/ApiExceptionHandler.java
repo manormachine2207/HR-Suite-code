@@ -1,6 +1,7 @@
 package io.github.manormachine2207.hrsuite.shared.web;
 
 import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypExceptions;
+import io.github.manormachine2207.hrsuite.shared.tenant.MissingTenantContextException;
 import io.github.manormachine2207.hrsuite.tenant.TenantExceptions.TenantConflictException;
 import io.github.manormachine2207.hrsuite.tenant.TenantExceptions.TenantNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -42,6 +43,13 @@ public class ApiExceptionHandler {
     @ExceptionHandler(AntragsTypExceptions.BreakingChange.class)
     ProblemDetail handleAntragsTypBreakingChange(AntragsTypExceptions.BreakingChange ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(MissingTenantContextException.class)
+    ProblemDetail handleMissingTenant(MissingTenantContextException ex) {
+        // Authenticated, tenant-scoped role, but no tenant_id in context (ADR-008):
+        // a token/client problem, not a server fault -> 403, not 500.
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

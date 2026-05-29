@@ -26,6 +26,17 @@ public final class TenantContext {
         return Optional.ofNullable(CURRENT.get());
     }
 
+    /**
+     * Returns the current tenant id, or throws {@link MissingTenantContextException}
+     * (mapped to HTTP 403) when none is set. Tenant-scoped service code must use this
+     * instead of unwrapping {@link #get()} with a raw {@link IllegalStateException},
+     * which would surface as a 500 on the auth path (ADR-008).
+     */
+    public static UUID require() {
+        return get().orElseThrow(
+                () -> new MissingTenantContextException("no tenant in context"));
+    }
+
     public static void clear() {
         CURRENT.remove();
     }

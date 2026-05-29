@@ -3,7 +3,11 @@ spring:
     name: hr-suite
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/hrsuite}
-    username: ${DB_USERNAME:hrsuite}
+    # Default to the restricted, non-superuser role so a bare-defaults run fails
+    # loudly (role missing) rather than silently connecting as a superuser and
+    # bypassing RLS (ADR-008). All real paths override DB_USERNAME: compose, prod
+    # secrets, and the ITs via @DynamicPropertySource.
+    username: ${DB_USERNAME:hrsuite_app}
     password: ${DB_PASSWORD:dev}
     # NOTE (ADR-008): intentionally NO Hikari connection-test-query here.
     # The per-connection reset of the session GUC app.tenant_id will be done

@@ -150,7 +150,6 @@ public class AntragsTypService {
     }
 
     private UUID currentTenant() {
-        return TenantContext.get().orElseThrow(
-                () -> new IllegalStateException("no tenant in context"));
+        return TenantContext.require();
     }
 }
