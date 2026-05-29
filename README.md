@@ -112,7 +112,7 @@ Endpoints (local):
 - **Backend (Spring Boot):** `http://localhost:8081`
 - **Backend health:** `http://localhost:8081/actuator/health`
 - **Request-type admin API:** `http://localhost:8081/api/v1/antragstyp` (RBAC: hr-designer / tenant-admin / hr-reviewer / applicant)
-- Postgres: `localhost:5432` (db=`hrsuite`, user=`hrsuite`, password=`dev` — override via `.env`)
+- Postgres: `localhost:5432` (db=`hrsuite`, admin user=`hrsuite`, password=`dev` — override via `.env`). The backend connects as the restricted, non-superuser role `hrsuite_app` (provisioned by `docker/postgres-init/`) so PostgreSQL RLS is enforced (ADR-008).
 - MinIO API: `http://localhost:9000` (user=`hrsuite`, password=`devdevdev` — override via `.env`)
 - MinIO Console: `http://localhost:9001`
 - Mailpit SMTP: `localhost:1025`

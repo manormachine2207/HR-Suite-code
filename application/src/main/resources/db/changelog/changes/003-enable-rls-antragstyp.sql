@@ -2,10 +2,16 @@
 
 --changeset hr-suite:003-enable-rls-antragstyp
 --comment: ADR-008 RLS activation on the first tenant-scoped business tables
--- FORCE applies the policy even to the table owner (the app role owns these
--- tables), so no separate non-owner DB role is required. The policy reads the
--- per-transaction GUC app.tenant_id set by TenantContextAspect via set_config(..,
--- is_local=true). current_setting(.., true) returns NULL when unset (missing_ok);
+-- FORCE makes the policy apply to the table OWNER too (owners are exempt by
+-- default). It does NOT, however, constrain superuser or BYPASSRLS roles -- those
+-- bypass RLS unconditionally. The application must therefore connect as a role that
+-- (a) owns these tables and (b) is NOT a superuser/BYPASSRLS role. The Postgres
+-- bootstrap user (POSTGRES_USER) is a superuser and cannot be demoted, so the app
+-- runs as a dedicated NOSUPERUSER role 'hrsuite_app', provisioned per environment
+-- (docker/postgres-init/ for compose, withInitScript for the IT, a managed role in
+-- prod). The policy reads the per-transaction GUC app.tenant_id set by
+-- TenantContextAspect via set_config(.., is_local=true). current_setting(.., true)
+-- returns NULL when unset (missing_ok);
 -- NULLIF turns an empty string into NULL; a NULL comparison yields no rows
 -- (deny-by-default) instead of erroring. WITH CHECK blocks inserting/updating
 -- rows for a foreign tenant.
