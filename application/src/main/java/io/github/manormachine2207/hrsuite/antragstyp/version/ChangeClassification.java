@@ -12,6 +12,10 @@ public record ChangeClassification(
         ChangeClass changeClass,
         List<String> reasons) {
 
+    public ChangeClassification {
+        reasons = reasons == null ? List.of() : List.copyOf(reasons);
+    }
+
     public boolean isMajor() {
         return changeClass == ChangeClass.MAJOR;
     }

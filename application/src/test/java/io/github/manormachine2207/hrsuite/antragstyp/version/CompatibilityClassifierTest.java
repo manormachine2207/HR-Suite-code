@@ -202,4 +202,19 @@ class CompatibilityClassifierTest {
         assertThat(r.isMajor()).isTrue();
         assertThat(r.reasons()).anyMatch(s -> s.contains("sf_action_bindings"));
     }
+
+    @Test
+    void majorDominatesAndOnlyMajorReasonsSurfaceWhenBothPresent() {
+        // 'b' removed (MAJOR) AND 'a' label changed (MINOR) in the same diff:
+        // the classifier must report MAJOR and surface ONLY the major reasons.
+        var oldD = def(
+                field("a", FieldType.TEXT, true, Map.of("de", "Alt"), null, List.of(), null),
+                text("b", true, 100));
+        var newD = def(
+                field("a", FieldType.TEXT, true, Map.of("de", "Neu"), null, List.of(), null));
+        var r = classifyForm(oldD, newD);
+        assertThat(r.isMajor()).isTrue();
+        assertThat(r.reasons()).anyMatch(s -> s.contains("field removed"));
+        assertThat(r.reasons()).noneMatch(s -> s.contains("label changed"));
+    }
 }
