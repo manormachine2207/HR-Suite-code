@@ -138,7 +138,7 @@ curl -sS http://localhost:8081/api/v1/tenant \
 ```
 
 Then create a versioned request type (the dev profile mints a tenant-scoped token
-`dev-<role>:<tenant-uuid>`):
+`dev-<role>~<tenant-uuid>`):
 
 ```bash
 # Capture a tenant id (from the create above), then act as its hr-designer
@@ -148,7 +148,7 @@ TID=$(curl -s http://localhost:8081/api/v1/tenant \
 
 # Create a request-type definition (201)
 curl -s -X POST http://localhost:8081/api/v1/antragstyp \
-  -H "Authorization: Bearer dev-hr-designer:$TID" \
+  -H "Authorization: Bearer dev-hr-designer~$TID" \
   -H 'Content-Type: application/json' \
   -d '{"key":"sonderurlaub","title":{"de":"Sonderurlaub"}}' -w '\n-> %{http_code}\n'
 ```

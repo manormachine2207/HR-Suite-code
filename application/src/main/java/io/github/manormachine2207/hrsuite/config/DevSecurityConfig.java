@@ -16,11 +16,15 @@ import java.util.Set;
 /**
  * Dev-only JwtDecoder. Two token shapes (no signature, no network):
  *   "dev-platform-admin"            -> roles:[platform-admin], no tenant_id
- *   "dev-<role>:<tenant-uuid>"      -> roles:[<role>], tenant_id:<uuid>
+ *   "dev-<role>~<tenant-uuid>"      -> roles:[<role>], tenant_id:<uuid>
  * where <role> is one of tenant-admin | hr-designer | hr-reviewer | applicant.
  * The "<uuid>" lets tests create a tenant, capture its id, then mint a token
  * scoped to that tenant — exercising RLS end-to-end. Active solely under the
  * 'dev' profile; prod validates real OIDC tokens via OIDC_ISSUER_URI.
+ *
+ * Separator is '~' (not ':'): a colon is not a legal RFC 6750 bearer-token
+ * character, so DefaultBearerTokenResolver rejects "Bearer dev-x:uuid" as
+ * malformed (401) before this decoder runs. '~' is in the allowed charset.
  */
 @Configuration
 @Profile("dev")
@@ -37,10 +41,10 @@ public class DevSecurityConfig {
             if (DEV_ADMIN_TOKEN.equals(token)) {
                 return jwt(token, now, Map.of("sub", token, "roles", List.of("platform-admin")));
             }
-            int colon = token.indexOf(':');
-            if (token.startsWith("dev-") && colon > 4) {
-                String role = token.substring(4, colon);
-                String tenantId = token.substring(colon + 1);
+            int sep = token.indexOf('~');
+            if (token.startsWith("dev-") && sep > 4) {
+                String role = token.substring(4, sep);
+                String tenantId = token.substring(sep + 1);
                 if (TENANT_ROLES.contains(role) && isUuid(tenantId)) {
                     return jwt(token, now, Map.of(
                             "sub", token,
@@ -49,7 +53,7 @@ public class DevSecurityConfig {
                 }
             }
             throw new BadJwtException("dev decoder rejects token '" + token + "' "
-                    + "(use 'dev-platform-admin' or 'dev-<role>:<tenant-uuid>')");
+                    + "(use 'dev-platform-admin' or 'dev-<role>~<tenant-uuid>')");
         };
     }
 

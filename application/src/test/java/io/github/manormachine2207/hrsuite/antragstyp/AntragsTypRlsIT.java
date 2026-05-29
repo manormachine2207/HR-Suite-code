@@ -52,7 +52,7 @@ class AntragsTypRlsIT {
 
     private HttpHeaders designer(String tenantId) {
         HttpHeaders h = jsonHeaders();
-        h.setBearerAuth("dev-hr-designer:" + tenantId);
+        h.setBearerAuth("dev-hr-designer~" + tenantId);
         return h;
     }
 
@@ -181,7 +181,7 @@ class AntragsTypRlsIT {
     void applicantCannotCreateAntragsTyp() throws Exception {
         String tenant = createTenant("RBAC", "rbac");
         HttpHeaders applicant = jsonHeaders();
-        applicant.setBearerAuth("dev-applicant:" + tenant);
+        applicant.setBearerAuth("dev-applicant~" + tenant);
         String body = """
                 {"key":"verboten","title":{"de":"x"}}
                 """;
