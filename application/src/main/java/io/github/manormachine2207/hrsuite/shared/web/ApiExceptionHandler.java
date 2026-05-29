@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.shared.web;
 
+import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypExceptions;
 import io.github.manormachine2207.hrsuite.tenant.TenantExceptions.TenantConflictException;
 import io.github.manormachine2207.hrsuite.tenant.TenantExceptions.TenantNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -21,6 +22,26 @@ public class ApiExceptionHandler {
     @ExceptionHandler(TenantConflictException.class)
     ProblemDetail handleConflict(TenantConflictException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AntragsTypExceptions.NotFound.class)
+    ProblemDetail handleAntragsTypNotFound(AntragsTypExceptions.NotFound ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AntragsTypExceptions.Conflict.class)
+    ProblemDetail handleAntragsTypConflict(AntragsTypExceptions.Conflict ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AntragsTypExceptions.IllegalState.class)
+    ProblemDetail handleAntragsTypIllegalState(AntragsTypExceptions.IllegalState ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
+    @ExceptionHandler(AntragsTypExceptions.BreakingChange.class)
+    ProblemDetail handleAntragsTypBreakingChange(AntragsTypExceptions.BreakingChange ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
