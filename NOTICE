@@ -9,6 +9,7 @@ This project includes or references the following third-party software:
 
 - Apache Flowable (Apache License 2.0)        — https://flowable.com
 - Spring Framework / Spring Boot (Apache 2.0) — https://spring.io
+- Spring Modulith (Apache License 2.0)         — https://spring.io/projects/spring-modulith
 - Liquibase (Apache License 2.0)              — https://www.liquibase.org
 - HikariCP (Apache License 2.0)               — https://github.com/brettwooldridge/HikariCP
 - uuid-creator (MIT License)                  — https://github.com/f4b6a3/uuid-creator
