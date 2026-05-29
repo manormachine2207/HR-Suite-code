@@ -11,6 +11,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -23,7 +24,7 @@ import java.util.UUID;
  */
 public class TenantContextFilter extends OncePerRequestFilter {
 
-    static final String TENANT_CLAIM = "tenant_id";
+    public static final String TENANT_CLAIM = "tenant_id";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -36,19 +37,19 @@ public class TenantContextFilter extends OncePerRequestFilter {
         }
     }
 
-    private java.util.Optional<UUID> tenantIdFromSecurityContext() {
+    private Optional<UUID> tenantIdFromSecurityContext() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth instanceof JwtAuthenticationToken jwtAuth) {
             Jwt jwt = jwtAuth.getToken();
             String raw = jwt.getClaimAsString(TENANT_CLAIM);
             if (raw != null && !raw.isBlank()) {
                 try {
-                    return java.util.Optional.of(UUID.fromString(raw));
+                    return Optional.of(UUID.fromString(raw));
                 } catch (IllegalArgumentException ignored) {
                     // malformed tenant_id claim -> treat as no tenant (deny via empty RLS scope)
                 }
             }
         }
-        return java.util.Optional.empty();
+        return Optional.empty();
     }
 }

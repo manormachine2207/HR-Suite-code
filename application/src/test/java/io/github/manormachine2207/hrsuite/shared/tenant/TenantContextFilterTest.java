@@ -70,4 +70,19 @@ class TenantContextFilterTest {
 
         assertThat(TenantContext.get()).isEmpty();
     }
+
+    @Test
+    void treatsInvalidUuidClaimAsNoTenant() throws Exception {
+        SecurityContextHolder.getContext().setAuthentication(
+                new JwtAuthenticationToken(jwtWith(Map.of("sub", "u",
+                        TenantContextFilter.TENANT_CLAIM, "not-a-uuid"))));
+
+        AtomicReference<Boolean> emptyDuringChain = new AtomicReference<>();
+        FilterChain chain = (req, res) -> emptyDuringChain.set(TenantContext.get().isEmpty());
+
+        filter.doFilter(new MockHttpServletRequest(), new MockHttpServletResponse(), chain);
+
+        assertThat(emptyDuringChain.get()).isTrue();   // malformed claim swallowed, no tenant set
+        assertThat(TenantContext.get()).isEmpty();      // cleared after
+    }
 }
