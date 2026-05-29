@@ -28,14 +28,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Testcontainers
 class AntragsTypRlsIT {
 
+    // The app must connect as a NON-superuser role for RLS to bind (ADR-008): the
+    // Testcontainers bootstrap user is a superuser and bypasses RLS. The init script
+    // creates a dedicated NOSUPERUSER role; the datasource (Liquibase + runtime) uses
+    // it, so the tables are owned by a non-superuser and FORCE actually isolates.
+    private static final String APP_ROLE = "hrsuite_app";
+    private static final String APP_ROLE_PASSWORD = "dev";
+
     @Container
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine")
+            .withInitScript("db/rls-it-init.sql");
 
     @DynamicPropertySource
     static void datasourceProps(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", POSTGRES::getJdbcUrl);
-        registry.add("spring.datasource.username", POSTGRES::getUsername);
-        registry.add("spring.datasource.password", POSTGRES::getPassword);
+        registry.add("spring.datasource.username", () -> APP_ROLE);
+        registry.add("spring.datasource.password", () -> APP_ROLE_PASSWORD);
     }
 
     @Autowired

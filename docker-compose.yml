@@ -23,10 +23,15 @@ services:
       POSTGRES_DB: hrsuite
       POSTGRES_USER: hrsuite
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dev}
+      # Password for the restricted runtime role created by the init script below.
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:-dev}
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      # Provisions the NOSUPERUSER 'hrsuite_app' role on first init so RLS is
+      # actually enforced (ADR-008): superusers bypass RLS regardless of FORCE.
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U hrsuite -d hrsuite"]
       interval: 10s
@@ -85,8 +90,10 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: dev
       DB_URL: jdbc:postgresql://postgres:5432/hrsuite
-      DB_USERNAME: hrsuite
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-dev}
+      # Connect as the restricted, non-superuser role (ADR-008 RLS), NOT the
+      # bootstrap superuser 'hrsuite' — superuser/BYPASSRLS roles bypass RLS.
+      DB_USERNAME: hrsuite_app
+      DB_PASSWORD: ${APP_DB_PASSWORD:-dev}
     ports:
       - "8081:8080"
     healthcheck:
