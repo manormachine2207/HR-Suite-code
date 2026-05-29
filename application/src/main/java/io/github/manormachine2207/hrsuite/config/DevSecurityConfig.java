@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.config;
 
+import io.github.manormachine2207.hrsuite.shared.tenant.TenantContextFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -44,7 +45,7 @@ public class DevSecurityConfig {
                     return jwt(token, now, Map.of(
                             "sub", token,
                             "roles", List.of(role),
-                            "tenant_id", tenantId));
+                            TenantContextFilter.TENANT_CLAIM, tenantId));
                 }
             }
             throw new BadJwtException("dev decoder rejects token '" + token + "' "
