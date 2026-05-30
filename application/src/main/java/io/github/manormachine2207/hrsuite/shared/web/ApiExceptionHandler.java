@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.shared.web;
 
+import io.github.manormachine2207.hrsuite.antrag.AntragExceptions;
 import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypExceptions;
 import io.github.manormachine2207.hrsuite.shared.tenant.MissingTenantContextException;
 import io.github.manormachine2207.hrsuite.tenant.TenantExceptions.TenantConflictException;
@@ -43,6 +44,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(AntragsTypExceptions.BreakingChange.class)
     ProblemDetail handleAntragsTypBreakingChange(AntragsTypExceptions.BreakingChange ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
+    @ExceptionHandler(AntragExceptions.NotFound.class)
+    ProblemDetail handleAntragNotFound(AntragExceptions.NotFound ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(AntragExceptions.IllegalState.class)
+    ProblemDetail handleAntragIllegalState(AntragExceptions.IllegalState ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(MissingTenantContextException.class)

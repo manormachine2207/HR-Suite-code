@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -71,6 +72,18 @@ public class AntragsTypService {
     @Transactional(readOnly = true)
     public List<AntragsTypVersion> listVersions(UUID antragstypId) {
         return versionRepository.findByAntragstypIdOrderByMajorDesc(antragstypId);
+    }
+
+    /**
+     * Returns the currently published major of an antragstyp (the unit an
+     * {@code Antrag} pins at submission, ADR-009 §4), or empty if the antragstyp has
+     * no published major / is not visible in the current tenant (RLS). Exposed for the
+     * antrag module via the small {@link PublishedMajorRef} record.
+     */
+    @Transactional(readOnly = true)
+    public Optional<PublishedMajorRef> findPublishedMajor(UUID antragstypId) {
+        return versionRepository.findByAntragstypIdAndStatus(antragstypId, VersionStatus.PUBLISHED)
+                .map(v -> new PublishedMajorRef(v.getId(), v.getMinor()));
     }
 
     public AntragsTypVersion createDraftMajor(UUID antragstypId, FormDefinition formDefinition,
