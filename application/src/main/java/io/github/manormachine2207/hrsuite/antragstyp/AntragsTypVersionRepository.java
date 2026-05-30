@@ -25,6 +25,16 @@ public interface AntragsTypVersionRepository extends JpaRepository<AntragsTypVer
      */
     Optional<AntragsTypVersion> findByAntragstypIdAndStatus(UUID antragstypId, VersionStatus status);
 
+    /**
+     * Resolves the parent antragstyp id for a version without loading the (mutable)
+     * version entity into the persistence context. {@link AntragsTypService#publish}
+     * uses it to derive the per-antragstyp advisory-lock key BEFORE reading any mutable
+     * state, so the lock can be held across the read-modify-write. RLS-scoped like every
+     * other query, so a cross-tenant version id resolves to {@link Optional#empty()}.
+     */
+    @Query("select v.antragstypId from AntragsTypVersion v where v.id = :id")
+    Optional<UUID> findAntragstypIdById(@Param("id") UUID id);
+
     @Query("select coalesce(max(v.major), 0) from AntragsTypVersion v where v.antragstypId = :antragstypId")
     int maxMajor(@Param("antragstypId") UUID antragstypId);
 }
