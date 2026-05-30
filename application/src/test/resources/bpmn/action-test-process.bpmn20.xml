@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://hr-suite/test">
+  <process id="actionTestProcess" name="Action Test" isExecutable="true">
+    <startEvent id="start"/>
+    <sequenceFlow id="f1" sourceRef="start" targetRef="callAction"/>
+    <serviceTask id="callAction" name="Call n8n action"
+                 flowable:delegateExpression="${n8nActionDelegate}">
+      <extensionElements>
+        <flowable:field name="ref">
+          <flowable:string>provision-ad-account</flowable:string>
+        </flowable:field>
+      </extensionElements>
+    </serviceTask>
+    <sequenceFlow id="f2" sourceRef="callAction" targetRef="end"/>
+    <endEvent id="end"/>
+  </process>
+</definitions>
