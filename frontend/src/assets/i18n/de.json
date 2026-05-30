@@ -6,13 +6,62 @@
   "nav": {
     "home": "Startseite",
     "conformite": "Erklärung zur Barrierefreiheit",
-    "language": "Sprache"
+    "language": "Sprache",
+    "antragstypen": "Antragstypen"
   },
   "footer": {
     "legal": "Rechtliches",
     "privacy": "Datenschutz",
     "imprint": "Impressum",
     "accessibility": "Barrierefreiheit"
+  },
+  "antragstyp": {
+    "listTitle": "Antragstypen",
+    "lead": "Übersicht aller verfügbaren Antragstypen.",
+    "colTitle": "Bezeichnung",
+    "colKey": "Schlüssel",
+    "colStatus": "Status",
+    "loading": "Wird geladen …",
+    "empty": "Keine Antragstypen vorhanden.",
+    "loadError": "Antragstypen konnten nicht geladen werden."
+  },
+  "designer": {
+    "back": "Zurück zur Liste",
+    "title": "Formular entwerfen",
+    "subtitle": "Neue Major-Version (Entwurf) für",
+    "loading": "Wird geladen …",
+    "addField": "Feld hinzufügen",
+    "fieldCount": "Felder",
+    "noFields": "Noch keine Felder. Füge das erste Feld hinzu.",
+    "key": "Feld-Schlüssel",
+    "type": "Typ",
+    "required": "Pflichtfeld",
+    "labels": "Beschriftung (mehrsprachig)",
+    "validation": "Validierung",
+    "maxLength": "Max. Länge",
+    "min": "Minimum",
+    "max": "Maximum",
+    "options": "Auswahloptionen",
+    "optionValue": "Wert",
+    "addOption": "Option hinzufügen",
+    "remove": "Entfernen",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "save": "Als Entwurf speichern",
+    "saving": "Wird gespeichert …",
+    "saved": "Entwurf gespeichert",
+    "saveError": "Speichern fehlgeschlagen:",
+    "keyRequired": "Schlüssel erforderlich",
+    "keyDuplicate": "Schlüssel doppelt",
+    "preview": "JSON-Vorschau",
+    "types": {
+      "TEXT": "Text",
+      "NUMBER": "Zahl",
+      "DATE": "Datum",
+      "BOOLEAN": "Ja/Nein",
+      "SELECT": "Auswahl",
+      "MULTI_SELECT": "Mehrfachauswahl"
+    }
   },
   "errors": {
     "notFound": "Seite nicht gefunden",

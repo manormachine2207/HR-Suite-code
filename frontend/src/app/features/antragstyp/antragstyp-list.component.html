@@ -1,0 +1,39 @@
+<section class="hr-antragstyp-list" aria-labelledby="antragstyp-title">
+  <header class="hr-head">
+    <h1 id="antragstyp-title">{{ 'antragstyp.listTitle' | translate }}</h1>
+    <p class="hr-lead">{{ 'antragstyp.lead' | translate }}</p>
+  </header>
+
+  @if (loading) {
+    <div class="hr-state" role="status">{{ 'antragstyp.loading' | translate }}</div>
+  } @else if (failed) {
+    <div class="hr-state hr-state--error" role="alert">{{ 'antragstyp.loadError' | translate }}</div>
+  } @else if (items.length === 0) {
+    <div class="hr-state">{{ 'antragstyp.empty' | translate }}</div>
+  } @else {
+    <div class="hr-card">
+      <table class="hr-table" [attr.aria-label]="'antragstyp.listTitle' | translate">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'antragstyp.colTitle' | translate }}</th>
+            <th scope="col">{{ 'antragstyp.colKey' | translate }}</th>
+            <th scope="col">{{ 'antragstyp.colStatus' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of items; track item.id) {
+            <tr>
+              <td class="hr-title">
+                <a [routerLink]="['/antragstypen', item.id, 'designer']">{{ title(item) }}</a>
+              </td>
+              <td><code class="hr-key">{{ item.key }}</code></td>
+              <td>
+                <span class="hr-status" [class]="statusClass(item.status)">{{ item.status }}</span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -6,13 +6,62 @@
   "nav": {
     "home": "Home",
     "conformite": "Accessibility Statement",
-    "language": "Language"
+    "language": "Language",
+    "antragstypen": "Request Types"
   },
   "footer": {
     "legal": "Legal",
     "privacy": "Privacy",
     "imprint": "Imprint",
     "accessibility": "Accessibility"
+  },
+  "antragstyp": {
+    "listTitle": "Request Types",
+    "lead": "Overview of all available request types.",
+    "colTitle": "Title",
+    "colKey": "Key",
+    "colStatus": "Status",
+    "loading": "Loading …",
+    "empty": "No request types yet.",
+    "loadError": "Request types could not be loaded."
+  },
+  "designer": {
+    "back": "Back to list",
+    "title": "Design form",
+    "subtitle": "New major version (draft) for",
+    "loading": "Loading …",
+    "addField": "Add field",
+    "fieldCount": "Fields",
+    "noFields": "No fields yet. Add the first field.",
+    "key": "Field key",
+    "type": "Type",
+    "required": "Required",
+    "labels": "Label (multilingual)",
+    "validation": "Validation",
+    "maxLength": "Max length",
+    "min": "Minimum",
+    "max": "Maximum",
+    "options": "Choice options",
+    "optionValue": "Value",
+    "addOption": "Add option",
+    "remove": "Remove",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "save": "Save as draft",
+    "saving": "Saving …",
+    "saved": "Draft saved",
+    "saveError": "Save failed:",
+    "keyRequired": "Key required",
+    "keyDuplicate": "Duplicate key",
+    "preview": "JSON preview",
+    "types": {
+      "TEXT": "Text",
+      "NUMBER": "Number",
+      "DATE": "Date",
+      "BOOLEAN": "Yes/No",
+      "SELECT": "Select",
+      "MULTI_SELECT": "Multi-select"
+    }
   },
   "errors": {
     "notFound": "Page not found",
