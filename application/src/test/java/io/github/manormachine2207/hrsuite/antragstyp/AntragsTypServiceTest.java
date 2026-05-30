@@ -6,12 +6,15 @@ import io.github.manormachine2207.hrsuite.antragstyp.form.FormField;
 import io.github.manormachine2207.hrsuite.antragstyp.form.Validation;
 import io.github.manormachine2207.hrsuite.antragstyp.version.CompatibilityClassifier;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +24,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -34,12 +38,22 @@ class AntragsTypServiceTest {
     private AntragsTypRepository antragsTypRepository;
     @Mock
     private AntragsTypVersionRepository versionRepository;
+    @Mock
+    private EntityManager entityManager;
+    @Mock
+    private Query advisoryLockQuery;
 
     private AntragsTypService service;
 
     @BeforeEach
     void setUp() {
         service = new AntragsTypService(antragsTypRepository, versionRepository, new CompatibilityClassifier());
+        // @PersistenceContext field injection has no Spring container here; wire the
+        // EntityManager publish() uses for its pg_advisory_xact_lock query by hand.
+        ReflectionTestUtils.setField(service, "entityManager", entityManager);
+        lenient().when(entityManager.createNativeQuery(anyString())).thenReturn(advisoryLockQuery);
+        lenient().when(advisoryLockQuery.setParameter(anyString(), any())).thenReturn(advisoryLockQuery);
+        lenient().when(advisoryLockQuery.getSingleResult()).thenReturn(1);
         TenantContext.set(TENANT);
         lenient().when(antragsTypRepository.save(any())).thenAnswer(i -> i.getArgument(0));
         lenient().when(versionRepository.save(any())).thenAnswer(i -> i.getArgument(0));
@@ -117,6 +131,7 @@ class AntragsTypServiceTest {
         UUID atId = UUID.randomUUID();
         var at = new AntragsTyp(atId, TENANT, "k", Map.of("de", "K"), Map.of());
         var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 1, form(text("a", true, 100)), "<bpmn/>", Map.of());
+        when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(atId));
         when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
         when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.empty());
         when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
@@ -135,6 +150,7 @@ class AntragsTypServiceTest {
         var at = new AntragsTyp(atId, TENANT, "k", Map.of("de", "K"), Map.of());
         var prev = publishedVersion(atId, form(text("a", true, 100)));
         var next = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 2, form(text("a", true, 100)), "<bpmn/>", Map.of());
+        when(versionRepository.findAntragstypIdById(next.getId())).thenReturn(Optional.of(atId));
         when(versionRepository.findById(next.getId())).thenReturn(Optional.of(next));
         when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.of(prev));
         when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
@@ -148,6 +164,7 @@ class AntragsTypServiceTest {
     @Test
     void publishThrowsIllegalStateWhenNotDraft() {
         var v = publishedVersion(UUID.randomUUID(), form(text("a", true, 100)));
+        when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(v.getAntragstypId()));
         when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
 
         assertThatThrownBy(() -> service.publish(v.getId(), USER))

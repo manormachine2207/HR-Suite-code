@@ -5,6 +5,8 @@ import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.version.ChangeClassification;
 import io.github.manormachine2207.hrsuite.antragstyp.version.CompatibilityClassifier;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,9 +27,19 @@ import java.util.UUID;
 @Transactional
 public class AntragsTypService {
 
+    /**
+     * Fixed namespace seed for the per-antragstyp publish advisory lock (see
+     * {@link #publish}). Arbitrary but stable; keeps this lock's 64-bit key space from
+     * colliding with any other {@code pg_advisory_*} user. ("AT_PUBL1")
+     */
+    private static final long PUBLISH_LOCK_NAMESPACE = 0x4154_5F50_5542_4C31L;
+
     private final AntragsTypRepository antragsTypRepository;
     private final AntragsTypVersionRepository versionRepository;
     private final CompatibilityClassifier classifier;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public AntragsTypService(AntragsTypRepository antragsTypRepository,
                              AntragsTypVersionRepository versionRepository,
@@ -101,26 +113,55 @@ public class AntragsTypService {
     }
 
     public AntragsTypVersion publish(UUID versionId, UUID publishedBy) {
+        UUID antragstypId = versionRepository.findAntragstypIdById(versionId)
+                .orElseThrow(() -> new AntragsTypExceptions.NotFound("version not found: " + versionId));
+
+        // ADR-009 "exactly one PUBLISHED major per Antragstyp": serialize all publishes of the
+        // same antragstyp on a per-antragstyp advisory lock taken BEFORE we read the current
+        // published major. Without it, two concurrent publish() calls at READ COMMITTED could
+        // both observe the same prior state (or both observe "none published"), both demote it,
+        // and both promote their own target -> two PUBLISHED majors. We use a transaction-scoped
+        // advisory lock rather than the alternatives because:
+        //   - SERIALIZABLE would force a serialization-failure (40001) retry loop on this path;
+        //   - a `WHERE status='PUBLISHED'` partial-unique index cannot be DEFERRABLE in
+        //     PostgreSQL and would break the demote->promote flush ordering below.
+        // The lock auto-releases on commit/rollback and runs on the same transactional
+        // connection, so RLS's app.tenant_id GUC (set by TenantContextAspect, ADR-008) stays in
+        // force for the demote/promote statements.
+        lockForPublish(antragstypId);
+
+        // Read the target fresh under the lock: a competing publish that committed while we waited
+        // for the lock may already have promoted a different major (or this very version).
         AntragsTypVersion target = getVersion(versionId);
         if (target.getStatus() != VersionStatus.DRAFT) {
             throw new AntragsTypExceptions.IllegalState("only DRAFT versions can be published: " + versionId);
         }
-        // Enforce exactly-one-published invariant: demote the current published major (if any)
-        // BEFORE promoting the target. This invariant is held at the service layer, not by a DB
-        // constraint: a `WHERE status='PUBLISHED'` partial-unique index cannot be DEFERRABLE in
-        // PostgreSQL and would break this demote->promote flush ordering. Consequence: two
-        // concurrent publish() calls for the same antragstyp at READ COMMITTED could both observe
-        // the same prior state and both promote, yielding two PUBLISHED majors. Publishing is a
-        // rare single-admin action, so we accept this window for now; fully closing it needs
-        // SERIALIZABLE isolation or a per-antragstyp advisory/row lock (tracked for a later cut).
-        versionRepository.findByAntragstypIdAndStatus(target.getAntragstypId(), VersionStatus.PUBLISHED)
+        // Demote the current published major (if any) BEFORE promoting the target.
+        versionRepository.findByAntragstypIdAndStatus(antragstypId, VersionStatus.PUBLISHED)
                 .ifPresent(prev -> prev.setStatus(VersionStatus.DEPRECATED));
 
         target.publish(publishedBy);
 
-        AntragsTyp at = getDefinition(target.getAntragstypId());
+        AntragsTyp at = getDefinition(antragstypId);
         at.markLive(target.getId());
         return target;
+    }
+
+    /**
+     * Acquires the per-antragstyp publish lock for the remainder of the current transaction
+     * (auto-released on commit/rollback), serializing concurrent {@link #publish} calls for the
+     * same antragstyp. {@code hashtextextended} maps the antragstyp id into the advisory-lock
+     * {@code bigint} key space under {@link #PUBLISH_LOCK_NAMESPACE}. The {@code SELECT 1 FROM
+     * (...)} wrapper keeps the {@code void}-returning lock function out of the result mapping.
+     * Runs on the transactional connection and touches no RLS table, so it leaves the
+     * {@code app.tenant_id} GUC untouched.
+     */
+    private void lockForPublish(UUID antragstypId) {
+        entityManager.createNativeQuery(
+                        "SELECT 1 FROM (SELECT pg_advisory_xact_lock(hashtextextended(:id, :seed))) publish_lock")
+                .setParameter("id", antragstypId.toString())
+                .setParameter("seed", PUBLISH_LOCK_NAMESPACE)
+                .getSingleResult();
     }
 
     public AntragsTypVersion deprecate(UUID versionId) {
