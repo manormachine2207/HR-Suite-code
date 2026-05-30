@@ -55,10 +55,20 @@ echo
 echo "DEV TOKEN (put into frontend runtime.json -> devAuth.token):"
 echo "  $DESIGNER"
 
-# Seed tenant_n8n_config for the demo tenant so the action connector can
-# reach the local n8n instance (Cut A smoke test).
+# Seed the fixed dev tenant (matches runtime.json devAuth.token) and its n8n config
+# so the smoke path (docs/n8n-smoke.md) works on a fresh stack.  The random DEMO
+# tenant created above is only needed for the Antragstyp list smoke; the action
+# connector smoke always uses the fixed UUID that runtime.json points at.
 docker exec -i -e PGPASSWORD="${POSTGRES_PASSWORD:-dev}" hrsuite-postgres \
   psql -U hrsuite -d hrsuite -v ON_ERROR_STOP=1 <<'SQL'
+-- Ensure the fixed dev tenant exists (runtime.json -> devAuth.token references it).
+INSERT INTO tenant (id, code, display_name, subdomain, status, default_locale, created_at, updated_at)
+VALUES ('019e754d-371c-70e0-b199-88ab785bef6e', 'BIT',
+        '{"de":"BIT Dev","fr":"BIT Dev","it":"BIT Dev","en":"BIT Dev"}'::jsonb,
+        'bit-dev', 'ACTIVE', 'de', now(), now())
+ON CONFLICT (id) DO NOTHING;
+
+-- Seed n8n config for the fixed dev tenant so the smoke path works on a fresh DB.
 INSERT INTO tenant_n8n_config (tenant_id, base_url, hmac_secret, allowed_refs, created_at, updated_at)
 VALUES ('019e754d-371c-70e0-b199-88ab785bef6e', 'http://n8n:5678', 'dev-n8n-secret',
         '["provision-ad-account"]'::jsonb, now(), now())
@@ -66,4 +76,4 @@ ON CONFLICT (tenant_id) DO UPDATE
   SET base_url = EXCLUDED.base_url, hmac_secret = EXCLUDED.hmac_secret,
       allowed_refs = EXCLUDED.allowed_refs, updated_at = now();
 SQL
-echo "Seeded tenant_n8n_config (demo tenant -> http://n8n:5678)"
+echo "Seeded fixed dev tenant (019e754d-…) + tenant_n8n_config (-> http://n8n:5678)"

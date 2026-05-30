@@ -43,6 +43,11 @@ public class ActionExecutionService {
 
         ActionExecution exec = repo.findByProcessInstanceIdAndStepKey(processInstanceId, stepKey)
                 .orElseGet(() -> repo.save(new ActionExecution(tenantId, processInstanceId, stepKey, ref)));
+        // Idempotency guard: only SUCCEEDED short-circuits. A row left RUNNING, FAILED, or
+        // DEAD (e.g. from a previous process-instance crash or a BPMN compensation re-entry)
+        // will re-attempt here, which is acceptable for Cut A's synchronous request/reply
+        // model — n8n receives an idempotency key in the canonical body and can deduplicate
+        // on its side. Stricter at-most-once semantics are a deferred follow-up.
         if (exec.getStatus() == ActionStatus.SUCCEEDED) {
             return exec; // idempotent: a retried BPMN step must not re-fire the side effect
         }
@@ -50,6 +55,10 @@ public class ActionExecutionService {
 
         ActionRequest request = new ActionRequest(tenantId, processInstanceId, stepKey, ref, input);
         ActionResult last = null;
+        // Retries are immediate (no backoff) on purpose for Cut A: introducing Thread.sleep
+        // here would hold the Flowable command thread and its DB connection for the full
+        // back-off interval.  Exponential backoff / async job execution is a deferred
+        // follow-up once the async action queue (Cut B/C) is in place.
         while (exec.getAttempts() < maxAttempts) {
             last = connector.execute(request);
             exec.recordAttempt(last.error());

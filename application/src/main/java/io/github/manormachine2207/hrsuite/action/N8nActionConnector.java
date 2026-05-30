@@ -1,9 +1,13 @@
 package io.github.manormachine2207.hrsuite.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
+import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -13,16 +17,38 @@ import java.util.Optional;
  * {@link TenantN8nConfig} (RLS-scoped), refuses any {@code ref} not on the tenant's
  * allowlist, HMAC-signs a canonical body and POSTs to {@code {baseUrl}/webhook/{ref}}.
  * 2xx => ok; 4xx => terminal; 5xx / IO / timeout => retryable.
+ *
+ * <p>Connect and read timeouts are configurable via:
+ * <ul>
+ *   <li>{@code hrsuite.action.connect-timeout-ms} (default 3000 ms)</li>
+ *   <li>{@code hrsuite.action.read-timeout-ms} (default 10000 ms)</li>
+ * </ul>
+ * A timeout/IO failure surfaces as {@code transientFailure} (retryable) through the
+ * existing catch block.
  */
 @Component
 public class N8nActionConnector implements ActionConnector {
 
     private final TenantN8nConfigRepository configRepo;
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final RestClient restClient = RestClient.builder().build();
+    private final RestClient restClient;
 
-    public N8nActionConnector(TenantN8nConfigRepository configRepo) {
+    public N8nActionConnector(
+            TenantN8nConfigRepository configRepo,
+            @Value("${hrsuite.action.connect-timeout-ms:3000}") int connectTimeoutMs,
+            @Value("${hrsuite.action.read-timeout-ms:10000}") int readTimeoutMs) {
         this.configRepo = configRepo;
+        var factorySettings = ClientHttpRequestFactorySettings.defaults()
+                .withConnectTimeout(Duration.ofMillis(connectTimeoutMs))
+                .withReadTimeout(Duration.ofMillis(readTimeoutMs));
+        this.restClient = RestClient.builder()
+                .requestFactory(ClientHttpRequestFactoryBuilder.simple().build(factorySettings))
+                .build();
+    }
+
+    /** Test-only constructor — uses sane default timeouts (3 s connect, 10 s read). */
+    N8nActionConnector(TenantN8nConfigRepository configRepo) {
+        this(configRepo, 3000, 10000);
     }
 
     @Override
