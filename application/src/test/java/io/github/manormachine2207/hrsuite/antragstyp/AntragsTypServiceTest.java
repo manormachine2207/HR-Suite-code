@@ -6,6 +6,8 @@ import io.github.manormachine2207.hrsuite.antragstyp.form.FormField;
 import io.github.manormachine2207.hrsuite.antragstyp.form.Validation;
 import io.github.manormachine2207.hrsuite.antragstyp.version.CompatibilityClassifier;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
+import io.github.manormachine2207.hrsuite.workflow.DeployedProcess;
+import io.github.manormachine2207.hrsuite.workflow.WorkflowEngine;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import org.junit.jupiter.api.AfterEach;
@@ -42,12 +44,16 @@ class AntragsTypServiceTest {
     private EntityManager entityManager;
     @Mock
     private Query advisoryLockQuery;
+    @Mock
+    private WorkflowEngine workflowEngine;
 
     private AntragsTypService service;
 
     @BeforeEach
     void setUp() {
-        service = new AntragsTypService(antragsTypRepository, versionRepository, new CompatibilityClassifier());
+        service = new AntragsTypService(antragsTypRepository, versionRepository, new CompatibilityClassifier(), workflowEngine);
+        lenient().when(workflowEngine.deploy(any(), anyString(), any(), any()))
+                .thenReturn(new DeployedProcess("dep-1", "proc-key", 1));
         // @PersistenceContext field injection has no Spring container here; wire the
         // EntityManager publish() uses for its pg_advisory_xact_lock query by hand.
         ReflectionTestUtils.setField(service, "entityManager", entityManager);

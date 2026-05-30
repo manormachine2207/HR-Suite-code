@@ -133,6 +133,7 @@ class AntragRlsIT {
         assertThat(s.get("status").asText()).isEqualTo("SUBMITTED");
         assertThat(s.get("antragstypVersionId").asText()).isEqualTo(at[1]);   // pinned the published major
         assertThat(s.get("submittedMinor").asInt()).isEqualTo(0);
+        assertThat(s.get("workflowProcessId").asText()).isNotBlank();         // Flowable process instance started (ADR-009 §5)
     }
 
     // ===== 2. RLS isolation across tenants ================================

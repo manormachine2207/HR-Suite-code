@@ -4,6 +4,7 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypService;
 import io.github.manormachine2207.hrsuite.antragstyp.PublishedMajorRef;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
+import io.github.manormachine2207.hrsuite.workflow.WorkflowEngine;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +28,13 @@ public class AntragService {
 
     private final AntragRepository antragRepository;
     private final AntragsTypService antragsTypService;
+    private final WorkflowEngine workflowEngine;
 
-    public AntragService(AntragRepository antragRepository, AntragsTypService antragsTypService) {
+    public AntragService(AntragRepository antragRepository, AntragsTypService antragsTypService,
+                         WorkflowEngine workflowEngine) {
         this.antragRepository = antragRepository;
         this.antragsTypService = antragsTypService;
+        this.workflowEngine = workflowEngine;
     }
 
     /** Creates a DRAFT request against a live antragstyp (one that has a published major). */
@@ -66,6 +70,14 @@ public class AntragService {
                 .orElseThrow(() -> new AntragExceptions.IllegalState(
                         "antragstyp has no published major to pin: " + antrag.getAntragstypId()));
         antrag.submit(major.versionId(), major.minor());
+        // Start the pinned major's process instance (ADR-009 §5), in this transaction.
+        // Guard the key: majors published before the workflow cut have none.
+        if (major.processDefinitionKey() != null) {
+            String processInstanceId = workflowEngine.startInstance(
+                    currentTenant(), major.processDefinitionKey(), antrag.getId().toString(),
+                    Map.of("antragId", antrag.getId().toString()));
+            antrag.attachWorkflowProcess(processInstanceId);
+        }
         return antrag;
     }
 

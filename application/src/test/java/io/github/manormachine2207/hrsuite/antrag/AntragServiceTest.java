@@ -3,6 +3,7 @@ package io.github.manormachine2207.hrsuite.antrag;
 import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypService;
 import io.github.manormachine2207.hrsuite.antragstyp.PublishedMajorRef;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
+import io.github.manormachine2207.hrsuite.workflow.WorkflowEngine;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -31,12 +33,14 @@ class AntragServiceTest {
     private AntragRepository antragRepository;
     @Mock
     private AntragsTypService antragsTypService;
+    @Mock
+    private WorkflowEngine workflowEngine;
 
     private AntragService service;
 
     @BeforeEach
     void setUp() {
-        service = new AntragService(antragRepository, antragsTypService);
+        service = new AntragService(antragRepository, antragsTypService, workflowEngine);
         TenantContext.set(TENANT);
         lenient().when(antragRepository.save(any())).thenAnswer(i -> i.getArgument(0));
     }
@@ -55,7 +59,7 @@ class AntragServiceTest {
     void createDraftCreatesUnpinnedDraftAgainstPublishedAntragstyp() {
         UUID atId = UUID.randomUUID();
         when(antragsTypService.findPublishedMajor(atId))
-                .thenReturn(Optional.of(new PublishedMajorRef(UUID.randomUUID(), 0)));
+                .thenReturn(Optional.of(new PublishedMajorRef(UUID.randomUUID(), 0, "proc-key")));
 
         Antrag a = service.createDraft(atId, Map.of("grund", "x"), SUBJECT);
 
@@ -83,7 +87,8 @@ class AntragServiceTest {
         UUID versionId = UUID.randomUUID();
         Antrag a = draft(atId, SUBJECT);
         when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
-        when(antragsTypService.findPublishedMajor(atId)).thenReturn(Optional.of(new PublishedMajorRef(versionId, 2)));
+        when(antragsTypService.findPublishedMajor(atId)).thenReturn(Optional.of(new PublishedMajorRef(versionId, 2, "proc-key")));
+        when(workflowEngine.startInstance(any(), eq("proc-key"), any(), any())).thenReturn("pi-1");
 
         service.submit(a.getId(), SUBJECT);
 
@@ -91,6 +96,7 @@ class AntragServiceTest {
         assertThat(a.getAntragstypVersionId()).isEqualTo(versionId);
         assertThat(a.getSubmittedMinor()).isEqualTo(2);
         assertThat(a.getSubmittedAt()).isNotNull();
+        assertThat(a.getWorkflowProcessId()).isEqualTo("pi-1");   // process instance started (ADR-009 §5)
     }
 
     @Test

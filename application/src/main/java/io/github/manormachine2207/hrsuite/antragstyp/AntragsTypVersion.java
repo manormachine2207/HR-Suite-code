@@ -141,6 +141,13 @@ public class AntragsTypVersion {
         this.publishedBy = publishedBy;
     }
 
+    /** Records the Flowable deployment handles after the major's BPMN is deployed (ADR-009 §5). */
+    public void recordDeployment(String deploymentId, String processDefinitionKey, int processDefinitionVersion) {
+        this.workflowDeploymentId = deploymentId;
+        this.processDefinitionKey = processDefinitionKey;
+        this.processDefinitionVersion = processDefinitionVersion;
+    }
+
     /**
      * Sets the status directly. Intended for deprecation/archival lifecycle
      * transitions (e.g. PUBLISHED→DEPRECATED, PUBLISHED→ARCHIVED). For the
@@ -157,6 +164,9 @@ public class AntragsTypVersion {
     public VersionStatus getStatus() { return status; }
     public FormDefinition getFormDefinition() { return formDefinition; }
     public String getWorkflowBpmn() { return workflowBpmn; }
+    public String getWorkflowDeploymentId() { return workflowDeploymentId; }
+    public String getProcessDefinitionKey() { return processDefinitionKey; }
+    public Integer getProcessDefinitionVersion() { return processDefinitionVersion; }
     public Map<String, Object> getSfActionBindings() {
         return sfActionBindings == null ? null : Collections.unmodifiableMap(sfActionBindings);
     }

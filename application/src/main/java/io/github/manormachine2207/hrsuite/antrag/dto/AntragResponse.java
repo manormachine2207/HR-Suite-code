@@ -15,6 +15,7 @@ public record AntragResponse(
         AntragStatus status,
         Map<String, Object> payload,
         String antragstellerSubject,
+        String workflowProcessId,
         OffsetDateTime submittedAt,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
@@ -22,7 +23,7 @@ public record AntragResponse(
     public static AntragResponse from(Antrag a) {
         return new AntragResponse(
                 a.getId(), a.getAntragstypId(), a.getAntragstypVersionId(), a.getSubmittedMinor(),
-                a.getStatus(), a.getPayload(), a.getAntragstellerSubject(),
+                a.getStatus(), a.getPayload(), a.getAntragstellerSubject(), a.getWorkflowProcessId(),
                 a.getSubmittedAt(), a.getCreatedAt(), a.getUpdatedAt());
     }
 }
