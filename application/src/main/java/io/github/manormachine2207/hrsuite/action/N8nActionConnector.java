@@ -1,6 +1,7 @@
 package io.github.manormachine2207.hrsuite.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
 import org.springframework.boot.http.client.ClientHttpRequestFactorySettings;
@@ -33,6 +34,7 @@ public class N8nActionConnector implements ActionConnector {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestClient restClient;
 
+    @Autowired
     public N8nActionConnector(
             TenantN8nConfigRepository configRepo,
             @Value("${hrsuite.action.connect-timeout-ms:3000}") int connectTimeoutMs,
