@@ -6,13 +6,62 @@
   "nav": {
     "home": "Accueil",
     "conformite": "Déclaration d'accessibilité",
-    "language": "Langue"
+    "language": "Langue",
+    "antragstypen": "Types de demande"
   },
   "footer": {
     "legal": "Mentions légales",
     "privacy": "Protection des données",
     "imprint": "Mentions légales",
     "accessibility": "Accessibilité"
+  },
+  "antragstyp": {
+    "listTitle": "Types de demande",
+    "lead": "Aperçu de tous les types de demande disponibles.",
+    "colTitle": "Désignation",
+    "colKey": "Clé",
+    "colStatus": "Statut",
+    "loading": "Chargement …",
+    "empty": "Aucun type de demande.",
+    "loadError": "Impossible de charger les types de demande."
+  },
+  "designer": {
+    "back": "Retour à la liste",
+    "title": "Concevoir le formulaire",
+    "subtitle": "Nouvelle version majeure (brouillon) pour",
+    "loading": "Chargement …",
+    "addField": "Ajouter un champ",
+    "fieldCount": "Champs",
+    "noFields": "Aucun champ pour l'instant. Ajoutez le premier champ.",
+    "key": "Clé du champ",
+    "type": "Type",
+    "required": "Obligatoire",
+    "labels": "Libellé (multilingue)",
+    "validation": "Validation",
+    "maxLength": "Longueur max.",
+    "min": "Minimum",
+    "max": "Maximum",
+    "options": "Options de sélection",
+    "optionValue": "Valeur",
+    "addOption": "Ajouter une option",
+    "remove": "Supprimer",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "save": "Enregistrer le brouillon",
+    "saving": "Enregistrement …",
+    "saved": "Brouillon enregistré",
+    "saveError": "Échec de l'enregistrement :",
+    "keyRequired": "Clé requise",
+    "keyDuplicate": "Clé en double",
+    "preview": "Aperçu JSON",
+    "types": {
+      "TEXT": "Texte",
+      "NUMBER": "Nombre",
+      "DATE": "Date",
+      "BOOLEAN": "Oui/Non",
+      "SELECT": "Sélection",
+      "MULTI_SELECT": "Sélection multiple"
+    }
   },
   "errors": {
     "notFound": "Page introuvable",

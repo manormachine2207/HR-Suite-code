@@ -6,13 +6,62 @@
   "nav": {
     "home": "Pagina iniziale",
     "conformite": "Dichiarazione di accessibilità",
-    "language": "Lingua"
+    "language": "Lingua",
+    "antragstypen": "Tipi di richiesta"
   },
   "footer": {
     "legal": "Note legali",
     "privacy": "Protezione dei dati",
     "imprint": "Colofone",
     "accessibility": "Accessibilità"
+  },
+  "antragstyp": {
+    "listTitle": "Tipi di richiesta",
+    "lead": "Panoramica di tutti i tipi di richiesta disponibili.",
+    "colTitle": "Denominazione",
+    "colKey": "Chiave",
+    "colStatus": "Stato",
+    "loading": "Caricamento …",
+    "empty": "Nessun tipo di richiesta.",
+    "loadError": "Impossibile caricare i tipi di richiesta."
+  },
+  "designer": {
+    "back": "Torna all'elenco",
+    "title": "Progetta il modulo",
+    "subtitle": "Nuova versione maggiore (bozza) per",
+    "loading": "Caricamento …",
+    "addField": "Aggiungi campo",
+    "fieldCount": "Campi",
+    "noFields": "Ancora nessun campo. Aggiungi il primo campo.",
+    "key": "Chiave del campo",
+    "type": "Tipo",
+    "required": "Obbligatorio",
+    "labels": "Etichetta (multilingue)",
+    "validation": "Validazione",
+    "maxLength": "Lunghezza max.",
+    "min": "Minimo",
+    "max": "Massimo",
+    "options": "Opzioni di scelta",
+    "optionValue": "Valore",
+    "addOption": "Aggiungi opzione",
+    "remove": "Rimuovi",
+    "moveUp": "Sposta su",
+    "moveDown": "Sposta giù",
+    "save": "Salva bozza",
+    "saving": "Salvataggio …",
+    "saved": "Bozza salvata",
+    "saveError": "Salvataggio non riuscito:",
+    "keyRequired": "Chiave obbligatoria",
+    "keyDuplicate": "Chiave duplicata",
+    "preview": "Anteprima JSON",
+    "types": {
+      "TEXT": "Testo",
+      "NUMBER": "Numero",
+      "DATE": "Data",
+      "BOOLEAN": "Sì/No",
+      "SELECT": "Selezione",
+      "MULTI_SELECT": "Selezione multipla"
+    }
   },
   "errors": {
     "notFound": "Pagina non trovata",

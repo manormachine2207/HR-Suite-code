@@ -1,0 +1,155 @@
+<section class="hr-designer" aria-labelledby="designer-title">
+  <nav class="hr-crumbs">
+    <a routerLink="/antragstypen">← {{ 'designer.back' | translate }}</a>
+  </nav>
+
+  <header class="hr-head">
+    <h1 id="designer-title">{{ 'designer.title' | translate }}</h1>
+    <p class="hr-lead">
+      {{ 'designer.subtitle' | translate }}
+      <strong>{{ antragsTypLabel }}</strong> <code class="hr-key">{{ antragsTyp?.key }}</code>
+    </p>
+  </header>
+
+  @if (loading) {
+    <div class="hr-state" role="status">{{ 'designer.loading' | translate }}</div>
+  } @else {
+    <div class="hr-toolbar">
+      <button type="button" class="hr-btn hr-btn--secondary" (click)="addField()">
+        + {{ 'designer.addField' | translate }}
+      </button>
+      <span class="hr-fieldcount">{{ 'designer.fieldCount' | translate }}: {{ fields.length }}</span>
+    </div>
+
+    @if (fields.length === 0) {
+      <div class="hr-state">{{ 'designer.noFields' | translate }}</div>
+    }
+
+    @for (field of fields.controls; track field; let i = $index) {
+      <article class="hr-fieldcard" [formGroup]="field">
+        <div class="hr-fieldcard__bar">
+          <span class="hr-fieldcard__idx">#{{ i + 1 }}</span>
+          <div class="hr-fieldcard__actions">
+            <button type="button" class="hr-icon" (click)="moveUp(i)" [disabled]="i === 0"
+                    [attr.aria-label]="'designer.moveUp' | translate">↑</button>
+            <button type="button" class="hr-icon" (click)="moveDown(i)" [disabled]="i === fields.length - 1"
+                    [attr.aria-label]="'designer.moveDown' | translate">↓</button>
+            <button type="button" class="hr-icon hr-icon--danger" (click)="removeField(i)"
+                    [attr.aria-label]="'designer.remove' | translate">✕</button>
+          </div>
+        </div>
+
+        <div class="hr-grid">
+          <label class="hr-field">
+            <span>{{ 'designer.key' | translate }}</span>
+            <input type="text" formControlName="key" [class.hr-invalid]="keyError(field)" autocomplete="off" />
+            @if (keyError(field) === 'required') { <small class="hr-err">{{ 'designer.keyRequired' | translate }}</small> }
+            @if (keyError(field) === 'duplicate') { <small class="hr-err">{{ 'designer.keyDuplicate' | translate }}</small> }
+          </label>
+
+          <label class="hr-field">
+            <span>{{ 'designer.type' | translate }}</span>
+            <select formControlName="type">
+              @for (t of fieldTypes; track t) {
+                <option [value]="t">{{ ('designer.types.' + t) | translate }}</option>
+              }
+            </select>
+          </label>
+
+          <label class="hr-field hr-field--check">
+            <input type="checkbox" formControlName="required" />
+            <span>{{ 'designer.required' | translate }}</span>
+          </label>
+        </div>
+
+        <fieldset class="hr-sub" formGroupName="label">
+          <legend>{{ 'designer.labels' | translate }}</legend>
+          <div class="hr-grid hr-grid--labels">
+            @for (l of langs; track l) {
+              <label class="hr-field">
+                <span>{{ l | uppercase }}</span>
+                <input type="text" [formControlName]="l" autocomplete="off" />
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        @if (fieldType(field) === 'TEXT') {
+          <fieldset class="hr-sub">
+            <legend>{{ 'designer.validation' | translate }}</legend>
+            <div class="hr-grid">
+              <label class="hr-field">
+                <span>{{ 'designer.maxLength' | translate }}</span>
+                <input type="number" min="0" formControlName="maxLength" />
+              </label>
+            </div>
+          </fieldset>
+        }
+        @if (fieldType(field) === 'NUMBER') {
+          <fieldset class="hr-sub">
+            <legend>{{ 'designer.validation' | translate }}</legend>
+            <div class="hr-grid">
+              <label class="hr-field">
+                <span>{{ 'designer.min' | translate }}</span>
+                <input type="number" formControlName="min" />
+              </label>
+              <label class="hr-field">
+                <span>{{ 'designer.max' | translate }}</span>
+                <input type="number" formControlName="max" />
+              </label>
+            </div>
+          </fieldset>
+        }
+
+        @if (fieldType(field) === 'SELECT' || fieldType(field) === 'MULTI_SELECT') {
+          <fieldset class="hr-sub">
+            <legend>{{ 'designer.options' | translate }}</legend>
+            <div formArrayName="options">
+              @for (opt of options(field).controls; track opt; let oi = $index) {
+                <div class="hr-option" [formGroupName]="oi">
+                  <label class="hr-field hr-field--sm">
+                    <span>{{ 'designer.optionValue' | translate }}</span>
+                    <input type="text" formControlName="value" autocomplete="off" />
+                  </label>
+                  <ng-container formGroupName="label">
+                    @for (l of langs; track l) {
+                      <label class="hr-field hr-field--sm">
+                        <span>{{ l | uppercase }}</span>
+                        <input type="text" [formControlName]="l" autocomplete="off" />
+                      </label>
+                    }
+                  </ng-container>
+                  <button type="button" class="hr-icon hr-icon--danger" (click)="removeOption(field, oi)"
+                          [attr.aria-label]="'designer.remove' | translate">✕</button>
+                </div>
+              }
+            </div>
+            <button type="button" class="hr-btn hr-btn--ghost" (click)="addOption(field)">
+              + {{ 'designer.addOption' | translate }}
+            </button>
+          </fieldset>
+        }
+      </article>
+    }
+
+    <div class="hr-save">
+      @if (savedMajor !== null) {
+        <div class="hr-state hr-state--ok" role="status">
+          {{ 'designer.saved' | translate }} (v{{ savedMajor }}.0 · DRAFT) —
+          <a routerLink="/antragstypen">{{ 'designer.back' | translate }}</a>
+        </div>
+      }
+      @if (errorMsg) {
+        <div class="hr-state hr-state--error" role="alert">{{ 'designer.saveError' | translate }} {{ errorMsg }}</div>
+      }
+      <button type="button" class="hr-btn hr-btn--primary" (click)="save()" [disabled]="!canSave">
+        {{ (saving ? 'designer.saving' : 'designer.save') | translate }}
+      </button>
+    </div>
+
+    <details class="hr-preview">
+      <summary>{{ 'designer.preview' | translate }}</summary>
+      <pre>{{ previewJson }}</pre>
+    </details>
+  }
+</section>
