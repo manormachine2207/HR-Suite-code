@@ -1,4 +1,10 @@
-import { ApplicationConfig, APP_INITIALIZER, inject, provideBrowserGlobalErrorListeners } from '@angular/core';
+import {
+  ApplicationConfig,
+  APP_INITIALIZER,
+  inject,
+  provideBrowserGlobalErrorListeners,
+  provideZonelessChangeDetection
+} from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
@@ -13,6 +19,11 @@ import { DevAuthInterceptor } from './core/auth/dev-auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    // Angular 21 scaffolds zoneless (no zone.js polyfill); the matching provider was
+    // missing, so async state changes never scheduled change detection and every
+    // data-loaded view froze on its initial (loading) render. This enables the
+    // zoneless scheduler; components notify it via signals / ChangeDetectorRef.
+    provideZonelessChangeDetection(),
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled' })),
     provideHttpClient(withInterceptorsFromDi()),
