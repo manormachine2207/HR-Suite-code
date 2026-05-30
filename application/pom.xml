@@ -61,6 +61,18 @@
         </dependency>
 
         <!--
+          Embedded BPMN engine (ADR-004, Flowable 7.x). Process starter only (no
+          CMMN/DMN/IDM/forms — we have our own form-designer, ADR-004). Version is
+          pinned explicitly: Flowable is not in the spring-boot-dependencies BOM.
+          Wrapped behind the workflow-engine-bridge module so the engine stays swappable.
+        -->
+        <dependency>
+            <groupId>org.flowable</groupId>
+            <artifactId>flowable-spring-boot-starter-process</artifactId>
+            <version>${flowable.version}</version>
+        </dependency>
+
+        <!--
           Annotations only (@ApplicationModule in main-source package-info.java)
           on the compile classpath. The boundary verifier (ArchUnit etc.) comes
           via spring-modulith-starter-test on the TEST classpath only, keeping

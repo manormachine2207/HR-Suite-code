@@ -48,3 +48,16 @@ management:
       probes:
         enabled: true
       show-details: never
+
+# Embedded BPMN engine (ADR-004, Flowable 7.x), wrapped by the workflow-engine-bridge.
+flowable:
+  # Flowable owns its act_* tables; create/update them on startup (separate from our
+  # Liquibase-managed business schema). The app connects as the NOSUPERUSER hrsuite_app
+  # owner role, which has CREATE on schema public.
+  database-schema-update: true
+  # No async/timer jobs in the minimal processes yet -> keep the background job executor
+  # off (no polling thread; deterministic tests). Re-enable with timers/async tasks.
+  async-executor-activate: false
+  # We use our own i18n form-designer, not Flowable's IDM/Forms (ADR-004).
+  idm:
+    enabled: false

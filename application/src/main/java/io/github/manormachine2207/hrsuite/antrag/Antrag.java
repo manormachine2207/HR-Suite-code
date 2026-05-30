@@ -124,6 +124,11 @@ public class Antrag {
         this.submittedAt = OffsetDateTime.now();
     }
 
+    /** Records the started Flowable process-instance id after submission (ADR-009 §5). */
+    public void attachWorkflowProcess(String processInstanceId) {
+        this.workflowProcessId = processInstanceId;
+    }
+
     /** Withdraws a DRAFT or SUBMITTED request. */
     public void cancel() {
         this.status = AntragStatus.CANCELLED;

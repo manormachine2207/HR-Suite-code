@@ -5,6 +5,8 @@ import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.version.ChangeClassification;
 import io.github.manormachine2207.hrsuite.antragstyp.version.CompatibilityClassifier;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
+import io.github.manormachine2207.hrsuite.workflow.DeployedProcess;
+import io.github.manormachine2207.hrsuite.workflow.WorkflowEngine;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Service;
@@ -38,16 +40,19 @@ public class AntragsTypService {
     private final AntragsTypRepository antragsTypRepository;
     private final AntragsTypVersionRepository versionRepository;
     private final CompatibilityClassifier classifier;
+    private final WorkflowEngine workflowEngine;
 
     @PersistenceContext
     private EntityManager entityManager;
 
     public AntragsTypService(AntragsTypRepository antragsTypRepository,
                              AntragsTypVersionRepository versionRepository,
-                             CompatibilityClassifier classifier) {
+                             CompatibilityClassifier classifier,
+                             WorkflowEngine workflowEngine) {
         this.antragsTypRepository = antragsTypRepository;
         this.versionRepository = versionRepository;
         this.classifier = classifier;
+        this.workflowEngine = workflowEngine;
     }
 
     public AntragsTyp createDefinition(String key, Map<String, String> title, Map<String, String> description) {
@@ -83,7 +88,7 @@ public class AntragsTypService {
     @Transactional(readOnly = true)
     public Optional<PublishedMajorRef> findPublishedMajor(UUID antragstypId) {
         return versionRepository.findByAntragstypIdAndStatus(antragstypId, VersionStatus.PUBLISHED)
-                .map(v -> new PublishedMajorRef(v.getId(), v.getMinor()));
+                .map(v -> new PublishedMajorRef(v.getId(), v.getMinor(), v.getProcessDefinitionKey()));
     }
 
     public AntragsTypVersion createDraftMajor(UUID antragstypId, FormDefinition formDefinition,
@@ -156,6 +161,16 @@ public class AntragsTypService {
         target.publish(publishedBy);
 
         AntragsTyp at = getDefinition(antragstypId);
+        // Deploy the major's BPMN to the engine and record the handles (ADR-009 §5).
+        // Runs in this transaction (Flowable joins the Spring tx), so deploy + promote are
+        // atomic. The stored workflowBpmn is provisional; the bridge substitutes a default
+        // process for a non-deployable placeholder until the workflow-designer cut.
+        String processKey = "at_" + antragstypId.toString().replace("-", "") + "_v" + target.getMajor();
+        DeployedProcess deployed = workflowEngine.deploy(
+                at.getTenantId(), processKey, at.getKey(), target.getWorkflowBpmn());
+        target.recordDeployment(deployed.deploymentId(), deployed.processDefinitionKey(),
+                deployed.processDefinitionVersion());
+
         at.markLive(target.getId());
         return target;
     }
