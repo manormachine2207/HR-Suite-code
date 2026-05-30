@@ -1,0 +1,237 @@
+// Mirrors the antragstyp-list visual language (Oblique/Bootstrap --bs-* tokens with
+// hex fallbacks) and adds the inline new-antrag form + Antrag status badges.
+
+.hr-antrag-list {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.hr-head {
+  margin-bottom: 1.25rem;
+
+  h1 {
+    margin: 0 0 0.4rem;
+    color: var(--bs-emphasis-color, #1f2d3d);
+  }
+}
+
+.hr-lead {
+  margin: 0;
+  color: var(--bs-secondary-color, #5a6b7b);
+  font-size: 1.05rem;
+}
+
+.hr-actions {
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hr-hint {
+  color: var(--bs-secondary-color, #5a6b7b);
+  font-size: 0.9rem;
+}
+
+.hr-state {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: var(--bs-secondary-color, #5a6b7b);
+  background: var(--bs-tertiary-bg, #f4f7fa);
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.5rem;
+
+  &--error {
+    color: var(--bs-danger-text-emphasis, #b3000c);
+    background: var(--bs-danger-bg-subtle, #fbe6e7);
+    border-color: var(--bs-danger-border-subtle, #f3c0c3);
+  }
+}
+
+.hr-card {
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--bs-body-bg, #fff);
+  box-shadow: 0 1px 2px rgba(15, 30, 50, 0.05);
+}
+
+// --- inline new-antrag form -------------------------------------------------
+.hr-form-card {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.hr-form-title {
+  margin: 0 0 1rem;
+  font-size: 1.15rem;
+  color: var(--bs-emphasis-color, #1f2d3d);
+}
+
+.hr-field {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bs-body-color, #33404d);
+  }
+
+  input[type='checkbox'] {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+.hr-req {
+  color: var(--bs-danger-text-emphasis, #b3000c);
+  margin-left: 0.15rem;
+}
+
+.hr-input {
+  width: 100%;
+  max-width: 28rem;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.95rem;
+  color: var(--bs-body-color, #33404d);
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #c9d2db);
+  border-radius: 0.375rem;
+
+  &:focus {
+    outline: 2px solid var(--bs-primary, #2570b8);
+    outline-offset: 1px;
+  }
+}
+
+.hr-form-actions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.hr-btn {
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--bs-border-color, #c9d2db);
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #33404d);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &--primary {
+    background: var(--bs-primary, #2570b8);
+    border-color: var(--bs-primary, #2570b8);
+    color: #fff;
+  }
+}
+
+// --- table ------------------------------------------------------------------
+.hr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+
+  thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #5a6b7b);
+    background: var(--bs-tertiary-bg, #f6f8fa);
+    border-bottom: 1px solid var(--bs-border-color, #e0e5ea);
+    padding: 0.7rem 1rem;
+  }
+
+  tbody td {
+    padding: 0.7rem 1rem;
+    border-top: 1px solid var(--bs-border-color, #eef1f4);
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background: var(--bs-tertiary-bg, #f4f7fa);
+  }
+}
+
+.hr-row--new {
+  animation: hr-flash 2.4s ease-out;
+}
+
+@keyframes hr-flash {
+  0% { background: var(--bs-success-bg-subtle, #d8f0e0); }
+  100% { background: transparent; }
+}
+
+.hr-title {
+  font-weight: 500;
+  color: var(--bs-emphasis-color, #1f2d3d);
+}
+
+.hr-muted {
+  color: var(--bs-secondary-color, #6b7480);
+}
+
+.hr-key {
+  font-family: var(--bs-font-monospace, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 0.82rem;
+  background: var(--bs-secondary-bg, #eef2f6);
+  border: 1px solid var(--bs-border-color, #dde3ea);
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  color: var(--bs-body-color, #33404d);
+}
+
+.hr-status {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+
+  &.is-submitted {
+    background: var(--bs-info-bg-subtle, #d7eefb);
+    color: var(--bs-info-text-emphasis, #1c5a86);
+    border-color: var(--bs-info-border-subtle, #b3ddf4);
+  }
+
+  &.is-approved {
+    background: var(--bs-success-bg-subtle, #e3f4e8);
+    color: var(--bs-success-text-emphasis, #1d6f3a);
+    border-color: var(--bs-success-border-subtle, #bfe6cb);
+  }
+
+  &.is-rejected {
+    background: var(--bs-danger-bg-subtle, #fbe6e7);
+    color: var(--bs-danger-text-emphasis, #b3000c);
+    border-color: var(--bs-danger-border-subtle, #f3c0c3);
+  }
+
+  &.is-review {
+    background: var(--bs-warning-bg-subtle, #fbecd6);
+    color: var(--bs-warning-text-emphasis, #8a5a00);
+    border-color: var(--bs-warning-border-subtle, #f0d6a8);
+  }
+
+  &.is-draft,
+  &.is-cancelled,
+  &.is-default {
+    background: var(--bs-secondary-bg-subtle, #eef1f4);
+    color: var(--bs-secondary-color, #5a6b7b);
+    border-color: var(--bs-border-color, #dbe1e8);
+  }
+}

@@ -7,7 +7,8 @@
     "home": "Accueil",
     "conformite": "Déclaration d'accessibilité",
     "language": "Langue",
-    "antragstypen": "Types de demande"
+    "antragstypen": "Types de demande",
+    "antraege": "Mes demandes"
   },
   "footer": {
     "legal": "Mentions légales",
@@ -24,6 +25,29 @@
     "loading": "Chargement …",
     "empty": "Aucun type de demande.",
     "loadError": "Impossible de charger les types de demande."
+  },
+  "antrag": {
+    "listTitle": "Mes demandes",
+    "lead": "Aperçu de vos demandes et de leur statut.",
+    "new": "Nouvelle demande",
+    "newTitle": "Déposer une nouvelle demande",
+    "noLiveTypes": "Aucun type de demande publié disponible.",
+    "chooseType": "Type de demande",
+    "choosePlaceholder": "Veuillez sélectionner …",
+    "noFields": "Ce type de demande n'a aucun champ.",
+    "createAndSubmit": "Créer et soumettre",
+    "submitting": "Envoi en cours …",
+    "cancel": "Annuler",
+    "loading": "Chargement …",
+    "empty": "Vous n'avez pas encore de demandes.",
+    "loadError": "Les demandes n'ont pas pu être chargées.",
+    "loadFieldsError": "Le formulaire n'a pas pu être chargé.",
+    "createError": "La demande n'a pas pu être créée.",
+    "submitError": "La demande n'a pas pu être soumise.",
+    "colType": "Type de demande",
+    "colStatus": "Statut",
+    "colProcess": "ID du processus de workflow",
+    "colCreated": "Créée"
   },
   "designer": {
     "back": "Retour à la liste",
