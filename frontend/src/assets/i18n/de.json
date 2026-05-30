@@ -7,7 +7,8 @@
     "home": "Startseite",
     "conformite": "Erklärung zur Barrierefreiheit",
     "language": "Sprache",
-    "antragstypen": "Antragstypen"
+    "antragstypen": "Antragstypen",
+    "antraege": "Meine Anträge"
   },
   "footer": {
     "legal": "Rechtliches",
@@ -24,6 +25,29 @@
     "loading": "Wird geladen …",
     "empty": "Keine Antragstypen vorhanden.",
     "loadError": "Antragstypen konnten nicht geladen werden."
+  },
+  "antrag": {
+    "listTitle": "Meine Anträge",
+    "lead": "Übersicht Ihrer Anträge und deren Status.",
+    "new": "Neuer Antrag",
+    "newTitle": "Neuen Antrag stellen",
+    "noLiveTypes": "Kein veröffentlichter Antragstyp verfügbar.",
+    "chooseType": "Antragstyp",
+    "choosePlaceholder": "Bitte wählen …",
+    "noFields": "Dieser Antragstyp hat keine Felder.",
+    "createAndSubmit": "Erstellen & Einreichen",
+    "submitting": "Wird eingereicht …",
+    "cancel": "Abbrechen",
+    "loading": "Wird geladen …",
+    "empty": "Sie haben noch keine Anträge.",
+    "loadError": "Anträge konnten nicht geladen werden.",
+    "loadFieldsError": "Formular konnte nicht geladen werden.",
+    "createError": "Antrag konnte nicht erstellt werden.",
+    "submitError": "Antrag konnte nicht eingereicht werden.",
+    "colType": "Antragstyp",
+    "colStatus": "Status",
+    "colProcess": "Workflow-Prozess-ID",
+    "colCreated": "Erstellt"
   },
   "designer": {
     "back": "Zurück zur Liste",

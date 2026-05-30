@@ -1,0 +1,131 @@
+<section class="hr-antrag-list" aria-labelledby="antrag-title">
+  <header class="hr-head">
+    <h1 id="antrag-title">{{ 'antrag.listTitle' | translate }}</h1>
+    <p class="hr-lead">{{ 'antrag.lead' | translate }}</p>
+  </header>
+
+  <div class="hr-actions">
+    @if (!creating) {
+      <button type="button" class="hr-btn hr-btn--primary" (click)="openCreate()"
+              [disabled]="loading || liveTypen.length === 0">
+        {{ 'antrag.new' | translate }}
+      </button>
+      @if (!loading && liveTypen.length === 0) {
+        <span class="hr-hint">{{ 'antrag.noLiveTypes' | translate }}</span>
+      }
+    }
+  </div>
+
+  @if (creating) {
+    <div class="hr-card hr-form-card">
+      <h2 class="hr-form-title">{{ 'antrag.newTitle' | translate }}</h2>
+
+      <div class="hr-field">
+        <label for="typ-select">{{ 'antrag.chooseType' | translate }}</label>
+        <select id="typ-select" class="hr-input"
+                [value]="selectedTypId" (change)="onTypChange($any($event.target).value)">
+          <option value="">{{ 'antrag.choosePlaceholder' | translate }}</option>
+          @for (t of liveTypen; track t.id) {
+            <option [value]="t.id">{{ typTitle(t.id) }}</option>
+          }
+        </select>
+      </div>
+
+      @if (loadingFields) {
+        <div class="hr-state" role="status">{{ 'antrag.loading' | translate }}</div>
+      } @else if (selectedTypId) {
+        <form [formGroup]="form" (ngSubmit)="createAndSubmit()">
+          @if (fields.length === 0) {
+            <p class="hr-hint">{{ 'antrag.noFields' | translate }}</p>
+          }
+          @for (f of fields; track f.key) {
+            <div class="hr-field">
+              <label [for]="'f-' + f.key">
+                {{ fieldLabel(f) }}@if (f.required) {<span class="hr-req" aria-hidden="true">*</span>}
+              </label>
+              @switch (f.type) {
+                @case ('BOOLEAN') {
+                  <input [id]="'f-' + f.key" type="checkbox" [formControlName]="f.key" />
+                }
+                @case ('NUMBER') {
+                  <input [id]="'f-' + f.key" type="number" class="hr-input" [formControlName]="f.key" />
+                }
+                @case ('DATE') {
+                  <input [id]="'f-' + f.key" type="date" class="hr-input" [formControlName]="f.key" />
+                }
+                @case ('SELECT') {
+                  <select [id]="'f-' + f.key" class="hr-input" [formControlName]="f.key">
+                    <option value="">—</option>
+                    @for (o of f.options ?? []; track o.value) {
+                      <option [value]="o.value">{{ optionLabel(o) }}</option>
+                    }
+                  </select>
+                }
+                @case ('MULTI_SELECT') {
+                  <select [id]="'f-' + f.key" class="hr-input" multiple [formControlName]="f.key">
+                    @for (o of f.options ?? []; track o.value) {
+                      <option [value]="o.value">{{ optionLabel(o) }}</option>
+                    }
+                  </select>
+                }
+                @default {
+                  <input [id]="'f-' + f.key" type="text" class="hr-input" [formControlName]="f.key" />
+                }
+              }
+            </div>
+          }
+
+          @if (errorKey) {
+            <div class="hr-state hr-state--error" role="alert">{{ ('antrag.' + errorKey) | translate }}</div>
+          }
+
+          <div class="hr-form-actions">
+            <button type="submit" class="hr-btn hr-btn--primary" [disabled]="submitting || form.invalid">
+              {{ (submitting ? 'antrag.submitting' : 'antrag.createAndSubmit') | translate }}
+            </button>
+            <button type="button" class="hr-btn" (click)="cancelCreate()" [disabled]="submitting">
+              {{ 'antrag.cancel' | translate }}
+            </button>
+          </div>
+        </form>
+      }
+    </div>
+  }
+
+  @if (loading) {
+    <div class="hr-state" role="status">{{ 'antrag.loading' | translate }}</div>
+  } @else if (failed) {
+    <div class="hr-state hr-state--error" role="alert">{{ 'antrag.loadError' | translate }}</div>
+  } @else if (antraege.length === 0) {
+    <div class="hr-state">{{ 'antrag.empty' | translate }}</div>
+  } @else {
+    <div class="hr-card">
+      <table class="hr-table" [attr.aria-label]="'antrag.listTitle' | translate">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'antrag.colType' | translate }}</th>
+            <th scope="col">{{ 'antrag.colStatus' | translate }}</th>
+            <th scope="col">{{ 'antrag.colProcess' | translate }}</th>
+            <th scope="col">{{ 'antrag.colCreated' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of antraege; track a.id) {
+            <tr [class.hr-row--new]="a.id === lastSubmittedId">
+              <td class="hr-title">{{ typTitle(a.antragstypId) }}</td>
+              <td><span class="hr-status" [class]="statusClass(a.status)">{{ a.status }}</span></td>
+              <td>
+                @if (a.workflowProcessId) {
+                  <code class="hr-key">{{ a.workflowProcessId }}</code>
+                } @else {
+                  <span class="hr-muted">—</span>
+                }
+              </td>
+              <td class="hr-muted">{{ a.createdAt | date: 'short' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

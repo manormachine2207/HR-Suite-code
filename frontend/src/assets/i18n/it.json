@@ -7,7 +7,8 @@
     "home": "Pagina iniziale",
     "conformite": "Dichiarazione di accessibilità",
     "language": "Lingua",
-    "antragstypen": "Tipi di richiesta"
+    "antragstypen": "Tipi di richiesta",
+    "antraege": "Le mie richieste"
   },
   "footer": {
     "legal": "Note legali",
@@ -24,6 +25,29 @@
     "loading": "Caricamento …",
     "empty": "Nessun tipo di richiesta.",
     "loadError": "Impossibile caricare i tipi di richiesta."
+  },
+  "antrag": {
+    "listTitle": "Le mie richieste",
+    "lead": "Panoramica delle tue richieste e del loro stato.",
+    "new": "Nuova richiesta",
+    "newTitle": "Inoltra una nuova richiesta",
+    "noLiveTypes": "Nessun tipo di richiesta pubblicato disponibile.",
+    "chooseType": "Tipo di richiesta",
+    "choosePlaceholder": "Seleziona …",
+    "noFields": "Questo tipo di richiesta non ha campi.",
+    "createAndSubmit": "Crea e inoltra",
+    "submitting": "Invio in corso …",
+    "cancel": "Annulla",
+    "loading": "Caricamento …",
+    "empty": "Non hai ancora richieste.",
+    "loadError": "Impossibile caricare le richieste.",
+    "loadFieldsError": "Impossibile caricare il modulo.",
+    "createError": "Impossibile creare la richiesta.",
+    "submitError": "Impossibile inoltrare la richiesta.",
+    "colType": "Tipo di richiesta",
+    "colStatus": "Stato",
+    "colProcess": "ID processo del workflow",
+    "colCreated": "Creata"
   },
   "designer": {
     "back": "Torna all'elenco",

@@ -7,7 +7,8 @@
     "home": "Home",
     "conformite": "Accessibility Statement",
     "language": "Language",
-    "antragstypen": "Request Types"
+    "antragstypen": "Request Types",
+    "antraege": "My Requests"
   },
   "footer": {
     "legal": "Legal",
@@ -24,6 +25,29 @@
     "loading": "Loading …",
     "empty": "No request types yet.",
     "loadError": "Request types could not be loaded."
+  },
+  "antrag": {
+    "listTitle": "My Requests",
+    "lead": "Overview of your requests and their status.",
+    "new": "New Request",
+    "newTitle": "Submit a new request",
+    "noLiveTypes": "No published request type available.",
+    "chooseType": "Request type",
+    "choosePlaceholder": "Please select …",
+    "noFields": "This request type has no fields.",
+    "createAndSubmit": "Create & submit",
+    "submitting": "Submitting …",
+    "cancel": "Cancel",
+    "loading": "Loading …",
+    "empty": "You have no requests yet.",
+    "loadError": "Requests could not be loaded.",
+    "loadFieldsError": "The form could not be loaded.",
+    "createError": "The request could not be created.",
+    "submitError": "The request could not be submitted.",
+    "colType": "Request type",
+    "colStatus": "Status",
+    "colProcess": "Workflow process ID",
+    "colCreated": "Created"
   },
   "designer": {
     "back": "Back to list",
