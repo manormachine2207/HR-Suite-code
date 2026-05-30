@@ -1,0 +1,22 @@
+{
+  "name": "provision-ad-account (demo echo)",
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "POST", "path": "provision-ad-account", "responseMode": "responseNode" },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [400, 300],
+      "webhookId": "provision-ad-account"
+    },
+    {
+      "parameters": { "respondWith": "json", "responseBody": "={\"ok\": true, \"echo\": $json.body }" },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [620, 300]
+    }
+  ],
+  "connections": { "Webhook": { "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]] } },
+  "active": true
+}

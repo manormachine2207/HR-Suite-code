@@ -54,3 +54,16 @@ echo "published: $FIRST_ID (version $VID) -> LIVE"
 echo
 echo "DEV TOKEN (put into frontend runtime.json -> devAuth.token):"
 echo "  $DESIGNER"
+
+# Seed tenant_n8n_config for the demo tenant so the action connector can
+# reach the local n8n instance (Cut A smoke test).
+docker exec -i -e PGPASSWORD="${POSTGRES_PASSWORD:-dev}" hrsuite-postgres \
+  psql -U hrsuite -d hrsuite -v ON_ERROR_STOP=1 <<'SQL'
+INSERT INTO tenant_n8n_config (tenant_id, base_url, hmac_secret, allowed_refs, created_at, updated_at)
+VALUES ('019e754d-371c-70e0-b199-88ab785bef6e', 'http://n8n:5678', 'dev-n8n-secret',
+        '["provision-ad-account"]'::jsonb, now(), now())
+ON CONFLICT (tenant_id) DO UPDATE
+  SET base_url = EXCLUDED.base_url, hmac_secret = EXCLUDED.hmac_secret,
+      allowed_refs = EXCLUDED.allowed_refs, updated_at = now();
+SQL
+echo "Seeded tenant_n8n_config (demo tenant -> http://n8n:5678)"
