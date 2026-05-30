@@ -25,13 +25,16 @@ public class ActionExecutionService {
 
     private final ActionConnector connector;
     private final ActionExecutionRepository repo;
+    private final DeadLetterWriter deadLetterWriter;
     private final int maxAttempts;
 
     public ActionExecutionService(ActionConnector connector,
                                   ActionExecutionRepository repo,
+                                  DeadLetterWriter deadLetterWriter,
                                   @Value("${hrsuite.action.max-attempts:3}") int maxAttempts) {
         this.connector = connector;
         this.repo = repo;
+        this.deadLetterWriter = deadLetterWriter;
         this.maxAttempts = maxAttempts;
     }
 
@@ -60,12 +63,15 @@ public class ActionExecutionService {
                 exec.markFailed(last.error());
                 log.warn("action FAILED (terminal) tenant={} pi={} step={} ref={} error={}",
                         tenantId, processInstanceId, stepKey, ref, last.error());
-                return repo.save(exec);
+                // Commit the dead-letter independently: the delegate raises BpmnError on a
+                // terminal outcome, which rolls back the process-start command (and thus the
+                // caller's transaction). Persist out-of-band so the DLQ record survives.
+                return deadLetterWriter.persistTerminal(exec);
             }
         }
         exec.markDead(last == null ? "no attempt" : last.error());
         log.error("action DEAD (dead-letter) tenant={} pi={} step={} ref={} attempts={} error={}",
                 tenantId, processInstanceId, stepKey, ref, exec.getAttempts(), exec.getLastError());
-        return repo.save(exec);
+        return deadLetterWriter.persistTerminal(exec);
     }
 }

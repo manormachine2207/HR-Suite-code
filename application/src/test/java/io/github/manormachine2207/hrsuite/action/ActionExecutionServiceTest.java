@@ -28,15 +28,19 @@ class ActionExecutionServiceTest {
     private ActionConnector connector;
     @Mock
     private ActionExecutionRepository repo;
+    @Mock
+    private DeadLetterWriter deadLetterWriter;
 
     private ActionExecutionService service;
 
     @BeforeEach
     void setUp() {
-        service = new ActionExecutionService(connector, repo, 3);
+        service = new ActionExecutionService(connector, repo, deadLetterWriter, 3);
         TenantContext.set(TENANT);
         lenient().when(repo.findByProcessInstanceIdAndStepKey(any(), any())).thenReturn(Optional.empty());
         lenient().when(repo.save(any())).thenAnswer(i -> i.getArgument(0));
+        // Terminal states (FAILED/DEAD) are persisted out-of-band via the writer.
+        lenient().when(deadLetterWriter.persistTerminal(any())).thenAnswer(i -> i.getArgument(0));
     }
 
     @AfterEach
