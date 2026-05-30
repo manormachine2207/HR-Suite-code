@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -16,6 +16,7 @@ import { AntragsTypSummary } from './antragstyp.model';
 export class AntragstypListComponent implements OnInit {
   private readonly service = inject(AntragsTypService);
   private readonly document = inject(DOCUMENT);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   items: AntragsTypSummary[] = [];
   loading = true;
@@ -26,10 +27,12 @@ export class AntragstypListComponent implements OnInit {
       next: items => {
         this.items = items;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: () => {
         this.failed = true;
         this.loading = false;
+        this.cdr.markForCheck();
       }
     });
   }

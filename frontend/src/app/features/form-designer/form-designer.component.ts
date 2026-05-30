@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -25,6 +25,7 @@ export class FormDesignerComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(AntragsTypService);
   private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly langs = LANGS;
   readonly fieldTypes = FIELD_TYPES;
@@ -53,6 +54,7 @@ export class FormDesignerComponent implements OnInit {
         this.fields.push(this.buildFieldGroup(f));
       }
       this.loading = false;
+      this.cdr.markForCheck();
     });
   }
 
@@ -135,10 +137,12 @@ export class FormDesignerComponent implements OnInit {
       next: version => {
         this.saving = false;
         this.savedMajor = version.major;
+        this.cdr.markForCheck();
       },
       error: (err: { status?: number }) => {
         this.saving = false;
         this.errorMsg = err?.status ? `HTTP ${err.status}` : '';
+        this.cdr.markForCheck();
       }
     });
   }
