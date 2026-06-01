@@ -2,6 +2,7 @@ package io.github.manormachine2207.hrsuite.antragstyp.flow;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A conditional branch (exclusive gateway). The process variable
@@ -22,6 +23,8 @@ public record BranchStep(
         List<FlowStep> elseSteps) implements FlowStep {
 
     public BranchStep {
+        key = Objects.requireNonNull(key, "key");
+        title = title == null ? Map.of() : Map.copyOf(title);
         thenSteps = thenSteps == null ? List.of() : List.copyOf(thenSteps);
         elseSteps = elseSteps == null ? List.of() : List.copyOf(elseSteps);
     }

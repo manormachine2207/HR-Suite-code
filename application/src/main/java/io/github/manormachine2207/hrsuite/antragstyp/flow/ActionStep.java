@@ -1,6 +1,7 @@
 package io.github.manormachine2207.hrsuite.antragstyp.flow;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * An automated action step: calls an n8n workflow via the {@code n8nActionDelegate}
@@ -14,6 +15,8 @@ public record ActionStep(
         Map<String, String> inputMapping) implements FlowStep {
 
     public ActionStep {
+        key = Objects.requireNonNull(key, "key");
+        title = title == null ? Map.of() : Map.copyOf(title);
         inputMapping = inputMapping == null ? Map.of() : Map.copyOf(inputMapping);
     }
 }

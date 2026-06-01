@@ -2,6 +2,7 @@ package io.github.manormachine2207.hrsuite.antragstyp.flow;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A human-approval step. {@code assigneeRole} is a Flowable candidate group.
@@ -16,6 +17,8 @@ public record ApprovalStep(
         List<String> outcomes) implements FlowStep {
 
     public ApprovalStep {
+        key = Objects.requireNonNull(key, "key");
+        title = title == null ? Map.of() : Map.copyOf(title);
         outcomes = (outcomes == null || outcomes.isEmpty())
                 ? List.of("approve", "reject") : List.copyOf(outcomes);
     }

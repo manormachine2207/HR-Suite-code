@@ -22,6 +22,7 @@ class FlowDefinitionSerializationTest {
         assertThat(parsed.steps()).hasSize(1);
         assertThat(parsed.steps().get(0)).isInstanceOf(FormStep.class);
         assertThat(((FormStep) parsed.steps().get(0)).key()).isEqualTo("antrag");
+        assertThat(((FormStep) parsed.steps().get(0)).title()).containsEntry("de", "Antrag stellen");
     }
 
     @Test
@@ -56,8 +57,11 @@ class FlowDefinitionSerializationTest {
                 mapper.writeValueAsString(new FlowDefinition(List.of(step))), FlowDefinition.class);
         var branch = (BranchStep) parsed.steps().get(0);
         assertThat(branch.key()).isEqualTo("b1");
+        assertThat(branch.conditionVariable()).isEqualTo("review_outcome");
+        assertThat(branch.approveValue()).isEqualTo("approve");
         assertThat(branch.thenSteps()).hasSize(1);
         assertThat(branch.thenSteps().get(0)).isInstanceOf(ActionStep.class);
+        assertThat(branch.elseSteps()).isEmpty();
     }
 
     @Test
