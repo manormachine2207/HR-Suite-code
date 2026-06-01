@@ -104,4 +104,48 @@ class BpmnCompilerTest {
         assertThatThrownBy(() -> BpmnCompiler.compile("bad key", "n", def))
                 .isInstanceOf(IllegalArgumentException.class);
     }
+
+    @Test
+    void approvalStepProducesUserTaskAndExclusiveGatewayWithConditions() {
+        var def = new FlowDefinition(List.of(
+                new ApprovalStep("review", Map.of("de", "Freigabe"), "hr-reviewer",
+                        List.of("approve", "reject"))));
+        String bpmn = BpmnCompiler.compile("proc_appr", "Approval", def);
+        // userTask for the reviewer
+        assertThat(bpmn).contains("<userTask id=\"review\"");
+        assertThat(bpmn).contains("flowable:candidateGroups=\"hr-reviewer\"");
+        // exclusive gateway
+        assertThat(bpmn).contains("<exclusiveGateway id=\"gw_review\"");
+        // reject → terminal end event
+        assertThat(bpmn).contains("id=\"end_review_reject\"");
+        // approve condition on the continue flow
+        assertThat(bpmn).contains("review_outcome == 'approve'");
+        // reject condition on the terminal flow
+        assertThat(bpmn).contains("review_outcome == 'reject'");
+    }
+
+    @Test
+    void fullFlowFormApprovalActionProducesCorrectBpmn() {
+        var def = new FlowDefinition(List.of(
+                new FormStep("antrag", Map.of("de", "Antrag")),
+                new ApprovalStep("review", Map.of("de", "Review"), "hr-reviewer",
+                        List.of("approve", "reject")),
+                new ActionStep("ad", Map.of("de", "Konto"), "provision-ad-account",
+                        Map.of("upn", "test@example.com"))
+        ));
+        String bpmn = BpmnCompiler.compile("full_proc", "Full Process", def);
+        // All elements present
+        assertThat(bpmn).contains("id=\"antrag\"").contains("id=\"review\"").contains("id=\"gw_review\"")
+                .contains("id=\"ad\"").contains("id=\"end\"").contains("id=\"end_review_reject\"");
+        // Chain: antrag → review
+        assertThat(bpmn).contains("sourceRef=\"antrag\"").contains("targetRef=\"review\"");
+        // review → gw_review
+        assertThat(bpmn).contains("sourceRef=\"review\"").contains("targetRef=\"gw_review\"");
+        // gw_review approve → ad (the continue/action step)
+        assertThat(bpmn).contains("sourceRef=\"gw_review\"").contains("targetRef=\"ad\"");
+        // gw_review reject → end_review_reject
+        assertThat(bpmn).contains("targetRef=\"end_review_reject\"");
+        // ad → end
+        assertThat(bpmn).contains("sourceRef=\"ad\"").contains("targetRef=\"end\"");
+    }
 }
