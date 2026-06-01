@@ -57,8 +57,20 @@ public final class BpmnCompiler {
         for (int i = 0; i < steps.size(); i++) {
             FlowStep step = steps.get(i);
             String from = (i == 0) ? "start" : exitId(steps.get(i - 1));
+            // 'to' is used by APPROVAL for its gateway outgoing flows; FORM and ACTION
+            // do NOT emit their own outgoing flow to avoid duplicate sequenceFlow IDs
+            // (the next step emits its own incoming, covering the same connection).
             String to = (i < steps.size() - 1) ? entryId(steps.get(i + 1)) : "end";
             compileStep(step, from, to, elements, seqFlows);
+        }
+
+        // Sequence flow from the last step's exit node to the main end event.
+        // FORM and ACTION emit only their INCOMING flow; this trailer closes the chain.
+        // APPROVAL already handles all its own outgoing flows (via its exclusive gateway),
+        // so no trailer is needed when APPROVAL is last.
+        FlowStep lastStep = steps.get(steps.size() - 1);
+        if (!(lastStep instanceof ApprovalStep)) {
+            seqFlows.add(sf("sf_" + exitId(lastStep) + "_end", exitId(lastStep), "end", null));
         }
 
         elements.add("<endEvent id=\"end\"/>");
@@ -95,8 +107,8 @@ public final class BpmnCompiler {
                 <userTask id="%s" name="%s">
                   <documentation>FORM</documentation>
                 </userTask>""".formatted(s.key(), lbl(s.title())));
+        // Only the INCOMING flow — the next step (or the post-loop trailer) emits the outgoing.
         seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
-        seqFlows.add(sf("sf_" + s.key() + "_" + to, s.key(), to, null));
     }
 
     private static void compileApproval(ApprovalStep s, String from, String to,
@@ -159,8 +171,8 @@ public final class BpmnCompiler {
                              flowable:delegateExpression="${n8nActionDelegate}">
                 %s
                 </serviceTask>""".formatted(s.key(), lbl(s.title()), ext));
+        // Only the INCOMING flow — the next step (or the post-loop trailer) emits the outgoing.
         seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
-        seqFlows.add(sf("sf_" + s.key() + "_" + to, s.key(), to, null));
     }
 
     // --- BPMN helpers ---

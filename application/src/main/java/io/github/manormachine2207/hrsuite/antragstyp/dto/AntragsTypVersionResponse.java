@@ -19,6 +19,7 @@ public record AntragsTypVersionResponse(
         String workflowBpmn,
         Map<String, Object> sfActionBindings,
         FlowDefinition flowDefinition,
+        String processDefinitionKey,
         OffsetDateTime publishedAt,
         UUID publishedBy,
         OffsetDateTime createdAt,
@@ -28,7 +29,7 @@ public record AntragsTypVersionResponse(
         return new AntragsTypVersionResponse(
                 v.getId(), v.getAntragstypId(), v.getMajor(), v.getMinor(), v.getStatus(),
                 v.getFormDefinition(), v.getWorkflowBpmn(), v.getSfActionBindings(),
-                v.getFlowDefinition(),
+                v.getFlowDefinition(), v.getProcessDefinitionKey(),
                 v.getPublishedAt(), v.getPublishedBy(), v.getCreatedAt(), v.getUpdatedAt());
     }
 }
