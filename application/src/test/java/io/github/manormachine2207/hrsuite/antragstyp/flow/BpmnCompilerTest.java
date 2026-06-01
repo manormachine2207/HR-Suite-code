@@ -88,4 +88,20 @@ class BpmnCompilerTest {
         assertThat(bpmn).doesNotContain("Antrag & <Test>");
         assertThat(bpmn).contains("Antrag &amp; &lt;Test&gt;");
     }
+
+    @Test
+    void hyphenatedStepKeyThrows() {
+        var def = new FlowDefinition(List.of(
+                new FormStep("provision-ad", Map.of("de", "x"))));
+        assertThatThrownBy(() -> BpmnCompiler.compile("proc", "n", def))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void invalidProcessKeyThrows() {
+        var def = new FlowDefinition(List.of(
+                new FormStep("antrag", Map.of("de", "Antrag"))));
+        assertThatThrownBy(() -> BpmnCompiler.compile("bad key", "n", def))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

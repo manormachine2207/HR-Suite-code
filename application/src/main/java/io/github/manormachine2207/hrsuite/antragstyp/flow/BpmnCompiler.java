@@ -18,7 +18,19 @@ public final class BpmnCompiler {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
+    private static final java.util.regex.Pattern KEY_PATTERN =
+            java.util.regex.Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
+
     private BpmnCompiler() {
+    }
+
+    private static String validateKey(String key, String role) {
+        if (key == null || !KEY_PATTERN.matcher(key).matches()) {
+            throw new IllegalArgumentException(
+                    "Invalid " + role + " '" + key + "': must match [A-Za-z][A-Za-z0-9_]* "
+                    + "(used as a BPMN element id and a JUEL variable name; hyphens/spaces/symbols are not allowed).");
+        }
+        return key;
     }
 
     /**
@@ -31,6 +43,10 @@ public final class BpmnCompiler {
         if (flow == null || flow.steps().isEmpty()) {
             throw new IllegalArgumentException(
                     "FlowDefinition must have at least one step to compile; processKey=" + processKey);
+        }
+        validateKey(processKey, "processKey");
+        for (FlowStep step : flow.steps()) {
+            validateKey(step.key(), "step key");
         }
         var elements = new ArrayList<String>();
         var seqFlows = new ArrayList<String>();
