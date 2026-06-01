@@ -114,7 +114,7 @@ class AntragsTypServiceTest {
                 .thenReturn(Optional.of(new AntragsTyp(atId, TENANT, "k", Map.of("de", "K"), Map.of())));
         when(versionRepository.maxMajor(atId)).thenReturn(2);
 
-        AntragsTypVersion v = service.createDraftMajor(atId, form(text("a", true, 100)), "<bpmn/>", Map.of());
+        AntragsTypVersion v = service.createDraftMajor(atId, form(text("a", true, 100)), "<bpmn/>", Map.of(), null);
 
         assertThat(v.getMajor()).isEqualTo(3);
         assertThat(v.getMinor()).isZero();
@@ -127,7 +127,7 @@ class AntragsTypServiceTest {
         UUID missing = UUID.randomUUID();
         when(antragsTypRepository.findById(missing)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.createDraftMajor(missing, form(text("a", true, 100)), "<bpmn/>", Map.of()))
+        assertThatThrownBy(() -> service.createDraftMajor(missing, form(text("a", true, 100)), "<bpmn/>", Map.of(), null))
                 .isInstanceOf(AntragsTypExceptions.NotFound.class);
     }
 
@@ -230,7 +230,7 @@ class AntragsTypServiceTest {
         var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, UUID.randomUUID(), 1, form(text("a", true, 100)), "<bpmn/>", Map.of());
         when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
 
-        var edited = service.editDraft(v.getId(), form(text("a", true, 100), text("b", false, 50)), "<bpmn>v2</bpmn>", Map.of());
+        var edited = service.editDraft(v.getId(), form(text("a", true, 100), text("b", false, 50)), "<bpmn>v2</bpmn>", Map.of(), null);
 
         assertThat(edited.getFormDefinition().fields()).hasSize(2);
         assertThat(edited.getWorkflowBpmn()).isEqualTo("<bpmn>v2</bpmn>");

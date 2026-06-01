@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -64,5 +65,23 @@ class N8nActionDelegateTest {
 
         assertThatThrownBy(() -> delegate().execute(execution))
                 .isInstanceOf(BpmnError.class);
+    }
+
+    @Test
+    void inputMappingJsonFieldIsUsedWhenActionInputVariableAbsent() {
+        stubExecution();
+        when(execution.getVariable("actionInput")).thenReturn(null);   // no process variable
+        Expression mappingExpr = mock(Expression.class);
+        when(mappingExpr.getValue(execution)).thenReturn("{\"upn\":\"a@b.ch\"}");
+
+        ActionExecution succeeded = new ActionExecution(TENANT, "pi-1", "ad", "provision-ad-account");
+        succeeded.markSucceeded();
+        when(service.run(eq("pi-1"), eq("ad"), eq("provision-ad-account"), any())).thenReturn(succeeded);
+
+        N8nActionDelegate d = delegate();
+        d.setInputMappingJson(mappingExpr);
+        d.execute(execution);
+
+        verify(execution).setVariable("actionStatus", "SUCCEEDED");
     }
 }

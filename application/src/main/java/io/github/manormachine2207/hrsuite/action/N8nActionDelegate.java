@@ -20,6 +20,7 @@ public class N8nActionDelegate implements JavaDelegate {
 
     private final ActionExecutionService actionExecutionService;
     private Expression ref;
+    private Expression inputMappingJson;  // optional; set by compiled BPMN ACTION steps
 
     public N8nActionDelegate(ActionExecutionService actionExecutionService) {
         this.actionExecutionService = actionExecutionService;
@@ -29,12 +30,29 @@ public class N8nActionDelegate implements JavaDelegate {
         this.ref = ref;
     }
 
+    public void setInputMappingJson(Expression inputMappingJson) {
+        this.inputMappingJson = inputMappingJson;
+    }
+
     @Override
-    @SuppressWarnings("unchecked")
     public void execute(DelegateExecution execution) {
         String refValue = (String) ref.getValue(execution);
         String stepKey = execution.getCurrentActivityId();
         Object raw = execution.getVariable("actionInput");
+        // Fall back to the compiled inputMappingJson field when actionInput is not set as a process variable
+        if (raw == null && inputMappingJson != null) {
+            String json = (String) inputMappingJson.getValue(execution);
+            if (json != null && !json.isBlank()) {
+                try {
+                    raw = new com.fasterxml.jackson.databind.ObjectMapper().readValue(json, java.util.Map.class);
+                } catch (Exception e) {
+                    // log warning, proceed with empty map; malformed JSON in BPMN is a deploy-time issue
+                    org.slf4j.LoggerFactory.getLogger(N8nActionDelegate.class)
+                            .warn("Could not parse inputMappingJson for step {}: {}", stepKey, e.getMessage());
+                }
+            }
+        }
+        @SuppressWarnings("unchecked")
         Map<String, Object> input = raw instanceof Map ? (Map<String, Object>) raw : Map.of();
 
         ActionExecution result = actionExecutionService.run(

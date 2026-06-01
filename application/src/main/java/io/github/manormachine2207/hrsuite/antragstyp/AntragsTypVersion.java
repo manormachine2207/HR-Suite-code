@@ -169,6 +169,8 @@ public class AntragsTypVersion {
     public VersionStatus getStatus() { return status; }
     public FormDefinition getFormDefinition() { return formDefinition; }
     public String getWorkflowBpmn() { return workflowBpmn; }
+    /** Stores the compiled BPMN. Called by {@code AntragsTypService.publish()} when a FlowDefinition is present. */
+    public void setWorkflowBpmn(String workflowBpmn) { this.workflowBpmn = workflowBpmn; }
     public String getWorkflowDeploymentId() { return workflowDeploymentId; }
     public String getProcessDefinitionKey() { return processDefinitionKey; }
     public Integer getProcessDefinitionVersion() { return processDefinitionVersion; }
