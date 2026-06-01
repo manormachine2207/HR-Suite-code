@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.antragstyp;
 
+import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,6 +62,10 @@ public class AntragsTypVersion {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "sf_action_bindings", columnDefinition = "jsonb")
     private Map<String, Object> sfActionBindings;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "flow_definition", columnDefinition = "jsonb")
+    private FlowDefinition flowDefinition;
 
     @Column(name = "workflow_deployment_id", length = 256)
     private String workflowDeploymentId;
@@ -164,12 +169,16 @@ public class AntragsTypVersion {
     public VersionStatus getStatus() { return status; }
     public FormDefinition getFormDefinition() { return formDefinition; }
     public String getWorkflowBpmn() { return workflowBpmn; }
+    /** Stores the compiled BPMN. Called by {@code AntragsTypService.publish()} when a FlowDefinition is present. */
+    public void setWorkflowBpmn(String workflowBpmn) { this.workflowBpmn = workflowBpmn; }
     public String getWorkflowDeploymentId() { return workflowDeploymentId; }
     public String getProcessDefinitionKey() { return processDefinitionKey; }
     public Integer getProcessDefinitionVersion() { return processDefinitionVersion; }
     public Map<String, Object> getSfActionBindings() {
         return sfActionBindings == null ? null : Collections.unmodifiableMap(sfActionBindings);
     }
+    public FlowDefinition getFlowDefinition() { return flowDefinition; }
+    public void setFlowDefinition(FlowDefinition flowDefinition) { this.flowDefinition = flowDefinition; }
     public Map<String, Object> getMinorChangelog() {
         return minorChangelog == null ? null : Collections.unmodifiableMap(minorChangelog);
     }

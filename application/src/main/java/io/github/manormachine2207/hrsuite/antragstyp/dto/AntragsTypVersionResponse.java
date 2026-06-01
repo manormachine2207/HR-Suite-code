@@ -2,6 +2,7 @@ package io.github.manormachine2207.hrsuite.antragstyp.dto;
 
 import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypVersion;
 import io.github.manormachine2207.hrsuite.antragstyp.VersionStatus;
+import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 
 import java.time.OffsetDateTime;
@@ -17,6 +18,8 @@ public record AntragsTypVersionResponse(
         FormDefinition formDefinition,
         String workflowBpmn,
         Map<String, Object> sfActionBindings,
+        FlowDefinition flowDefinition,
+        String processDefinitionKey,
         OffsetDateTime publishedAt,
         UUID publishedBy,
         OffsetDateTime createdAt,
@@ -26,6 +29,7 @@ public record AntragsTypVersionResponse(
         return new AntragsTypVersionResponse(
                 v.getId(), v.getAntragstypId(), v.getMajor(), v.getMinor(), v.getStatus(),
                 v.getFormDefinition(), v.getWorkflowBpmn(), v.getSfActionBindings(),
+                v.getFlowDefinition(), v.getProcessDefinitionKey(),
                 v.getPublishedAt(), v.getPublishedBy(), v.getCreatedAt(), v.getUpdatedAt());
     }
 }

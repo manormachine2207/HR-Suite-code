@@ -1,6 +1,8 @@
 package io.github.manormachine2207.hrsuite.antragstyp;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import io.github.manormachine2207.hrsuite.antragstyp.flow.BpmnCompiler;
+import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.version.ChangeClassification;
 import io.github.manormachine2207.hrsuite.antragstyp.version.CompatibilityClassifier;
@@ -92,22 +94,28 @@ public class AntragsTypService {
     }
 
     public AntragsTypVersion createDraftMajor(UUID antragstypId, FormDefinition formDefinition,
-                                              String workflowBpmn, Map<String, Object> sfActionBindings) {
+                                              String workflowBpmn, Map<String, Object> sfActionBindings,
+                                              FlowDefinition flowDefinition) {
         AntragsTyp at = getDefinition(antragstypId);
         int nextMajor = versionRepository.maxMajor(at.getId()) + 1;
         AntragsTypVersion v = new AntragsTypVersion(
                 UuidCreator.getTimeOrderedEpoch(), currentTenant(), at.getId(),
                 nextMajor, formDefinition, workflowBpmn, sfActionBindings);
+        v.setFlowDefinition(flowDefinition);
         return versionRepository.save(v);
     }
 
     public AntragsTypVersion editDraft(UUID versionId, FormDefinition formDefinition,
-                                       String workflowBpmn, Map<String, Object> sfActionBindings) {
+                                       String workflowBpmn, Map<String, Object> sfActionBindings,
+                                       FlowDefinition flowDefinition) {
         AntragsTypVersion v = getVersion(versionId);
         if (v.getStatus() != VersionStatus.DRAFT) {
             throw new AntragsTypExceptions.IllegalState("only DRAFT versions can be edited freely: " + versionId);
         }
+        // Note: flowDefinition is managed separately via setFlowDefinition and is intentionally
+        // NOT part of replaceDraftContent (which only handles form/bpmn/sfActionBindings).
         v.replaceDraftContent(formDefinition, workflowBpmn, sfActionBindings);
+        v.setFlowDefinition(flowDefinition);
         return v;
     }
 
@@ -166,6 +174,12 @@ public class AntragsTypService {
         // atomic. The stored workflowBpmn is provisional; the bridge substitutes a default
         // process for a non-deployable placeholder until the workflow-designer cut.
         String processKey = "at_" + antragstypId.toString().replace("-", "") + "_v" + target.getMajor();
+        // If a FlowDefinition is present, compile it to BPMN and store the result on the version
+        // for traceability; otherwise fall back to the stored workflowBpmn (backward compat).
+        if (target.getFlowDefinition() != null) {
+            String compiled = BpmnCompiler.compile(processKey, at.getKey(), target.getFlowDefinition());
+            target.setWorkflowBpmn(compiled);
+        }
         DeployedProcess deployed = workflowEngine.deploy(
                 at.getTenantId(), processKey, at.getKey(), target.getWorkflowBpmn());
         target.recordDeployment(deployed.deploymentId(), deployed.processDefinitionKey(),
