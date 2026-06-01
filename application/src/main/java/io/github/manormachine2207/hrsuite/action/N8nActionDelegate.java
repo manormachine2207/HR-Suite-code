@@ -1,9 +1,12 @@
 package io.github.manormachine2207.hrsuite.action;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.flowable.common.engine.api.delegate.Expression;
 import org.flowable.engine.delegate.BpmnError;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -17,6 +20,9 @@ import java.util.Map;
  */
 @Component("n8nActionDelegate")
 public class N8nActionDelegate implements JavaDelegate {
+
+    private static final Logger log = LoggerFactory.getLogger(N8nActionDelegate.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final ActionExecutionService actionExecutionService;
     private Expression ref;
@@ -44,11 +50,14 @@ public class N8nActionDelegate implements JavaDelegate {
             String json = (String) inputMappingJson.getValue(execution);
             if (json != null && !json.isBlank()) {
                 try {
-                    raw = new com.fasterxml.jackson.databind.ObjectMapper().readValue(json, java.util.Map.class);
+                    raw = MAPPER.readValue(json, Map.class);
                 } catch (Exception e) {
-                    // log warning, proceed with empty map; malformed JSON in BPMN is a deploy-time issue
-                    org.slf4j.LoggerFactory.getLogger(N8nActionDelegate.class)
-                            .warn("Could not parse inputMappingJson for step {}: {}", stepKey, e.getMessage());
+                    // Malformed inputMappingJson is a misconfiguration/tampering: silently proceeding
+                    // with empty input could "succeed" with wrong/no data, which is unacceptable.
+                    // Fail loud on the same terminal path as any other ACTION_FAILED outcome.
+                    log.error("Malformed inputMappingJson for step {}: {}", stepKey, e.getMessage());
+                    throw new BpmnError("ACTION_FAILED",
+                            "malformed inputMappingJson for step " + stepKey + ": " + e.getMessage());
                 }
             }
         }

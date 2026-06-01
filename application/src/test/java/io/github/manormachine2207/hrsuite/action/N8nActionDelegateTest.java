@@ -11,6 +11,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Map;
 import java.util.UUID;
 
+import org.mockito.ArgumentCaptor;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -83,5 +86,11 @@ class N8nActionDelegateTest {
         d.execute(execution);
 
         verify(execution).setVariable("actionStatus", "SUCCEEDED");
+
+        // Verify the parsed map was actually forwarded to the service (not an empty map)
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> inputCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(service).run(eq("pi-1"), eq("ad"), eq("provision-ad-account"), inputCaptor.capture());
+        assertThat(inputCaptor.getValue()).containsExactlyEntriesOf(Map.of("upn", "a@b.ch"));
     }
 }

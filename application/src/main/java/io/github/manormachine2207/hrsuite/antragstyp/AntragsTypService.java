@@ -112,6 +112,8 @@ public class AntragsTypService {
         if (v.getStatus() != VersionStatus.DRAFT) {
             throw new AntragsTypExceptions.IllegalState("only DRAFT versions can be edited freely: " + versionId);
         }
+        // Note: flowDefinition is managed separately via setFlowDefinition and is intentionally
+        // NOT part of replaceDraftContent (which only handles form/bpmn/sfActionBindings).
         v.replaceDraftContent(formDefinition, workflowBpmn, sfActionBindings);
         v.setFlowDefinition(flowDefinition);
         return v;
