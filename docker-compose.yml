@@ -107,12 +107,16 @@ services:
         condition: service_healthy
 
   n8n:
-    image: n8nio/n8n:1.70.0
+    # Pinned to the current stable 2.x line (ADR-010: n8n is an EXTERNAL action
+    # runtime, version explicitly pinned for reproducibility — not :latest).
+    image: n8nio/n8n:2.23.1
     container_name: hrsuite-n8n
     environment:
-      N8N_BASIC_AUTH_ACTIVE: "true"
-      N8N_BASIC_AUTH_USER: admin
-      N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD:-dev}
+      # n8n 2.x: the N8N_BASIC_AUTH_* vars were removed; access is gated by the
+      # owner account (user management). Production webhook endpoints stay public,
+      # which is all the Cut-A connector needs. Task runners are always-on in 2.x
+      # (the JS runner is registered automatically; no env flag needed).
+      N8N_SECURE_COOKIE: "false"         # allow UI login over http://localhost (dev only)
       N8N_HOST: localhost
       N8N_PORT: "5678"
       N8N_PROTOCOL: http
