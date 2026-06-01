@@ -20,3 +20,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/007-create-action-execution.sql
       relativeToChangelogFile: false
+  - include:
+      file: db/changelog/changes/008-add-flow-definition.sql
+      relativeToChangelogFile: false
