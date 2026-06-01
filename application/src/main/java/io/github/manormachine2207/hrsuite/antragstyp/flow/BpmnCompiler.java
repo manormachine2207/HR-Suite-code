@@ -61,7 +61,14 @@ public final class BpmnCompiler {
             // do NOT emit their own outgoing flow to avoid duplicate sequenceFlow IDs
             // (the next step emits its own incoming, covering the same connection).
             String to = (i < steps.size() - 1) ? entryId(steps.get(i + 1)) : "end";
-            compileStep(step, from, to, elements, seqFlows);
+            // An APPROVAL's exclusive gateway already emits the conditional flow to the
+            // following step (the "continue" outflow).  If we also emitted an unconditional
+            // incoming flow here, the gateway would have two outgoing flows to the same
+            // target — one conditional and one unconditional — which is a BPMN semantic
+            // defect.  So a step must only emit its incoming flow when its predecessor is
+            // NOT an ApprovalStep.
+            boolean emitIncoming = (i == 0) || !(steps.get(i - 1) instanceof ApprovalStep);
+            compileStep(step, from, to, emitIncoming, elements, seqFlows);
         }
 
         // Sequence flow from the last step's exit node to the main end event.
@@ -91,27 +98,34 @@ public final class BpmnCompiler {
     // --- step compilers ---
 
     private static void compileStep(FlowStep step, String from, String to,
+                                     boolean emitIncoming,
                                      List<String> elements, List<String> seqFlows) {
         switch (step) {
-            case FormStep s     -> compileForm(s, from, to, elements, seqFlows);
-            case ApprovalStep s -> compileApproval(s, from, to, elements, seqFlows);
-            case ActionStep s   -> compileAction(s, from, to, elements, seqFlows);
+            case FormStep s     -> compileForm(s, from, to, emitIncoming, elements, seqFlows);
+            case ApprovalStep s -> compileApproval(s, from, to, emitIncoming, elements, seqFlows);
+            case ActionStep s   -> compileAction(s, from, to, emitIncoming, elements, seqFlows);
             case BranchStep s   -> throw new UnsupportedOperationException(
                     "BRANCH step compilation is not yet supported (scheduled for Cut C): key=" + s.key());
         }
     }
 
     private static void compileForm(FormStep s, String from, String to,
+                                     boolean emitIncoming,
                                      List<String> elements, List<String> seqFlows) {
         elements.add("""
                 <userTask id="%s" name="%s">
                   <documentation>FORM</documentation>
                 </userTask>""".formatted(s.key(), lbl(s.title())));
-        // Only the INCOMING flow — the next step (or the post-loop trailer) emits the outgoing.
-        seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
+        // Only emit the INCOMING flow when the predecessor is not an ApprovalStep.
+        // An ApprovalStep's exclusive gateway already emits the conditional "continue"
+        // flow to this step, so no additional unconditional incoming flow is needed.
+        if (emitIncoming) {
+            seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
+        }
     }
 
     private static void compileApproval(ApprovalStep s, String from, String to,
+                                         boolean emitIncoming,
                                          List<String> elements, List<String> seqFlows) {
         String gwId = "gw_" + s.key();
         String role = (s.assigneeRole() == null || s.assigneeRole().isBlank())
@@ -120,7 +134,10 @@ public final class BpmnCompiler {
         // The reviewer's userTask
         elements.add("<userTask id=\"%s\" name=\"%s\" flowable:candidateGroups=\"%s\"/>"
                 .formatted(s.key(), lbl(s.title()), esc(role)));
-        seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
+        // Only emit the incoming flow when the predecessor is not an ApprovalStep.
+        if (emitIncoming) {
+            seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
+        }
 
         // Exclusive gateway — no 'default' attr; all outgoing flows have conditionExpressions
         elements.add("<exclusiveGateway id=\"%s\" name=\"%s_decision\"/>"
@@ -143,6 +160,7 @@ public final class BpmnCompiler {
     }
 
     private static void compileAction(ActionStep s, String from, String to,
+                                       boolean emitIncoming,
                                        List<String> elements, List<String> seqFlows) {
         var ext = new StringBuilder();
         ext.append("""
@@ -171,8 +189,12 @@ public final class BpmnCompiler {
                              flowable:delegateExpression="${n8nActionDelegate}">
                 %s
                 </serviceTask>""".formatted(s.key(), lbl(s.title()), ext));
-        // Only the INCOMING flow — the next step (or the post-loop trailer) emits the outgoing.
-        seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
+        // Only emit the INCOMING flow when the predecessor is not an ApprovalStep.
+        // An ApprovalStep's exclusive gateway already emits the conditional "continue"
+        // flow to this step, so no additional unconditional incoming flow is needed.
+        if (emitIncoming) {
+            seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
+        }
     }
 
     // --- BPMN helpers ---

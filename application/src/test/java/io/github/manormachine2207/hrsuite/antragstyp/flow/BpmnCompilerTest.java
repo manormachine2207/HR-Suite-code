@@ -124,6 +124,47 @@ class BpmnCompilerTest {
         assertThat(bpmn).contains("review_outcome == 'reject'");
     }
 
+    /**
+     * Regression for the defect introduced in commit 43ca371:
+     * After an APPROVAL step the exclusive gateway already emits a conditional "continue"
+     * flow to the following step.  The following step must NOT also emit an unconditional
+     * incoming flow — that would leave the gateway with two outgoing flows to the same
+     * target, one of which is unconditional (BPMN semantic defect /
+     * exclusive-gateway-seq-flow-without-conditions Flowable warning).
+     */
+    @Test
+    void approvalToActionHasNoUnconditionalGatewayOutflow() {
+        var def = new FlowDefinition(List.of(
+                new FormStep("antrag", Map.of("de", "Antrag")),
+                new ApprovalStep("review", Map.of("de", "Review"), "hr-reviewer",
+                        List.of("approve", "reject")),
+                new ActionStep("provision", Map.of("de", "Provision"), "provision-ad-account", Map.of())
+        ));
+        String bpmn = BpmnCompiler.compile("proc_regression", "Regression", def);
+
+        // There must be exactly ONE flow from gw_review to provision (the conditional approve flow).
+        int count = 0;
+        int idx = 0;
+        String needle = "sourceRef=\"gw_review\" targetRef=\"provision\"";
+        while ((idx = bpmn.indexOf(needle, idx)) != -1) {
+            count++;
+            idx += needle.length();
+        }
+        assertThat(count)
+                .as("Expected exactly one sequenceFlow from gw_review to provision, found %d", count)
+                .isEqualTo(1);
+
+        // The single flow from gw_review to provision must carry a conditionExpression —
+        // i.e. it must NOT be a self-closing unconditional element.
+        // The compiler's sf() method produces for an unconditional flow:
+        //   <sequenceFlow id="sf_gw_review_continue" sourceRef="gw_review" targetRef="provision"/>
+        // and for a conditional flow the element is NOT self-closing (it contains a child
+        // <conditionExpression> element). We assert the self-closing form does not appear.
+        assertThat(bpmn)
+                .as("No unconditional (self-closing) sequenceFlow from gw_review to provision must exist")
+                .doesNotContain("sourceRef=\"gw_review\" targetRef=\"provision\"/>");
+    }
+
     @Test
     void fullFlowFormApprovalActionProducesCorrectBpmn() {
         var def = new FlowDefinition(List.of(
