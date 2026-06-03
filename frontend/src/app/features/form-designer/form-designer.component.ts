@@ -1,4 +1,4 @@
-import { Component, OnInit, AfterViewInit, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -23,7 +23,7 @@ import { FlowStepEditorComponent } from './flow-step-editor.component';
   templateUrl: './form-designer.component.html',
   styleUrl: './form-designer.component.scss'
 })
-export class FormDesignerComponent implements OnInit, AfterViewInit {
+export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewChecked {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(AntragsTypService);
   private readonly fb = inject(FormBuilder);
@@ -52,6 +52,7 @@ export class FormDesignerComponent implements OnInit, AfterViewInit {
   publishing = false;
 
   private pendingFlow: FlowDefinition | null = null;
+  private flowSeeded = false;
 
   ngOnInit(): void {
     this.antragstypId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -75,13 +76,23 @@ export class FormDesignerComponent implements OnInit, AfterViewInit {
       // seed flow editor once the view (and child) exist
       this.pendingFlow = source?.flowDefinition ?? null;
       this.loading = false;
+      this.seedFlowEditor();
       this.cdr.markForCheck();
     });
   }
 
   ngAfterViewInit(): void {
-    if (this.flowEditor && this.pendingFlow) {
+    this.seedFlowEditor();
+  }
+
+  ngAfterViewChecked(): void {
+    this.seedFlowEditor();
+  }
+
+  private seedFlowEditor(): void {
+    if (!this.flowSeeded && this.flowEditor && !this.loading) {
       this.flowEditor.loadFlow(this.pendingFlow);
+      this.flowSeeded = true;
       this.cdr.markForCheck();
     }
   }
@@ -205,10 +216,11 @@ export class FormDesignerComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private httpMessage(e: any): string {
-    if (e?.status === 422) return 'Inkompatible Änderung — eine neue Major-Version ist nötig.';
-    if (e?.status === 409) return 'Gerade veröffentlicht — bitte erneut versuchen.';
-    return e?.error?.message ?? 'Aktion fehlgeschlagen.';
+  private httpMessage(e: unknown): string {
+    const err = e as { status?: number; error?: { message?: string } };
+    if (err?.status === 422) return 'Inkompatible Änderung — eine neue Major-Version ist nötig.';
+    if (err?.status === 409) return 'Gerade veröffentlicht — bitte erneut versuchen.';
+    return err?.error?.message ?? 'Aktion fehlgeschlagen.';
   }
 
   // ---- (de)serialization ------------------------------------------------

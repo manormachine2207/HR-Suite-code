@@ -160,13 +160,11 @@
       </details>
     }
 
-    @if (section === 'flow') {
-      <app-flow-step-editor [availableRefs]="availableRefs" />
-    }
+    <app-flow-step-editor [availableRefs]="availableRefs" [hidden]="section !== 'flow'" />
 
     @if (section === 'publish') {
       <section class="publish">
-        <button type="button" (click)="save()" [disabled]="saving">{{ 'builder.saveDraft' | translate }}</button>
+        <button type="button" (click)="save()" [disabled]="saving || !canSave">{{ 'builder.saveDraft' | translate }}</button>
         <button type="button" (click)="publish()" [disabled]="publishing || !draftVersionId">{{ 'builder.publish' | translate }}</button>
         @if (savedMajor !== null) { <p class="ok">{{ 'builder.savedMajor' | translate }} {{ savedMajor }}</p> }
         @if (publishedKey) { <p class="ok">{{ 'builder.published' | translate }} {{ publishedKey }}</p> }
