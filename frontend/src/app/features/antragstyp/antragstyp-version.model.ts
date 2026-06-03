@@ -1,4 +1,5 @@
 import { FormDefinition } from '../form-designer/form-definition.model';
+import { FlowDefinition } from '../form-designer/flow-definition.model';
 
 /**
  * Read model for an Antragstyp version, mirroring the backend
@@ -12,6 +13,8 @@ export interface AntragsTypVersion {
   status: string;
   formDefinition: FormDefinition;
   workflowBpmn?: string | null;
+  flowDefinition?: FlowDefinition | null;
+  processDefinitionKey?: string | null;
   publishedAt?: string | null;
   createdAt: string;
   updatedAt: string;
