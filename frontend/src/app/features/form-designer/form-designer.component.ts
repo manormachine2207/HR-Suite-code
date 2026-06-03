@@ -133,7 +133,7 @@ export class FormDesignerComponent implements OnInit {
     this.saving = true;
     this.errorMsg = '';
     this.savedMajor = null;
-    this.service.createDraftVersion(this.antragstypId, this.toFormDefinition()).subscribe({
+    this.service.createDraftVersion(this.antragstypId, this.toFormDefinition(), null).subscribe({
       next: version => {
         this.saving = false;
         this.savedMajor = version.major;
