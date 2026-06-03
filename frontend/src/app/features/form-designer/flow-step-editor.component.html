@@ -1,0 +1,64 @@
+<div class="flow-editor">
+  <div class="toolbar">
+    <span>{{ 'flow.editor.steps' | translate }}</span>
+    <button type="button" (click)="addStep('FORM')">+ FORM</button>
+    <button type="button" (click)="addStep('APPROVAL')">+ APPROVAL</button>
+    <button type="button" (click)="addStep('ACTION')" [disabled]="availableRefs().length === 0">+ ACTION</button>
+  </div>
+  @if (availableRefs().length === 0) {
+    <p class="hint">{{ 'flow.editor.noRefs' | translate }}</p>
+  }
+
+  @for (g of steps.controls; track g; let i = $index) {
+    <div class="step" [formGroup]="g">
+      <header>
+        <span class="badge">{{ i + 1 }} · {{ kindOf(g) }}</span>
+        <span class="spacer"></span>
+        <button type="button" (click)="moveUp(i)" [disabled]="i === 0">▲</button>
+        <button type="button" (click)="moveDown(i)" [disabled]="i === steps.length - 1">▼</button>
+        <button type="button" (click)="removeStep(i)" aria-label="delete">&#x1F5D1;</button>
+      </header>
+
+      <label>{{ 'flow.editor.key' | translate }}<input formControlName="key" /></label>
+      @if (g.controls.key.touched && g.controls.key.invalid) {
+        <p class="hint">{{ 'flow.editor.keyHint' | translate }}</p>
+      }
+
+      <fieldset formGroupName="title">
+        <legend>{{ 'flow.editor.title' | translate }}</legend>
+        @for (lang of langs; track lang) {
+          <label>{{ lang | uppercase }}<input [formControlName]="lang" /></label>
+        }
+      </fieldset>
+
+      @if (kindOf(g) === 'APPROVAL') {
+        <label>{{ 'flow.editor.assigneeRole' | translate }}
+          <select formControlName="assigneeRole">
+            @for (r of assigneeRoles; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </label>
+        <p class="hint">{{ 'flow.editor.outcomesFixed' | translate }}</p>
+      }
+
+      @if (kindOf(g) === 'ACTION') {
+        <label>{{ 'flow.editor.ref' | translate }}
+          <select formControlName="ref">
+            <option value="" disabled>—</option>
+            @for (r of availableRefs(); track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </label>
+        <div class="mapping">
+          <span>{{ 'flow.editor.inputMapping' | translate }}</span>
+          @for (row of inputMapping(i).controls; track row; let r = $index) {
+            <div class="row" [formGroup]="row">
+              <input formControlName="k" placeholder="key" />
+              <input formControlName="v" placeholder="value" />
+              <button type="button" (click)="removeInputMappingRow(i, r)">&#x2715;</button>
+            </div>
+          }
+          <button type="button" (click)="addInputMappingRow(i)">+ {{ 'flow.editor.addRow' | translate }}</button>
+        </div>
+      }
+    </div>
+  }
+</div>
