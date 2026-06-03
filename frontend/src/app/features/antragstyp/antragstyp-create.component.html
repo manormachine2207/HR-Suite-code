@@ -1,0 +1,25 @@
+<section class="create">
+  <a routerLink="/antragstypen">&larr; {{ 'antragstyp.list.title' | translate }}</a>
+  <h1>{{ 'antragstyp.create.title' | translate }}</h1>
+
+  @if (errorMsg) { <p class="error" role="alert">{{ errorMsg }}</p> }
+
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label>
+      {{ 'antragstyp.create.key' | translate }}
+      <input formControlName="key" autocomplete="off" />
+    </label>
+    @if (form.controls['key'].touched && form.controls['key'].invalid) {
+      <p class="hint">{{ 'antragstyp.create.keyHint' | translate }}</p>
+    }
+
+    <fieldset formGroupName="title">
+      <legend>{{ 'antragstyp.create.title' | translate }}</legend>
+      @for (lang of langs; track lang) {
+        <label>{{ lang | uppercase }}<input [formControlName]="lang" /></label>
+      }
+    </fieldset>
+
+    <button type="submit" [disabled]="saving">{{ 'antragstyp.create.submit' | translate }}</button>
+  </form>
+</section>
