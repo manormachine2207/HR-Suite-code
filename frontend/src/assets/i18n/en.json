@@ -24,7 +24,35 @@
     "colStatus": "Status",
     "loading": "Loading …",
     "empty": "No request types yet.",
-    "loadError": "Request types could not be loaded."
+    "loadError": "Request types could not be loaded.",
+    "create": {
+      "title": "New Request Type",
+      "key": "Key",
+      "keyHint": "Lowercase letters, digits, _ and - only",
+      "submit": "Create"
+    }
+  },
+  "builder": {
+    "form": "Form",
+    "flow": "Flow",
+    "publish": "Publish",
+    "saveDraft": "Save draft",
+    "savedMajor": "Draft saved, major version",
+    "published": "Published, process key:"
+  },
+  "flow": {
+    "editor": {
+      "steps": "Flow steps",
+      "key": "Key",
+      "keyHint": "Must match [A-Za-z][A-Za-z0-9_]* (no hyphens)",
+      "title": "Title",
+      "assigneeRole": "Assignee role",
+      "outcomesFixed": "Outcomes: approve / reject (fixed)",
+      "ref": "Action (n8n ref)",
+      "inputMapping": "Input mapping",
+      "addRow": "Row",
+      "noRefs": "No n8n refs configured for this tenant — ACTION steps unavailable."
+    }
   },
   "antrag": {
     "listTitle": "My Requests",

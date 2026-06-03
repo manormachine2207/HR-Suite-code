@@ -24,7 +24,35 @@
     "colStatus": "Stato",
     "loading": "Caricamento …",
     "empty": "Nessun tipo di richiesta.",
-    "loadError": "Impossibile caricare i tipi di richiesta."
+    "loadError": "Impossibile caricare i tipi di richiesta.",
+    "create": {
+      "title": "Nuovo tipo di richiesta",
+      "key": "Chiave",
+      "keyHint": "Solo minuscole, cifre, _ e -",
+      "submit": "Crea"
+    }
+  },
+  "builder": {
+    "form": "Modulo",
+    "flow": "Flusso",
+    "publish": "Pubblica",
+    "saveDraft": "Salva bozza",
+    "savedMajor": "Bozza salvata, versione maggiore",
+    "published": "Pubblicato, chiave del processo:"
+  },
+  "flow": {
+    "editor": {
+      "steps": "Passi del flusso",
+      "key": "Chiave",
+      "keyHint": "Deve corrispondere a [A-Za-z][A-Za-z0-9_]* (senza trattini)",
+      "title": "Titolo",
+      "assigneeRole": "Ruolo responsabile",
+      "outcomesFixed": "Esiti: approvare / rifiutare (fisso)",
+      "ref": "Azione (riferimento n8n)",
+      "inputMapping": "Mappatura degli input",
+      "addRow": "Riga",
+      "noRefs": "Nessun riferimento n8n configurato per questo tenant — passi ACTION non disponibili."
+    }
   },
   "antrag": {
     "listTitle": "Le mie richieste",

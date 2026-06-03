@@ -24,7 +24,35 @@
     "colStatus": "Statut",
     "loading": "Chargement …",
     "empty": "Aucun type de demande.",
-    "loadError": "Impossible de charger les types de demande."
+    "loadError": "Impossible de charger les types de demande.",
+    "create": {
+      "title": "Nouveau type de demande",
+      "key": "Clé",
+      "keyHint": "Minuscules, chiffres, _ et - uniquement",
+      "submit": "Créer"
+    }
+  },
+  "builder": {
+    "form": "Formulaire",
+    "flow": "Flux",
+    "publish": "Publier",
+    "saveDraft": "Enregistrer le brouillon",
+    "savedMajor": "Brouillon enregistré, version majeure",
+    "published": "Publié, clé du processus :"
+  },
+  "flow": {
+    "editor": {
+      "steps": "Étapes du flux",
+      "key": "Clé",
+      "keyHint": "Doit correspondre à [A-Za-z][A-Za-z0-9_]* (sans tirets)",
+      "title": "Titre",
+      "assigneeRole": "Rôle responsable",
+      "outcomesFixed": "Issues : approuver / rejeter (fixe)",
+      "ref": "Action (référence n8n)",
+      "inputMapping": "Mappage des entrées",
+      "addRow": "Ligne",
+      "noRefs": "Aucune référence n8n configurée pour ce tenant — étapes ACTION non disponibles."
+    }
   },
   "antrag": {
     "listTitle": "Mes demandes",

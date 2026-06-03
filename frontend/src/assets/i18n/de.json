@@ -24,7 +24,35 @@
     "colStatus": "Status",
     "loading": "Wird geladen …",
     "empty": "Keine Antragstypen vorhanden.",
-    "loadError": "Antragstypen konnten nicht geladen werden."
+    "loadError": "Antragstypen konnten nicht geladen werden.",
+    "create": {
+      "title": "Neuer Antragstyp",
+      "key": "Schlüssel",
+      "keyHint": "Nur Kleinbuchstaben, Ziffern, _ und -",
+      "submit": "Anlegen"
+    }
+  },
+  "builder": {
+    "form": "Formular",
+    "flow": "Flow",
+    "publish": "Veröffentlichen",
+    "saveDraft": "Als Entwurf speichern",
+    "savedMajor": "Entwurf gespeichert, Major",
+    "published": "Veröffentlicht, Prozess-Key:"
+  },
+  "flow": {
+    "editor": {
+      "steps": "Flow-Schritte",
+      "key": "Schlüssel",
+      "keyHint": "Muss [A-Za-z][A-Za-z0-9_]* sein (keine Bindestriche)",
+      "title": "Titel",
+      "assigneeRole": "Zuständige Rolle",
+      "outcomesFixed": "Outcomes: approve / reject (fest)",
+      "ref": "Aktion (n8n-ref)",
+      "inputMapping": "Input-Mapping",
+      "addRow": "Zeile",
+      "noRefs": "Keine n8n-Refs für diesen Tenant konfiguriert — ACTION-Schritte nicht verfügbar."
+    }
   },
   "antrag": {
     "listTitle": "Meine Anträge",
