@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { GraphDefinition } from './flow-graph.model';
-import { emptyGraph, addNode, connect, validateGraph, cloneGraph } from './flow-graph.logic';
+import { emptyGraph, addNode, connect, validateGraph, cloneGraph, removeNode } from './flow-graph.logic';
 
 describe('flow-graph.logic', () => {
   it('emptyGraph has no nodes/edges', () => {
@@ -68,5 +68,27 @@ describe('flow-graph.logic', () => {
     g = connect(g, s.id, a.id);
     g = connect(g, a.id, e.id);
     expect(validateGraph(g)).toEqual([]);
+  });
+
+  it('removeNode removes the node and its dangling edges, leaving the input intact', () => {
+    let g = emptyGraph();
+    g = addNode(g, 'START', { x: 0, y: 0 });
+    g = addNode(g, 'END', { x: 100, y: 0 });
+    const [s, e] = g.nodes;
+    g = connect(g, s.id, e.id);
+    const before = g;                       // capture reference to assert no mutation
+    const after = removeNode(g, s.id);
+    expect(after.nodes).toHaveLength(1);
+    expect(after.nodes[0].id).toBe(e.id);
+    expect(after.edges).toHaveLength(0);    // dangling edge removed
+    expect(before.nodes).toHaveLength(2);   // input not mutated
+    expect(before.edges).toHaveLength(1);
+  });
+
+  it('addNode does not mutate the input graph', () => {
+    const g0 = emptyGraph();
+    const g1 = addNode(g0, 'ACTION', { x: 0, y: 0 });
+    expect(g0.nodes).toHaveLength(0);   // original untouched
+    expect(g1.nodes).toHaveLength(1);
   });
 });
