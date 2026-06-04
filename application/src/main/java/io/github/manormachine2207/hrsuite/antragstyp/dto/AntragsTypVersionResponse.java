@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.antragstyp.dto;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypVersion;
 import io.github.manormachine2207.hrsuite.antragstyp.VersionStatus;
 import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
@@ -20,6 +21,7 @@ public record AntragsTypVersionResponse(
         Map<String, Object> sfActionBindings,
         FlowDefinition flowDefinition,
         String processDefinitionKey,
+        JsonNode graphDefinition,
         OffsetDateTime publishedAt,
         UUID publishedBy,
         OffsetDateTime createdAt,
@@ -29,7 +31,7 @@ public record AntragsTypVersionResponse(
         return new AntragsTypVersionResponse(
                 v.getId(), v.getAntragstypId(), v.getMajor(), v.getMinor(), v.getStatus(),
                 v.getFormDefinition(), v.getWorkflowBpmn(), v.getSfActionBindings(),
-                v.getFlowDefinition(), v.getProcessDefinitionKey(),
+                v.getFlowDefinition(), v.getProcessDefinitionKey(), v.getGraphDefinition(),
                 v.getPublishedAt(), v.getPublishedBy(), v.getCreatedAt(), v.getUpdatedAt());
     }
 }

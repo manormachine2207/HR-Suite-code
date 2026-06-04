@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.antragstyp;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.f4b6a3.uuid.UuidCreator;
 import io.github.manormachine2207.hrsuite.antragstyp.flow.BpmnCompiler;
 import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
@@ -95,19 +96,20 @@ public class AntragsTypService {
 
     public AntragsTypVersion createDraftMajor(UUID antragstypId, FormDefinition formDefinition,
                                               String workflowBpmn, Map<String, Object> sfActionBindings,
-                                              FlowDefinition flowDefinition) {
+                                              FlowDefinition flowDefinition, JsonNode graphDefinition) {
         AntragsTyp at = getDefinition(antragstypId);
         int nextMajor = versionRepository.maxMajor(at.getId()) + 1;
         AntragsTypVersion v = new AntragsTypVersion(
                 UuidCreator.getTimeOrderedEpoch(), currentTenant(), at.getId(),
                 nextMajor, formDefinition, workflowBpmn, sfActionBindings);
         v.setFlowDefinition(flowDefinition);
+        v.setGraphDefinition(graphDefinition);
         return versionRepository.save(v);
     }
 
     public AntragsTypVersion editDraft(UUID versionId, FormDefinition formDefinition,
                                        String workflowBpmn, Map<String, Object> sfActionBindings,
-                                       FlowDefinition flowDefinition) {
+                                       FlowDefinition flowDefinition, JsonNode graphDefinition) {
         AntragsTypVersion v = getVersion(versionId);
         if (v.getStatus() != VersionStatus.DRAFT) {
             throw new AntragsTypExceptions.IllegalState("only DRAFT versions can be edited freely: " + versionId);
@@ -116,6 +118,7 @@ public class AntragsTypService {
         // NOT part of replaceDraftContent (which only handles form/bpmn/sfActionBindings).
         v.replaceDraftContent(formDefinition, workflowBpmn, sfActionBindings);
         v.setFlowDefinition(flowDefinition);
+        v.setGraphDefinition(graphDefinition);
         return v;
     }
 

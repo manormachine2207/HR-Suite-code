@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.antragstyp;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 import jakarta.persistence.Column;
@@ -66,6 +67,10 @@ public class AntragsTypVersion {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "flow_definition", columnDefinition = "jsonb")
     private FlowDefinition flowDefinition;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "graph_definition", columnDefinition = "jsonb")
+    private JsonNode graphDefinition;
 
     @Column(name = "workflow_deployment_id", length = 256)
     private String workflowDeploymentId;
@@ -179,6 +184,8 @@ public class AntragsTypVersion {
     }
     public FlowDefinition getFlowDefinition() { return flowDefinition; }
     public void setFlowDefinition(FlowDefinition flowDefinition) { this.flowDefinition = flowDefinition; }
+    public JsonNode getGraphDefinition() { return graphDefinition; }
+    public void setGraphDefinition(JsonNode graphDefinition) { this.graphDefinition = graphDefinition; }
     public Map<String, Object> getMinorChangelog() {
         return minorChangelog == null ? null : Collections.unmodifiableMap(minorChangelog);
     }
