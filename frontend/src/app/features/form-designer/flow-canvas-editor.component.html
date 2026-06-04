@@ -22,6 +22,7 @@
     [edges]="vflowEdges()"
     changesController
     (nodesChanges.position)="onPositionChange($event)"
+    (nodesChanges.select)="onSelectionChange($event)"
     connect
     (connect)="onConnect($event)">
   </vflow>

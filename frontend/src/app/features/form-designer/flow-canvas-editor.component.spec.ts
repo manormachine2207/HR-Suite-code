@@ -33,4 +33,15 @@ describe('FlowCanvasEditorComponent', () => {
     cmp.addNode('XOR');   // no START/END, XOR unconditioned, missing key
     expect(cmp.warnings().map(w => w.code)).toContain('NO_START');
   });
+
+  it('onSelectionChange wires canvas selection to the inspector', () => {
+    cmp.addNode('START');
+    const nodeId = cmp.graph().nodes[0].id;
+    cmp.onSelectionChange([{ id: nodeId, type: 'select', selected: true }]);
+    expect(cmp.selectedNode()).not.toBeNull();
+    expect(cmp.selectedNode()!.id).toBe(nodeId);
+    // deselecting clears the inspector
+    cmp.onSelectionChange([{ id: nodeId, type: 'select', selected: false }]);
+    expect(cmp.selectedNode()).toBeNull();
+  });
 });

@@ -1,7 +1,7 @@
-import { Component, computed, effect, input, signal, ViewChild } from '@angular/core';
+import { Component, computed, input, signal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { Vflow, VflowComponent, createNodes, createEdges, Node, Edge, NodePositionChange } from 'ngx-vflow';
+import { Vflow, createNodes, createEdges, Node, Edge, NodePositionChange, NodeSelectedChange } from 'ngx-vflow';
 
 import {
   GraphDefinition,
@@ -83,6 +83,12 @@ export class FlowCanvasEditorComponent {
 
   select(id: string): void {
     this.selectedNodeId.set(id);
+  }
+
+  /** Fired by changesController (nodesChanges.select) when the user clicks a node on the canvas. */
+  onSelectionChange(changes: NodeSelectedChange[]): void {
+    const selected = changes.find(c => c.selected);
+    this.selectedNodeId.set(selected ? selected.id : null);
   }
 
   /** Persist drag-position changes emitted by changesController (nodesChanges.position). */
