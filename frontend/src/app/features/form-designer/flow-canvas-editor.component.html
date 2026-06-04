@@ -11,19 +11,21 @@
 
   <!-- ngx-vflow canvas.
        - [nodes] / [edges]: re-derived from domain graph signal via computed().
-       - changesController: persists drag positions back into domain graph.
-       - [connect]: listens for new connection events from ConnectionControllerDirective.
+       - (nodesChanges.position) / (nodesChanges.select): outputs exposed by ChangesControllerDirective
+         which is already applied as a host-directive on VflowComponent — no explicit
+         `changesController` attribute is needed (and adding it would double-instantiate the
+         directive and crash Angular with "Cannot read 'firstCreatePass' of null").
+       - (connect): output of ConnectionControllerDirective; the binding `(connect)="..."` itself
+         is enough for Angular to match [connect] selector — no explicit `connect` attribute is
+         needed (same double-instantiation hazard).
   -->
-  <!-- connect attribute activates ConnectionControllerDirective; (connect) is its output event -->
   <vflow
     class="canvas"
     view="auto"
     [nodes]="vflowNodes()"
     [edges]="vflowEdges()"
-    changesController
     (nodesChanges.position)="onPositionChange($event)"
     (nodesChanges.select)="onSelectionChange($event)"
-    connect
     (connect)="onConnect($event)">
   </vflow>
 
