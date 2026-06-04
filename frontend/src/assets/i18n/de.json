@@ -42,18 +42,6 @@
     "publishDeferred": "Veröffentlichen für Graph-Flows folgt (Compiler = SP1)."
   },
   "flow": {
-    "editor": {
-      "steps": "Flow-Schritte",
-      "key": "Schlüssel",
-      "keyHint": "Muss [A-Za-z][A-Za-z0-9_]* sein (keine Bindestriche)",
-      "title": "Titel",
-      "assigneeRole": "Zuständige Rolle",
-      "outcomesFixed": "Outcomes: approve / reject (fest)",
-      "ref": "Aktion (n8n-ref)",
-      "inputMapping": "Input-Mapping",
-      "addRow": "Zeile",
-      "noRefs": "Keine n8n-Refs für diesen Tenant konfiguriert — ACTION-Schritte nicht verfügbar."
-    },
     "canvas": {
       "palette": "Knoten",
       "key": "Schlüssel",

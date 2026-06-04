@@ -109,5 +109,9 @@ describe('FormDesignerComponent — canvas seeding', () => {
     // draftVersionId is set from the loaded draft; canvas has 2 nodes → canPublish false
     expect(cmp.draftVersionId).toBe('v-1');
     expect(cmp.canPublish).toBe(false);
+
+    // Clear the canvas → toGraphDefinition() returns null; draftVersionId still set → canPublish true
+    cmp.flowCanvas!.loadGraph(null);
+    expect(cmp.canPublish).toBe(true);
   });
 });

@@ -42,18 +42,6 @@
     "publishDeferred": "La publication des flux graphiques est à venir (compilateur = SP1)."
   },
   "flow": {
-    "editor": {
-      "steps": "Étapes du flux",
-      "key": "Clé",
-      "keyHint": "Doit correspondre à [A-Za-z][A-Za-z0-9_]* (sans tirets)",
-      "title": "Titre",
-      "assigneeRole": "Rôle responsable",
-      "outcomesFixed": "Issues : approuver / rejeter (fixe)",
-      "ref": "Action (référence n8n)",
-      "inputMapping": "Mappage des entrées",
-      "addRow": "Ligne",
-      "noRefs": "Aucune référence n8n configurée pour ce tenant — étapes ACTION non disponibles."
-    },
     "canvas": {
       "palette": "Nœuds",
       "key": "Clé",

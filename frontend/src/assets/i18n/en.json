@@ -42,18 +42,6 @@
     "publishDeferred": "Publishing graph flows is coming (compiler = SP1)."
   },
   "flow": {
-    "editor": {
-      "steps": "Flow steps",
-      "key": "Key",
-      "keyHint": "Must match [A-Za-z][A-Za-z0-9_]* (no hyphens)",
-      "title": "Title",
-      "assigneeRole": "Assignee role",
-      "outcomesFixed": "Outcomes: approve / reject (fixed)",
-      "ref": "Action (n8n ref)",
-      "inputMapping": "Input mapping",
-      "addRow": "Row",
-      "noRefs": "No n8n refs configured for this tenant — ACTION steps unavailable."
-    },
     "canvas": {
       "palette": "Nodes",
       "key": "Key",

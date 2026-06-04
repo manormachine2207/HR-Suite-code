@@ -42,18 +42,6 @@
     "publishDeferred": "La pubblicazione dei flussi grafici è in arrivo (compilatore = SP1)."
   },
   "flow": {
-    "editor": {
-      "steps": "Passi del flusso",
-      "key": "Chiave",
-      "keyHint": "Deve corrispondere a [A-Za-z][A-Za-z0-9_]* (senza trattini)",
-      "title": "Titolo",
-      "assigneeRole": "Ruolo responsabile",
-      "outcomesFixed": "Esiti: approvare / rifiutare (fisso)",
-      "ref": "Azione (riferimento n8n)",
-      "inputMapping": "Mappatura degli input",
-      "addRow": "Riga",
-      "noRefs": "Nessun riferimento n8n configurato per questo tenant — passi ACTION non disponibili."
-    },
     "canvas": {
       "palette": "Nodi",
       "key": "Chiave",
