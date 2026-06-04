@@ -35,21 +35,29 @@ export class AntragsTypService {
     return this.http.post<AntragsTypSummary>(`${this.base}/antragstyp`, { key, title });
   }
 
-  /** Creates a new DRAFT major carrying the form and (optional) flow definition. */
+  /** Creates a new DRAFT major carrying the form, (optional) flow, and (optional) graph definition. */
   createDraftVersion(id: string, formDefinition: FormDefinition,
-                     flowDefinition: FlowDefinition | null): Observable<AntragsTypVersion> {
+                     flowDefinition: FlowDefinition | null,
+                     graphDefinition: unknown | null = null): Observable<AntragsTypVersion> {
     const body: Record<string, unknown> = { formDefinition, workflowBpmn: '<bpmn/>', sfActionBindings: {} };
     if (flowDefinition) {
       body['flowDefinition'] = flowDefinition;
+    }
+    if (graphDefinition) {
+      body['graphDefinition'] = graphDefinition;
     }
     return this.http.post<AntragsTypVersion>(`${this.base}/antragstyp/${id}/versions`, body);
   }
 
   editDraft(versionId: string, formDefinition: FormDefinition,
-            flowDefinition: FlowDefinition | null): Observable<AntragsTypVersion> {
+            flowDefinition: FlowDefinition | null,
+            graphDefinition: unknown | null = null): Observable<AntragsTypVersion> {
     const body: Record<string, unknown> = { formDefinition, workflowBpmn: '<bpmn/>', sfActionBindings: {} };
     if (flowDefinition) {
       body['flowDefinition'] = flowDefinition;
+    }
+    if (graphDefinition) {
+      body['graphDefinition'] = graphDefinition;
     }
     return this.http.put<AntragsTypVersion>(`${this.base}/antragstyp/versions/${versionId}/draft`, body);
   }

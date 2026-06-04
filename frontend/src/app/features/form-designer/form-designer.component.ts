@@ -13,13 +13,13 @@ import {
   FieldType, FIELD_TYPES, Lang, LANGS, LocaleMap,
   FormDefinition, FormFieldDef, OptionDef, Validation
 } from './form-definition.model';
-import { FlowDefinition } from './flow-definition.model';
-import { FlowStepEditorComponent } from './flow-step-editor.component';
+import { FlowCanvasEditorComponent } from './flow-canvas-editor.component';
+import { GraphDefinition } from './flow-graph.model';
 
 @Component({
   selector: 'app-form-designer',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslateModule, RouterLink, UpperCasePipe, FlowStepEditorComponent],
+  imports: [ReactiveFormsModule, TranslateModule, RouterLink, UpperCasePipe, FlowCanvasEditorComponent],
   templateUrl: './form-designer.component.html',
   styleUrl: './form-designer.component.scss'
 })
@@ -29,7 +29,7 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   private readonly fb = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  @ViewChild(FlowStepEditorComponent) flowEditor?: FlowStepEditorComponent;
+  @ViewChild(FlowCanvasEditorComponent) flowCanvas?: FlowCanvasEditorComponent;
 
   readonly langs = LANGS;
   readonly fieldTypes = FIELD_TYPES;
@@ -51,8 +51,8 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   publishedKey: string | null = null;
   publishing = false;
 
-  private pendingFlow: FlowDefinition | null = null;
-  private flowSeeded = false;
+  private pendingGraph: GraphDefinition | null = null;
+  private canvasSeeded = false;
 
   ngOnInit(): void {
     this.antragstypId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -73,26 +73,26 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
       for (const f of (defs.length ? defs : [null])) {
         this.fields.push(this.buildFieldGroup(f));
       }
-      // seed flow editor once the view (and child) exist
-      this.pendingFlow = source?.flowDefinition ?? null;
+      // seed canvas editor once the view (and child) exist
+      this.pendingGraph = source?.graphDefinition ?? null;
       this.loading = false;
-      this.seedFlowEditor();
+      this.seedCanvas();
       this.cdr.markForCheck();
     });
   }
 
   ngAfterViewInit(): void {
-    this.seedFlowEditor();
+    this.seedCanvas();
   }
 
   ngAfterViewChecked(): void {
-    this.seedFlowEditor();
+    this.seedCanvas();
   }
 
-  private seedFlowEditor(): void {
-    if (!this.flowSeeded && this.flowEditor && !this.loading) {
-      this.flowEditor.loadFlow(this.pendingFlow);
-      this.flowSeeded = true;
+  private seedCanvas(): void {
+    if (!this.canvasSeeded && this.flowCanvas && !this.loading) {
+      this.flowCanvas.loadGraph(this.pendingGraph);
+      this.canvasSeeded = true;
       this.cdr.markForCheck();
     }
   }
@@ -125,6 +125,11 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
 
   get canSave(): boolean {
     return !this.saving && this.fields.length > 0 && this.fields.controls.every(c => this.keyError(c as FormGroup) === null);
+  }
+
+  /** Publish is disabled whenever a graph exists (compiler is SP1). */
+  get canPublish(): boolean {
+    return !!this.draftVersionId && !this.flowCanvas?.toGraphDefinition();
   }
 
   get previewJson(): string {
@@ -174,11 +179,11 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
     this.savedMajor = null;
 
     const formDefinition = this.collectFormDefinition();
-    const flow = this.flowEditor?.toFlowDefinition() ?? null;
+    const graph = this.flowCanvas?.toGraphDefinition() ?? null;
 
     const save$ = this.draftVersionId
-      ? this.service.editDraft(this.draftVersionId, formDefinition, flow)
-      : this.service.createDraftVersion(this.antragstypId, formDefinition, flow);
+      ? this.service.editDraft(this.draftVersionId, formDefinition, null, graph)
+      : this.service.createDraftVersion(this.antragstypId, formDefinition, null, graph);
 
     save$.subscribe({
       next: (v) => {

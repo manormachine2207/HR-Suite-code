@@ -160,12 +160,13 @@
       </details>
     }
 
-    <app-flow-step-editor [availableRefs]="availableRefs" [hidden]="section !== 'flow'" />
+    <app-flow-canvas-editor [availableRefs]="availableRefs" [hidden]="section !== 'flow'" />
 
     @if (section === 'publish') {
       <section class="publish">
         <button type="button" (click)="save()" [disabled]="saving || !canSave">{{ 'builder.saveDraft' | translate }}</button>
-        <button type="button" (click)="publish()" [disabled]="publishing || !draftVersionId">{{ 'builder.publish' | translate }}</button>
+        <button type="button" (click)="publish()" [disabled]="publishing || !canPublish">{{ 'builder.publish' | translate }}</button>
+        @if (flowCanvas?.toGraphDefinition()) { <p class="hint">{{ 'builder.publishDeferred' | translate }}</p> }
         @if (savedMajor !== null) { <p class="ok">{{ 'builder.savedMajor' | translate }} {{ savedMajor }}</p> }
         @if (publishedKey) { <p class="ok">{{ 'builder.published' | translate }} {{ publishedKey }}</p> }
         @if (errorMsg) { <p class="error" role="alert">{{ errorMsg }}</p> }

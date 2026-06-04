@@ -15,16 +15,22 @@ const stubRoute = {
   snapshot: { paramMap: { get: (_: string) => 'at-1' } },
 } as unknown as ActivatedRoute;
 
+const GRAPH_DEF = {
+  nodes: [
+    { id: 'n1', type: 'START', position: { x: 0, y: 0 }, data: {} },
+    { id: 'n2', type: 'ACTION', position: { x: 100, y: 0 }, data: { key: 'act', ref: 'r', inputMapping: {} } },
+  ],
+  edges: [{ id: 'e1', source: 'n1', target: 'n2' }],
+};
+
 const DRAFT_VERSION = {
   id: 'v-1', antragstypId: 'at-1', major: 1, minor: 0, status: 'DRAFT',
   formDefinition: { fields: [{ key: 'name', type: 'TEXT', required: true }] },
-  flowDefinition: {
-    steps: [{ kind: 'FORM', key: 'fill_form', title: { de: 'Formular' } }],
-  },
+  graphDefinition: GRAPH_DEF,
   createdAt: '2026-01-01T00:00:00Z', updatedAt: '2026-01-01T00:00:00Z',
 };
 
-describe('FormDesignerComponent — flow seeding', () => {
+describe('FormDesignerComponent — canvas seeding', () => {
   let fixture: ComponentFixture<FormDesignerComponent>;
   let cmp: FormDesignerComponent;
   let http: HttpTestingController;
@@ -44,11 +50,7 @@ describe('FormDesignerComponent — flow seeding', () => {
     http = TestBed.inject(HttpTestingController);
   });
 
-  it('seeds the flow editor with an existing draft flowDefinition', () => {
-    // Install spy on loadFlow before any detectChanges so we can observe the call.
-    // The component hasn't run ngOnInit yet, but flowEditor ViewChild is not set yet either.
-    // We'll assert by inspecting the editor's FormArray state after seeding.
-
+  it('seeds the canvas editor with an existing draft graphDefinition', () => {
     fixture.detectChanges(); // triggers ngOnInit — forkJoin fires
 
     // Flush all three HTTP requests
@@ -59,16 +61,16 @@ describe('FormDesignerComponent — flow seeding', () => {
     // Run another CD cycle so the subscribe callback runs and markForCheck() takes effect
     fixture.detectChanges();
 
-    // ViewChild must now be defined (editor is always mounted, not behind @if)
-    expect(cmp.flowEditor).toBeDefined();
+    // ViewChild must now be defined (canvas is always mounted, not behind @if)
+    expect(cmp.flowCanvas).toBeDefined();
 
-    // The flow editor must contain the one FORM step from the draft
-    expect(cmp.flowEditor!.steps.length).toBe(1);
-    expect(cmp.flowEditor!.steps.at(0).controls.kind.value).toBe('FORM');
-    expect(cmp.flowEditor!.steps.at(0).controls.key.value).toBe('fill_form');
+    // The canvas must contain the nodes from the draft graphDefinition
+    expect(cmp.flowCanvas!.graph().nodes.length).toBe(2);
+    expect(cmp.flowCanvas!.graph().nodes[0].type).toBe('START');
+    expect(cmp.flowCanvas!.graph().nodes[1].type).toBe('ACTION');
   });
 
-  it('save() reads flow from the editor even when the form tab is active', () => {
+  it('save() reads graph from the canvas and sends it as graphDefinition', () => {
     fixture.detectChanges();
 
     http.expectOne('/api/v1/antragstyp/at-1').flush({ id: 'at-1', key: 'urlaubsantrag' });
@@ -77,20 +79,35 @@ describe('FormDesignerComponent — flow seeding', () => {
 
     fixture.detectChanges();
 
-    // section is 'form' by default; the flow editor is always mounted
+    // section is 'form' by default; the canvas editor is always mounted
     expect(cmp.section).toBe('form');
-    expect(cmp.flowEditor).toBeDefined();
+    expect(cmp.flowCanvas).toBeDefined();
 
-    const toFlowSpy = vi.spyOn(cmp.flowEditor!, 'toFlowDefinition');
+    const toGraphSpy = vi.spyOn(cmp.flowCanvas!, 'toGraphDefinition');
 
     cmp.save();
 
-    // save() must call toFlowDefinition() on the editor regardless of active tab
-    expect(toFlowSpy).toHaveBeenCalledOnce();
+    // save() must call toGraphDefinition() on the canvas regardless of active tab
+    expect(toGraphSpy).toHaveBeenCalled();
 
-    // Clean up pending PUT request
-    http.expectOne(r => r.url.includes('/draft')).flush(
-      { ...DRAFT_VERSION, minor: 1 }
-    );
+    // Clean up pending PUT request — body must contain graphDefinition, NOT flowDefinition
+    const req = http.expectOne(r => r.url.includes('/draft'));
+    expect('graphDefinition' in req.request.body).toBe(true);
+    expect('flowDefinition' in req.request.body).toBe(false);
+    req.flush({ ...DRAFT_VERSION, minor: 1 });
+  });
+
+  it('canPublish is false when canvas has a graph, true when empty', () => {
+    fixture.detectChanges();
+
+    http.expectOne('/api/v1/antragstyp/at-1').flush({ id: 'at-1', key: 'urlaubsantrag' });
+    http.expectOne('/api/v1/action/refs').flush(['provision-ad-account']);
+    http.expectOne('/api/v1/antragstyp/at-1/versions').flush([DRAFT_VERSION]);
+
+    fixture.detectChanges();
+
+    // draftVersionId is set from the loaded draft; canvas has 2 nodes → canPublish false
+    expect(cmp.draftVersionId).toBe('v-1');
+    expect(cmp.canPublish).toBe(false);
   });
 });

@@ -56,11 +56,43 @@ describe('AntragsTypService', () => {
     req.flush({ id: 'v1' });
   });
 
+  it('createDraftVersion includes graphDefinition when provided', () => {
+    const graph = { nodes: [{ id: 'n1', type: 'START', position: { x: 0, y: 0 }, data: {} }], edges: [] };
+    service.createDraftVersion('at1', { fields: [] }, null, graph).subscribe();
+    const req = http.expectOne('/api/v1/antragstyp/at1/versions');
+    expect(req.request.body.graphDefinition).toEqual(graph);
+    expect('flowDefinition' in req.request.body).toBe(false);
+    req.flush({ id: 'v1' });
+  });
+
+  it('createDraftVersion omits graphDefinition when null (default)', () => {
+    service.createDraftVersion('at1', { fields: [] }, null).subscribe();
+    const req = http.expectOne('/api/v1/antragstyp/at1/versions');
+    expect('graphDefinition' in req.request.body).toBe(false);
+    req.flush({ id: 'v1' });
+  });
+
   it('editDraft PUTs form + flow', () => {
     const flow: FlowDefinition = { steps: [] };
     service.editDraft('v1', { fields: [] }, flow).subscribe();
     const req = http.expectOne('/api/v1/antragstyp/versions/v1/draft');
     expect(req.request.method).toBe('PUT');
+    req.flush({ id: 'v1' });
+  });
+
+  it('editDraft includes graphDefinition when provided', () => {
+    const graph = { nodes: [{ id: 'n1', type: 'END', position: { x: 0, y: 0 }, data: {} }], edges: [] };
+    service.editDraft('v1', { fields: [] }, null, graph).subscribe();
+    const req = http.expectOne('/api/v1/antragstyp/versions/v1/draft');
+    expect(req.request.body.graphDefinition).toEqual(graph);
+    expect('flowDefinition' in req.request.body).toBe(false);
+    req.flush({ id: 'v1' });
+  });
+
+  it('editDraft omits graphDefinition when null (default)', () => {
+    service.editDraft('v1', { fields: [] }, null).subscribe();
+    const req = http.expectOne('/api/v1/antragstyp/versions/v1/draft');
+    expect('graphDefinition' in req.request.body).toBe(false);
     req.flush({ id: 'v1' });
   });
 
