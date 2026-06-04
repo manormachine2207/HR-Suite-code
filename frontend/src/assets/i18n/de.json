@@ -38,7 +38,8 @@
     "publish": "Veröffentlichen",
     "saveDraft": "Als Entwurf speichern",
     "savedMajor": "Entwurf gespeichert, Major",
-    "published": "Veröffentlicht, Prozess-Key:"
+    "published": "Veröffentlicht, Prozess-Key:",
+    "publishDeferred": "Veröffentlichen für Graph-Flows folgt (Compiler = SP1)."
   },
   "flow": {
     "editor": {
@@ -52,6 +53,15 @@
       "inputMapping": "Input-Mapping",
       "addRow": "Zeile",
       "noRefs": "Keine n8n-Refs für diesen Tenant konfiguriert — ACTION-Schritte nicht verfügbar."
+    },
+    "canvas": {
+      "palette": "Knoten",
+      "key": "Schlüssel",
+      "assigneeRole": "Zuständige Rolle",
+      "ref": "Aktion (n8n-ref)",
+      "delete": "Knoten löschen",
+      "selectHint": "Knoten auswählen, um ihn zu bearbeiten.",
+      "noRefs": "Keine n8n-Refs für diesen Tenant — ACTION-Knoten ohne Ref."
     }
   },
   "antrag": {

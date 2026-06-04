@@ -38,7 +38,8 @@
     "publish": "Pubblica",
     "saveDraft": "Salva bozza",
     "savedMajor": "Bozza salvata, versione maggiore",
-    "published": "Pubblicato, chiave del processo:"
+    "published": "Pubblicato, chiave del processo:",
+    "publishDeferred": "La pubblicazione dei flussi grafici è in arrivo (compilatore = SP1)."
   },
   "flow": {
     "editor": {
@@ -52,6 +53,15 @@
       "inputMapping": "Mappatura degli input",
       "addRow": "Riga",
       "noRefs": "Nessun riferimento n8n configurato per questo tenant — passi ACTION non disponibili."
+    },
+    "canvas": {
+      "palette": "Nodi",
+      "key": "Chiave",
+      "assigneeRole": "Ruolo responsabile",
+      "ref": "Azione (riferimento n8n)",
+      "delete": "Elimina nodo",
+      "selectHint": "Selezionare un nodo per modificarlo.",
+      "noRefs": "Nessun riferimento n8n per questo tenant — nodi ACTION senza riferimento."
     }
   },
   "antrag": {

@@ -38,7 +38,8 @@
     "publish": "Publish",
     "saveDraft": "Save draft",
     "savedMajor": "Draft saved, major version",
-    "published": "Published, process key:"
+    "published": "Published, process key:",
+    "publishDeferred": "Publishing graph flows is coming (compiler = SP1)."
   },
   "flow": {
     "editor": {
@@ -52,6 +53,15 @@
       "inputMapping": "Input mapping",
       "addRow": "Row",
       "noRefs": "No n8n refs configured for this tenant — ACTION steps unavailable."
+    },
+    "canvas": {
+      "palette": "Nodes",
+      "key": "Key",
+      "assigneeRole": "Assignee role",
+      "ref": "Action (n8n ref)",
+      "delete": "Delete node",
+      "selectHint": "Select a node to edit it.",
+      "noRefs": "No n8n refs for this tenant — ACTION nodes have no ref."
     }
   },
   "antrag": {

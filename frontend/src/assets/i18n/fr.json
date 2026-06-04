@@ -38,7 +38,8 @@
     "publish": "Publier",
     "saveDraft": "Enregistrer le brouillon",
     "savedMajor": "Brouillon enregistré, version majeure",
-    "published": "Publié, clé du processus :"
+    "published": "Publié, clé du processus :",
+    "publishDeferred": "La publication des flux graphiques est à venir (compilateur = SP1)."
   },
   "flow": {
     "editor": {
@@ -52,6 +53,15 @@
       "inputMapping": "Mappage des entrées",
       "addRow": "Ligne",
       "noRefs": "Aucune référence n8n configurée pour ce tenant — étapes ACTION non disponibles."
+    },
+    "canvas": {
+      "palette": "Nœuds",
+      "key": "Clé",
+      "assigneeRole": "Rôle responsable",
+      "ref": "Action (référence n8n)",
+      "delete": "Supprimer le nœud",
+      "selectHint": "Sélectionner un nœud pour le modifier.",
+      "noRefs": "Aucune référence n8n pour ce tenant — nœuds ACTION sans référence."
     }
   },
   "antrag": {
