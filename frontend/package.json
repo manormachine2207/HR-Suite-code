@@ -27,6 +27,7 @@
     "ajv-formats": "^3.0.1",
     "angular-oauth2-oidc": "^20.0.2",
     "js-cookie": "^3.0.7",
+    "ngx-vflow": "^2.6.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
