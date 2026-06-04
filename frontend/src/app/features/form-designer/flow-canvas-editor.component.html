@@ -1,0 +1,64 @@
+<div class="canvas-wrap">
+  <aside class="palette">
+    <span>{{ 'flow.canvas.palette' | translate }}</span>
+    @for (t of nodeTypes; track t) {
+      <button type="button" (click)="addNode(t)">+ {{ t }}</button>
+    }
+    @if (availableRefs().length === 0) {
+      <p class="hint">{{ 'flow.canvas.noRefs' | translate }}</p>
+    }
+  </aside>
+
+  <!-- ngx-vflow canvas.
+       - [nodes] / [edges]: re-derived from domain graph signal via computed().
+       - changesController: persists drag positions back into domain graph.
+       - [connect]: listens for new connection events from ConnectionControllerDirective.
+  -->
+  <!-- connect attribute activates ConnectionControllerDirective; (connect) is its output event -->
+  <vflow
+    class="canvas"
+    view="auto"
+    [nodes]="vflowNodes()"
+    [edges]="vflowEdges()"
+    changesController
+    (nodesChanges.position)="onPositionChange($event)"
+    connect
+    (connect)="onConnect($event)">
+  </vflow>
+
+  <aside class="inspector">
+    @if (selectedNode(); as n) {
+      <h4>{{ n.type }}</h4>
+      @if (n.type !== 'START' && n.type !== 'END') {
+        <label>{{ 'flow.canvas.key' | translate }}
+          <input [value]="n.data.key ?? ''" (input)="patchSelected({ key: $any($event.target).value })" />
+        </label>
+      }
+      @if (n.type === 'APPROVAL') {
+        <label>{{ 'flow.canvas.assigneeRole' | translate }}
+          <select [value]="n.data.assigneeRole ?? 'hr-reviewer'"
+                  (change)="patchSelected({ assigneeRole: $any($event.target).value })">
+            @for (r of assigneeRoles; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </label>
+      }
+      @if (n.type === 'ACTION') {
+        <label>{{ 'flow.canvas.ref' | translate }}
+          <select [value]="n.data.ref ?? ''" (change)="patchSelected({ ref: $any($event.target).value })">
+            <option value="" disabled>—</option>
+            @for (r of availableRefs(); track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </label>
+      }
+      <button type="button" (click)="removeNode(n.id)">{{ 'flow.canvas.delete' | translate }}</button>
+    } @else {
+      <p class="hint">{{ 'flow.canvas.selectHint' | translate }}</p>
+    }
+
+    @if (warnings().length) {
+      <ul class="warnings">
+        @for (w of warnings(); track w.message) { <li>&#9888; {{ w.message }}</li> }
+      </ul>
+    }
+  </aside>
+</div>
