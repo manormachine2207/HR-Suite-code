@@ -69,7 +69,8 @@ public class AntragsTypController {
     public ResponseEntity<AntragsTypVersionResponse> createVersion(@PathVariable("id") UUID id,
                                                                    @Valid @RequestBody CreateVersionRequest req,
                                                                    UriComponentsBuilder uri) {
-        AntragsTypVersion v = service.createDraftMajor(id, req.formDefinition(), req.workflowBpmn(), req.sfActionBindings(), req.flowDefinition());
+        AntragsTypVersion v = service.createDraftMajor(id, req.formDefinition(), req.workflowBpmn(), req.sfActionBindings(),
+                req.flowDefinition(), req.graphDefinition());
         URI location = uri.path("/api/v1/antragstyp/versions/{vid}").buildAndExpand(v.getId()).toUri();
         return ResponseEntity.created(location).body(AntragsTypVersionResponse.from(v));
     }
@@ -84,7 +85,8 @@ public class AntragsTypController {
     @PreAuthorize(WRITE_DRAFT)
     public AntragsTypVersionResponse editDraft(@PathVariable("vid") UUID vid, @Valid @RequestBody CreateVersionRequest req) {
         return AntragsTypVersionResponse.from(
-                service.editDraft(vid, req.formDefinition(), req.workflowBpmn(), req.sfActionBindings(), req.flowDefinition()));
+                service.editDraft(vid, req.formDefinition(), req.workflowBpmn(), req.sfActionBindings(),
+                        req.flowDefinition(), req.graphDefinition()));
     }
 
     @PutMapping("/versions/{vid}/minor")

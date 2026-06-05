@@ -24,7 +24,33 @@
     "colStatus": "Stato",
     "loading": "Caricamento …",
     "empty": "Nessun tipo di richiesta.",
-    "loadError": "Impossibile caricare i tipi di richiesta."
+    "loadError": "Impossibile caricare i tipi di richiesta.",
+    "create": {
+      "title": "Nuovo tipo di richiesta",
+      "key": "Chiave",
+      "keyHint": "Solo minuscole, cifre, _ e -",
+      "submit": "Crea"
+    }
+  },
+  "builder": {
+    "form": "Modulo",
+    "flow": "Flusso",
+    "publish": "Pubblica",
+    "saveDraft": "Salva bozza",
+    "savedMajor": "Bozza salvata, versione maggiore",
+    "published": "Pubblicato, chiave del processo:",
+    "publishDeferred": "La pubblicazione dei flussi grafici è in arrivo (compilatore = SP1)."
+  },
+  "flow": {
+    "canvas": {
+      "palette": "Nodi",
+      "key": "Chiave",
+      "assigneeRole": "Ruolo responsabile",
+      "ref": "Azione (riferimento n8n)",
+      "delete": "Elimina nodo",
+      "selectHint": "Selezionare un nodo per modificarlo.",
+      "noRefs": "Nessun riferimento n8n per questo tenant — nodi ACTION senza riferimento."
+    }
   },
   "antrag": {
     "listTitle": "Le mie richieste",

@@ -13,6 +13,11 @@ export const routes: Routes = [
       import('./features/antragstyp/antragstyp-list.component').then(m => m.AntragstypListComponent),
   },
   {
+    path: 'antragstypen/neu',
+    loadComponent: () =>
+      import('./features/antragstyp/antragstyp-create.component').then(m => m.AntragstypCreateComponent),
+  },
+  {
     path: 'antragstypen/:id/designer',
     loadComponent: () =>
       import('./features/form-designer/form-designer.component').then(m => m.FormDesignerComponent),

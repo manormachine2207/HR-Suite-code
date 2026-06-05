@@ -24,7 +24,33 @@
     "colStatus": "Status",
     "loading": "Wird geladen …",
     "empty": "Keine Antragstypen vorhanden.",
-    "loadError": "Antragstypen konnten nicht geladen werden."
+    "loadError": "Antragstypen konnten nicht geladen werden.",
+    "create": {
+      "title": "Neuer Antragstyp",
+      "key": "Schlüssel",
+      "keyHint": "Nur Kleinbuchstaben, Ziffern, _ und -",
+      "submit": "Anlegen"
+    }
+  },
+  "builder": {
+    "form": "Formular",
+    "flow": "Flow",
+    "publish": "Veröffentlichen",
+    "saveDraft": "Als Entwurf speichern",
+    "savedMajor": "Entwurf gespeichert, Major",
+    "published": "Veröffentlicht, Prozess-Key:",
+    "publishDeferred": "Veröffentlichen für Graph-Flows folgt (Compiler = SP1)."
+  },
+  "flow": {
+    "canvas": {
+      "palette": "Knoten",
+      "key": "Schlüssel",
+      "assigneeRole": "Zuständige Rolle",
+      "ref": "Aktion (n8n-ref)",
+      "delete": "Knoten löschen",
+      "selectHint": "Knoten auswählen, um ihn zu bearbeiten.",
+      "noRefs": "Keine n8n-Refs für diesen Tenant — ACTION-Knoten ohne Ref."
+    }
   },
   "antrag": {
     "listTitle": "Meine Anträge",

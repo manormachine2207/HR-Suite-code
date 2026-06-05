@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -13,19 +13,23 @@ import {
   FieldType, FIELD_TYPES, Lang, LANGS, LocaleMap,
   FormDefinition, FormFieldDef, OptionDef, Validation
 } from './form-definition.model';
+import { FlowCanvasEditorComponent } from './flow-canvas-editor.component';
+import { GraphDefinition } from './flow-graph.model';
 
 @Component({
   selector: 'app-form-designer',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslateModule, RouterLink, UpperCasePipe],
+  imports: [ReactiveFormsModule, TranslateModule, RouterLink, UpperCasePipe, FlowCanvasEditorComponent],
   templateUrl: './form-designer.component.html',
   styleUrl: './form-designer.component.scss'
 })
-export class FormDesignerComponent implements OnInit {
+export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewChecked {
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(AntragsTypService);
   private readonly fb = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
+
+  @ViewChild(FlowCanvasEditorComponent) flowCanvas?: FlowCanvasEditorComponent;
 
   readonly langs = LANGS;
   readonly fieldTypes = FIELD_TYPES;
@@ -41,21 +45,56 @@ export class FormDesignerComponent implements OnInit {
   savedMajor: number | null = null;
   errorMsg = '';
 
+  section: 'form' | 'flow' | 'publish' = 'form';
+  availableRefs: string[] = [];
+  draftVersionId: string | null = null;
+  publishedKey: string | null = null;
+  publishing = false;
+
+  private pendingGraph: GraphDefinition | null = null;
+  private canvasSeeded = false;
+
   ngOnInit(): void {
     this.antragstypId = this.route.snapshot.paramMap.get('id') ?? '';
     forkJoin({
       antragsTyp: this.service.getById(this.antragstypId).pipe(catchError(() => of(undefined))),
-      versions: this.service.listVersions(this.antragstypId).pipe(catchError(() => of([] as AntragsTypVersion[])))
-    }).subscribe(({ antragsTyp, versions }) => {
+      versions: this.service.listVersions(this.antragstypId).pipe(catchError(() => of([] as AntragsTypVersion[]))),
+      refs: this.service.listActionRefs().pipe(catchError(() => of([] as string[]))),
+    }).subscribe(({ antragsTyp, versions, refs }) => {
       this.antragsTyp = antragsTyp;
       this.antragsTypLabel = this.resolveLabel(antragsTyp);
-      const defs = versions[0]?.formDefinition?.fields ?? [];
+      this.availableRefs = refs;
+
+      const draft = versions.find(v => v.status === 'DRAFT');
+      const source = draft ?? versions[0];
+      this.draftVersionId = draft?.id ?? null;
+
+      const defs = source?.formDefinition?.fields ?? [];
       for (const f of (defs.length ? defs : [null])) {
         this.fields.push(this.buildFieldGroup(f));
       }
+      // seed canvas editor once the view (and child) exist
+      this.pendingGraph = source?.graphDefinition ?? null;
       this.loading = false;
+      this.seedCanvas();
       this.cdr.markForCheck();
     });
+  }
+
+  ngAfterViewInit(): void {
+    this.seedCanvas();
+  }
+
+  ngAfterViewChecked(): void {
+    this.seedCanvas();
+  }
+
+  private seedCanvas(): void {
+    if (!this.canvasSeeded && this.flowCanvas && !this.loading) {
+      this.flowCanvas.loadGraph(this.pendingGraph);
+      this.canvasSeeded = true;
+      this.cdr.markForCheck();
+    }
   }
 
   // ---- typed accessors --------------------------------------------------
@@ -88,8 +127,13 @@ export class FormDesignerComponent implements OnInit {
     return !this.saving && this.fields.length > 0 && this.fields.controls.every(c => this.keyError(c as FormGroup) === null);
   }
 
+  /** Publish is disabled whenever a graph exists (compiler is SP1). */
+  get canPublish(): boolean {
+    return !!this.draftVersionId && !this.flowCanvas?.toGraphDefinition();
+  }
+
   get previewJson(): string {
-    return JSON.stringify(this.toFormDefinition(), null, 2);
+    return JSON.stringify(this.collectFormDefinition(), null, 2);
   }
 
   // ---- mutators ---------------------------------------------------------
@@ -125,7 +169,7 @@ export class FormDesignerComponent implements OnInit {
     this.options(field).removeAt(index);
   }
 
-  // ---- save -------------------------------------------------------------
+  // ---- save + publish ---------------------------------------------------
   save(): void {
     if (!this.canSave) {
       return;
@@ -133,50 +177,59 @@ export class FormDesignerComponent implements OnInit {
     this.saving = true;
     this.errorMsg = '';
     this.savedMajor = null;
-    this.service.createDraftVersion(this.antragstypId, this.toFormDefinition()).subscribe({
-      next: version => {
+
+    const formDefinition = this.collectFormDefinition();
+    const graph = this.flowCanvas?.toGraphDefinition() ?? null;
+
+    const save$ = this.draftVersionId
+      ? this.service.editDraft(this.draftVersionId, formDefinition, null, graph)
+      : this.service.createDraftVersion(this.antragstypId, formDefinition, null, graph);
+
+    save$.subscribe({
+      next: (v) => {
         this.saving = false;
-        this.savedMajor = version.major;
+        this.savedMajor = v.major;
+        this.draftVersionId = v.id;
         this.cdr.markForCheck();
       },
-      error: (err: { status?: number }) => {
+      error: (e) => {
         this.saving = false;
-        this.errorMsg = err?.status ? `HTTP ${err.status}` : '';
+        this.errorMsg = this.httpMessage(e);
         this.cdr.markForCheck();
       }
     });
   }
 
-  // ---- (de)serialization ------------------------------------------------
-  private buildFieldGroup(def: FormFieldDef | null): FormGroup {
-    return this.fb.group({
-      key: this.fb.control(def?.key ?? '', { nonNullable: true, validators: [Validators.required] }),
-      type: this.fb.control<FieldType>(def?.type ?? 'TEXT', { nonNullable: true }),
-      required: this.fb.control(def?.required ?? false, { nonNullable: true }),
-      label: this.buildLabelGroup(def?.label),
-      maxLength: this.fb.control<number | null>(def?.validation?.maxLength ?? null),
-      min: this.fb.control<number | null>(def?.validation?.min ?? null),
-      max: this.fb.control<number | null>(def?.validation?.max ?? null),
-      options: this.fb.array((def?.options ?? []).map(o => this.buildOptionGroup(o)))
-    });
-  }
-
-  private buildOptionGroup(def: OptionDef | null): FormGroup {
-    return this.fb.group({
-      value: this.fb.control(def?.value ?? '', { nonNullable: true }),
-      label: this.buildLabelGroup(def?.label)
-    });
-  }
-
-  private buildLabelGroup(map?: LocaleMap): FormGroup {
-    const group: Record<string, unknown> = {};
-    for (const l of LANGS) {
-      group[l] = this.fb.control(map?.[l] ?? '', { nonNullable: true });
+  publish(): void {
+    if (!this.draftVersionId) {
+      this.errorMsg = 'Bitte zuerst als Entwurf speichern.';
+      return;
     }
-    return this.fb.group(group);
+    this.publishing = true;
+    this.errorMsg = '';
+    this.service.publish(this.draftVersionId).subscribe({
+      next: (v) => {
+        this.publishing = false;
+        this.publishedKey = v.processDefinitionKey ?? null;
+        this.cdr.markForCheck();
+      },
+      error: (e) => {
+        this.publishing = false;
+        this.errorMsg = this.httpMessage(e);
+        this.cdr.markForCheck();
+      }
+    });
   }
 
-  private toFormDefinition(): FormDefinition {
+  private httpMessage(e: unknown): string {
+    const err = e as { status?: number; error?: { message?: string } };
+    if (err?.status === 422) return 'Inkompatible Änderung — eine neue Major-Version ist nötig.';
+    if (err?.status === 409) return 'Gerade veröffentlicht — bitte erneut versuchen.';
+    return err?.error?.message ?? 'Aktion fehlgeschlagen.';
+  }
+
+  // ---- (de)serialization ------------------------------------------------
+  private collectFormDefinition(): FormDefinition {
     return {
       fields: this.fields.controls.map(c => {
         const g = c as FormGroup;
@@ -219,6 +272,34 @@ export class FormDesignerComponent implements OnInit {
         return field;
       })
     };
+  }
+
+  private buildFieldGroup(def: FormFieldDef | null): FormGroup {
+    return this.fb.group({
+      key: this.fb.control(def?.key ?? '', { nonNullable: true, validators: [Validators.required] }),
+      type: this.fb.control<FieldType>(def?.type ?? 'TEXT', { nonNullable: true }),
+      required: this.fb.control(def?.required ?? false, { nonNullable: true }),
+      label: this.buildLabelGroup(def?.label),
+      maxLength: this.fb.control<number | null>(def?.validation?.maxLength ?? null),
+      min: this.fb.control<number | null>(def?.validation?.min ?? null),
+      max: this.fb.control<number | null>(def?.validation?.max ?? null),
+      options: this.fb.array((def?.options ?? []).map(o => this.buildOptionGroup(o)))
+    });
+  }
+
+  private buildOptionGroup(def: OptionDef | null): FormGroup {
+    return this.fb.group({
+      value: this.fb.control(def?.value ?? '', { nonNullable: true }),
+      label: this.buildLabelGroup(def?.label)
+    });
+  }
+
+  private buildLabelGroup(map?: LocaleMap): FormGroup {
+    const group: Record<string, unknown> = {};
+    for (const l of LANGS) {
+      group[l] = this.fb.control(map?.[l] ?? '', { nonNullable: true });
+    }
+    return this.fb.group(group);
   }
 
   private cleanLabel(map: Record<Lang, string>): LocaleMap | undefined {

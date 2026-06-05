@@ -24,7 +24,33 @@
     "colStatus": "Status",
     "loading": "Loading …",
     "empty": "No request types yet.",
-    "loadError": "Request types could not be loaded."
+    "loadError": "Request types could not be loaded.",
+    "create": {
+      "title": "New Request Type",
+      "key": "Key",
+      "keyHint": "Lowercase letters, digits, _ and - only",
+      "submit": "Create"
+    }
+  },
+  "builder": {
+    "form": "Form",
+    "flow": "Flow",
+    "publish": "Publish",
+    "saveDraft": "Save draft",
+    "savedMajor": "Draft saved, major version",
+    "published": "Published, process key:",
+    "publishDeferred": "Publishing graph flows is coming (compiler = SP1)."
+  },
+  "flow": {
+    "canvas": {
+      "palette": "Nodes",
+      "key": "Key",
+      "assigneeRole": "Assignee role",
+      "ref": "Action (n8n ref)",
+      "delete": "Delete node",
+      "selectHint": "Select a node to edit it.",
+      "noRefs": "No n8n refs for this tenant — ACTION nodes have no ref."
+    }
   },
   "antrag": {
     "listTitle": "My Requests",
