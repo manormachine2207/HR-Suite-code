@@ -84,7 +84,9 @@ class GraphBpmnCompilerTest {
         String bpmn = GraphBpmnCompiler.compile("proc_g4", "G", g);
 
         assertThat(bpmn).contains("<exclusiveGateway id=\"entscheid\"");
-        assertThat(bpmn).contains("${entscheid_outcome == 'approve'}");
+        // null-safe form: a missing variable must mean "false -> default flow",
+        // not a Flowable "Unknown property" exception at complete time
+        assertThat(bpmn).contains("${execution.getVariable('entscheid_outcome') == 'approve'}");
         // the unconditioned branch is the gateway default and stays unconditional
         assertThat(bpmn).containsPattern("default=\"sf_entscheid_end_[01]\"");
     }

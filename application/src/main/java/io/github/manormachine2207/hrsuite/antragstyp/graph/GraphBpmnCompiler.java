@@ -95,14 +95,17 @@ public final class GraphBpmnCompiler {
     /**
      * Compiles the constrained condition syntax ({@code var == 'value'}) to a JUEL
      * expression. Safe by construction: the validator admits only the closed pattern,
-     * never free-form JUEL.
+     * never free-form JUEL. Emitted null-safe via {@code execution.getVariable(...)}:
+     * a bare {@code ${var == ...}} makes Flowable throw "Unknown property" when the
+     * variable was never set — getVariable returns null instead, the condition is
+     * false, and the token takes the gateway's default flow (deny-by-default).
      */
     private static String compileCondition(String condition) {
         Matcher m = GraphValidator.CONDITION_PATTERN.matcher(condition);
         if (!m.matches()) {
             throw new IllegalArgumentException("uncompilable condition: " + condition);
         }
-        return "${%s %s '%s'}".formatted(m.group(1), m.group(2), m.group(3));
+        return "${execution.getVariable('%s') %s '%s'}".formatted(m.group(1), m.group(2), m.group(3));
     }
 
     private static String actionTask(String id, GraphNodeData data) {

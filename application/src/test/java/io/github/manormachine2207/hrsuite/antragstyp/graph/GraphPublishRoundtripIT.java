@@ -110,7 +110,7 @@ class GraphPublishRoundtripIT {
                 HttpMethod.GET, new HttpEntity<>(h), String.class).getBody();
         String storedBpmn = JSON.readTree(versJson).get(0).get("workflowBpmn").asText();
         assertThat(storedBpmn).contains("<exclusiveGateway id=\"entscheid\"")
-                .contains("${entscheid_outcome == 'approve'}");
+                .contains("${execution.getVariable('entscheid_outcome') == 'approve'}");
         String procKey = JSON.readTree(versJson).get(0).get("processDefinitionKey").asText();
 
         TenantContext.set(UUID.fromString(tenantId));

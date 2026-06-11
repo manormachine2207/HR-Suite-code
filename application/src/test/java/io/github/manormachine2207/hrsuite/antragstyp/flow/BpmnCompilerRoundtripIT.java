@@ -111,7 +111,7 @@ class BpmnCompilerRoundtripIT {
         HttpHeaders h = designerToken(tenantId);
         String atId = new com.fasterxml.jackson.databind.ObjectMapper().readTree(
                 rest.exchange("/api/v1/antragstyp", HttpMethod.POST,
-                        new HttpEntity<>("{\"key\":\"urlaubsantrag\",\"title\":{\"de\":\"Urlaub\"}}", h),
+                        new HttpEntity<>("{\"key\":\"urlaubsantrag\",\"title\":{\"de\":\"Urlaub\",\"fr\":\"Urlaub\",\"it\":\"Urlaub\",\"en\":\"Urlaub\"}}", h),
                         String.class).getBody()).get("id").asText();
 
         // 4. Create version WITH flowDefinition (FORM→APPROVAL→ACTION)
