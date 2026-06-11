@@ -114,7 +114,7 @@ class AntragsTypServiceTest {
                 .thenReturn(Optional.of(new AntragsTyp(atId, TENANT, "k", Map.of("de", "K"), Map.of())));
         when(versionRepository.maxMajor(atId)).thenReturn(2);
 
-        AntragsTypVersion v = service.createDraftMajor(atId, form(text("a", true, 100)), "<bpmn/>", Map.of(), null, null);
+        AntragsTypVersion v = service.createDraftMajor(atId, form(text("a", true, 100)), Map.of(), null, null);
 
         assertThat(v.getMajor()).isEqualTo(3);
         assertThat(v.getMinor()).isZero();
@@ -127,7 +127,7 @@ class AntragsTypServiceTest {
         UUID missing = UUID.randomUUID();
         when(antragsTypRepository.findById(missing)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.createDraftMajor(missing, form(text("a", true, 100)), "<bpmn/>", Map.of(), null, null))
+        assertThatThrownBy(() -> service.createDraftMajor(missing, form(text("a", true, 100)), Map.of(), null, null))
                 .isInstanceOf(AntragsTypExceptions.NotFound.class);
     }
 
@@ -148,6 +148,36 @@ class AntragsTypServiceTest {
         assertThat(v.getPublishedBy()).isEqualTo(USER);
         assertThat(at.getStatus()).isEqualTo(AntragsTypStatus.LIVE);
         assertThat(at.getCurrentVersionId()).isEqualTo(v.getId());
+    }
+
+    /**
+     * Security (Review 2026-06-12): client-supplied BPMN must NEVER reach the engine.
+     * Flowable evaluates expressions/delegates in deployed XML against the full Spring
+     * context — deploying raw client XML is code execution and a tenant escape. publish()
+     * deploys exclusively compiler output or the default placeholder.
+     */
+    @Test
+    void publishNeverDeploysStoredRawBpmn() {
+        UUID atId = UUID.randomUUID();
+        var at = new AntragsTyp(atId, TENANT, "k", Map.of("de", "K"), Map.of());
+        var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 1, form(text("a", true, 100)),
+                "<process id=\"evil\"><serviceTask flowable:expression=\"${runtime.exec()}\"/></process>",
+                Map.of());
+        when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(atId));
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+        when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.empty());
+        when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
+
+        service.publish(v.getId(), USER);
+
+        var xml = org.mockito.ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(workflowEngine).deploy(any(), anyString(), any(), xml.capture());
+        assertThat(xml.getValue()).doesNotContain("evil");
+        assertThat(xml.getValue()).doesNotContain("runtime.exec");
+        // without a FlowDefinition the default placeholder is what gets deployed
+        assertThat(xml.getValue()).contains("<userTask id=\"review\"");
+        // and the version records what was actually deployed (traceability)
+        assertThat(v.getWorkflowBpmn()).doesNotContain("evil");
     }
 
     @Test
@@ -230,10 +260,11 @@ class AntragsTypServiceTest {
         var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, UUID.randomUUID(), 1, form(text("a", true, 100)), "<bpmn/>", Map.of());
         when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
 
-        var edited = service.editDraft(v.getId(), form(text("a", true, 100), text("b", false, 50)), "<bpmn>v2</bpmn>", Map.of(), null, null);
+        var edited = service.editDraft(v.getId(), form(text("a", true, 100), text("b", false, 50)), Map.of(), null, null);
 
         assertThat(edited.getFormDefinition().fields()).hasSize(2);
-        assertThat(edited.getWorkflowBpmn()).isEqualTo("<bpmn>v2</bpmn>");
+        // workflowBpmn is compiler output only and must not be client-editable (Review 2026-06-12)
+        assertThat(edited.getWorkflowBpmn()).isEqualTo("<bpmn/>");
         assertThat(edited.getMinor()).isZero();
         assertThat(edited.getStatus()).isEqualTo(VersionStatus.DRAFT);
     }

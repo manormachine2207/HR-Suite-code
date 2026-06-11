@@ -76,15 +76,16 @@ class AntragsTypVersionTest {
     }
 
     @Test
-    void replaceDraftContentSwapsAllThreeFields() {
+    void replaceDraftContentSwapsFormAndBindingsButNeverBpmn() {
         var version = new AntragsTypVersion(ID, TENANT_ID, ANTRAGSTYP_ID, 1, minimalFormDefinition(), "<old/>", Map.of("old", "binding"));
         var newDef = formDefinitionWithField("neues-feld");
         var newSf = Map.<String, Object>of("new", "binding");
 
-        version.replaceDraftContent(newDef, "<new/>", newSf);
+        version.replaceDraftContent(newDef, newSf);
 
         assertThat(version.getFormDefinition()).isEqualTo(newDef);
-        assertThat(version.getWorkflowBpmn()).isEqualTo("<new/>");
+        // workflowBpmn holds compiler output only (set by publish) — draft edits must not touch it
+        assertThat(version.getWorkflowBpmn()).isEqualTo("<old/>");
         assertThat(version.getSfActionBindings()).isEqualTo(newSf);
         assertThat(version.getMinor()).isEqualTo(0);
         assertThat(version.getStatus()).isEqualTo(VersionStatus.DRAFT);

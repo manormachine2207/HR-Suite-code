@@ -8,6 +8,7 @@ import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.version.ChangeClassification;
 import io.github.manormachine2207.hrsuite.antragstyp.version.CompatibilityClassifier;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
+import io.github.manormachine2207.hrsuite.workflow.DefaultProcessBpmn;
 import io.github.manormachine2207.hrsuite.workflow.DeployedProcess;
 import io.github.manormachine2207.hrsuite.workflow.WorkflowEngine;
 import jakarta.persistence.EntityManager;
@@ -94,29 +95,33 @@ public class AntragsTypService {
                 .map(v -> new PublishedMajorRef(v.getId(), v.getMinor(), v.getProcessDefinitionKey()));
     }
 
+    // Security (Review 2026-06-12): clients can no longer supply workflowBpmn. BPMN is
+    // exclusively compiler output (ADR-010 "HR sieht kein BPMN") — deploying raw client
+    // XML would let Flowable evaluate arbitrary expressions against the Spring context.
+
     public AntragsTypVersion createDraftMajor(UUID antragstypId, FormDefinition formDefinition,
-                                              String workflowBpmn, Map<String, Object> sfActionBindings,
+                                              Map<String, Object> sfActionBindings,
                                               FlowDefinition flowDefinition, JsonNode graphDefinition) {
         AntragsTyp at = getDefinition(antragstypId);
         int nextMajor = versionRepository.maxMajor(at.getId()) + 1;
         AntragsTypVersion v = new AntragsTypVersion(
                 UuidCreator.getTimeOrderedEpoch(), currentTenant(), at.getId(),
-                nextMajor, formDefinition, workflowBpmn, sfActionBindings);
+                nextMajor, formDefinition, null, sfActionBindings);
         v.setFlowDefinition(flowDefinition);
         v.setGraphDefinition(graphDefinition);
         return versionRepository.save(v);
     }
 
     public AntragsTypVersion editDraft(UUID versionId, FormDefinition formDefinition,
-                                       String workflowBpmn, Map<String, Object> sfActionBindings,
+                                       Map<String, Object> sfActionBindings,
                                        FlowDefinition flowDefinition, JsonNode graphDefinition) {
         AntragsTypVersion v = getVersion(versionId);
         if (v.getStatus() != VersionStatus.DRAFT) {
             throw new AntragsTypExceptions.IllegalState("only DRAFT versions can be edited freely: " + versionId);
         }
         // Note: flowDefinition is managed separately via setFlowDefinition and is intentionally
-        // NOT part of replaceDraftContent (which only handles form/bpmn/sfActionBindings).
-        v.replaceDraftContent(formDefinition, workflowBpmn, sfActionBindings);
+        // NOT part of replaceDraftContent (which only handles form/sfActionBindings).
+        v.replaceDraftContent(formDefinition, sfActionBindings);
         v.setFlowDefinition(flowDefinition);
         v.setGraphDefinition(graphDefinition);
         return v;
@@ -174,17 +179,16 @@ public class AntragsTypService {
         AntragsTyp at = getDefinition(antragstypId);
         // Deploy the major's BPMN to the engine and record the handles (ADR-009 §5).
         // Runs in this transaction (Flowable joins the Spring tx), so deploy + promote are
-        // atomic. The stored workflowBpmn is provisional; the bridge substitutes a default
-        // process for a non-deployable placeholder until the workflow-designer cut.
+        // atomic. Only compiler output or the default placeholder is ever deployed — a
+        // stored raw workflowBpmn (legacy rows) is deliberately NOT passed to the engine
+        // (Flowable evaluates expressions in deployed XML against the Spring context).
         String processKey = "at_" + antragstypId.toString().replace("-", "") + "_v" + target.getMajor();
-        // If a FlowDefinition is present, compile it to BPMN and store the result on the version
-        // for traceability; otherwise fall back to the stored workflowBpmn (backward compat).
-        if (target.getFlowDefinition() != null) {
-            String compiled = BpmnCompiler.compile(processKey, at.getKey(), target.getFlowDefinition());
-            target.setWorkflowBpmn(compiled);
-        }
+        String bpmn = (target.getFlowDefinition() != null)
+                ? BpmnCompiler.compile(processKey, at.getKey(), target.getFlowDefinition())
+                : DefaultProcessBpmn.minimal(processKey, at.getKey());
+        target.setWorkflowBpmn(bpmn);
         DeployedProcess deployed = workflowEngine.deploy(
-                at.getTenantId(), processKey, at.getKey(), target.getWorkflowBpmn());
+                at.getTenantId(), processKey, at.getKey(), bpmn);
         target.recordDeployment(deployed.deploymentId(), deployed.processDefinitionKey(),
                 deployed.processDefinitionVersion());
 
