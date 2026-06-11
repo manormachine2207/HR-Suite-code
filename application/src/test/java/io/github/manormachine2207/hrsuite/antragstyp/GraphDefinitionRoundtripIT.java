@@ -73,7 +73,7 @@ class GraphDefinitionRoundtripIT {
 
     private String createTenant(String code, String subdomain) throws Exception {
         String body = """
-                {"code":"%s","subdomain":"%s","displayName":{"de":"%s"}}
+                {"code":"%s","subdomain":"%s","displayName":{"de":"%s","fr":"%s","it":"%s","en":"%s"}}
                 """.formatted(code, subdomain, code);
         ResponseEntity<String> r = rest.exchange("/api/v1/tenant", HttpMethod.POST,
                 new HttpEntity<>(body, admin()), String.class);
@@ -83,7 +83,7 @@ class GraphDefinitionRoundtripIT {
 
     private String createAntragstyp(HttpHeaders h, String key) throws Exception {
         String body = """
-                {"key":"%s","title":{"de":"%s"}}
+                {"key":"%s","title":{"de":"%s","fr":"%s","it":"%s","en":"%s"}}
                 """.formatted(key, key);
         ResponseEntity<String> r = rest.exchange("/api/v1/antragstyp", HttpMethod.POST,
                 new HttpEntity<>(body, h), String.class);

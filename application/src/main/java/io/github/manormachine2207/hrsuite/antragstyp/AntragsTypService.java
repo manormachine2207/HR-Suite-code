@@ -7,6 +7,8 @@ import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormI18nValidator;
 import io.github.manormachine2207.hrsuite.antragstyp.form.PayloadValidator;
+import io.github.manormachine2207.hrsuite.antragstyp.graph.GraphBpmnCompiler;
+import io.github.manormachine2207.hrsuite.antragstyp.graph.GraphDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.version.ChangeClassification;
 import io.github.manormachine2207.hrsuite.antragstyp.version.CompatibilityClassifier;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
@@ -220,9 +222,21 @@ public class AntragsTypService {
         // stored raw workflowBpmn (legacy rows) is deliberately NOT passed to the engine
         // (Flowable evaluates expressions in deployed XML against the Spring context).
         String processKey = "at_" + antragstypId.toString().replace("-", "") + "_v" + target.getMajor();
-        String bpmn = (target.getFlowDefinition() != null)
-                ? BpmnCompiler.compile(processKey, at.getKey(), target.getFlowDefinition())
-                : DefaultProcessBpmn.minimal(processKey, at.getKey());
+        // Precedence: visual graph (ADR-012 SP1) > legacy FlowDefinition (Cut B) > placeholder.
+        String bpmn;
+        if (target.getGraphDefinition() != null) {
+            try {
+                GraphDefinition graph = GraphDefinition.from(target.getGraphDefinition());
+                bpmn = GraphBpmnCompiler.compile(processKey, at.getKey(), graph);
+            } catch (IllegalArgumentException e) {
+                // surfaces validator issues as 422; the tx (incl. the demote above) rolls back
+                throw new AntragsTypExceptions.Invalid("flow graph is not publishable: " + e.getMessage());
+            }
+        } else if (target.getFlowDefinition() != null) {
+            bpmn = BpmnCompiler.compile(processKey, at.getKey(), target.getFlowDefinition());
+        } else {
+            bpmn = DefaultProcessBpmn.minimal(processKey, at.getKey());
+        }
         target.setWorkflowBpmn(bpmn);
         DeployedProcess deployed = workflowEngine.deploy(
                 at.getTenantId(), processKey, at.getKey(), bpmn);

@@ -75,7 +75,7 @@ class AntragRlsIT {
     // ---- API helpers ------------------------------------------------------
     private String createTenant(String code, String subdomain) throws Exception {
         String body = """
-                {"code":"%s","subdomain":"%s","displayName":{"de":"%s"}}
+                {"code":"%s","subdomain":"%s","displayName":{"de":"%s","fr":"%s","it":"%s","en":"%s"}}
                 """.formatted(code, subdomain, code);
         ResponseEntity<String> r = rest.exchange("/api/v1/tenant", HttpMethod.POST,
                 new HttpEntity<>(body, admin()), String.class);
@@ -92,8 +92,8 @@ class AntragRlsIT {
         String atId = mapper.readTree(at.getBody()).get("id").asText();
 
         String versionBody = """
-                {"formDefinition":{"fields":[{"key":"grund","type":"TEXT","required":true,"label":{"de":"Grund"}}]},
-                 "workflowBpmn":"<bpmn/>","sfActionBindings":{}}
+                {"formDefinition":{"fields":[{"key":"grund","type":"TEXT","required":true,"label":{"de":"Grund","fr":"Grund","it":"Grund","en":"Grund"}}]},
+                 "sfActionBindings":{}}
                 """;
         ResponseEntity<String> v = rest.exchange("/api/v1/antragstyp/" + atId + "/versions", HttpMethod.POST,
                 new HttpEntity<>(versionBody, designer), String.class);

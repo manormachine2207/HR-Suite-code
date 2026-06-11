@@ -232,6 +232,54 @@ class AntragsTypServiceTest {
                 .findByAntragstypIdAndStatus(any(), any());
     }
 
+    // ---- publish with graph (ADR-012 SP1) ----------------------------------
+    @Test
+    void publishCompilesGraphDefinitionAndDeploysIt() throws Exception {
+        UUID atId = UUID.randomUUID();
+        var at = new AntragsTyp(atId, TENANT, "k", LABELS, Map.of());
+        var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 1, form(text("a", true, 100)), null, Map.of());
+        v.setGraphDefinition(new com.fasterxml.jackson.databind.ObjectMapper().readTree("""
+                {"nodes":[
+                   {"id":"n1","type":"START","position":{"x":0,"y":0},"data":{}},
+                   {"id":"n2","type":"FORM","position":{"x":1,"y":0},"data":{"key":"erfassen","title":{"de":"E"}}},
+                   {"id":"n3","type":"END","position":{"x":2,"y":0},"data":{}}],
+                 "edges":[
+                   {"id":"e1","source":"n1","target":"n2"},
+                   {"id":"e2","source":"n2","target":"n3"}]}
+                """));
+        when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(atId));
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+        when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.empty());
+        when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
+
+        service.publish(v.getId(), USER);
+
+        var xml = org.mockito.ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(workflowEngine).deploy(any(), anyString(), any(), xml.capture());
+        assertThat(xml.getValue()).contains("<userTask id=\"erfassen\"");
+        assertThat(v.getWorkflowBpmn()).contains("<userTask id=\"erfassen\"");
+        assertThat(v.getStatus()).isEqualTo(VersionStatus.PUBLISHED);
+    }
+
+    @Test
+    void publishRejectsInvalidGraphWith422() throws Exception {
+        UUID atId = UUID.randomUUID();
+        var at = new AntragsTyp(atId, TENANT, "k", LABELS, Map.of());
+        var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 1, form(text("a", true, 100)), null, Map.of());
+        v.setGraphDefinition(new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+                "{\"nodes\":[{\"id\":\"n1\",\"type\":\"FORM\",\"data\":{\"key\":\"solo\"}}],\"edges\":[]}"));
+        when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(atId));
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+        when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.empty());
+        when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
+
+        assertThatThrownBy(() -> service.publish(v.getId(), USER))
+                .isInstanceOf(AntragsTypExceptions.Invalid.class)
+                .hasMessageContaining("START");
+        org.mockito.Mockito.verify(workflowEngine, org.mockito.Mockito.never())
+                .deploy(any(), anyString(), any(), any());
+    }
+
     // ---- validatePayloadForPublishedMajor ----------------------------------
     @Test
     void validatePayloadRejectsMismatchWithInvalid() {

@@ -118,15 +118,15 @@ class BpmnCompilerRoundtripIT {
         String versionBody = """
                 {
                   "formDefinition": {"fields": [{"key":"grund","type":"TEXT","required":true,
-                    "label":{"de":"Grund"}}]},
-                  "workflowBpmn": "<bpmn/>",
+                    "label":{"de":"Grund","fr":"Grund","it":"Grund","en":"Grund"}}]},
+                  
                   "sfActionBindings": {},
                   "flowDefinition": {
                     "steps": [
-                      {"kind":"FORM","key":"antrag","title":{"de":"Antrag stellen"}},
-                      {"kind":"APPROVAL","key":"review","title":{"de":"Freigabe"},
+                      {"kind":"FORM","key":"antrag","title":{"de":"Antrag stellen","fr":"Antrag stellen","it":"Antrag stellen","en":"Antrag stellen"}},
+                      {"kind":"APPROVAL","key":"review","title":{"de":"Freigabe","fr":"Freigabe","it":"Freigabe","en":"Freigabe"},
                        "assigneeRole":"hr-reviewer","outcomes":["approve","reject"]},
-                      {"kind":"ACTION","key":"provision","title":{"de":"Konto anlegen"},
+                      {"kind":"ACTION","key":"provision","title":{"de":"Konto anlegen","fr":"Konto anlegen","it":"Konto anlegen","en":"Konto anlegen"},
                        "ref":"provision-ad-account","inputMapping":{"upn":"test@example.com"}}
                     ]
                   }

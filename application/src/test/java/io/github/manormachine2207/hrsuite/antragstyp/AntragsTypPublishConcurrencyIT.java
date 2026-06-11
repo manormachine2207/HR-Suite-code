@@ -87,7 +87,7 @@ class AntragsTypPublishConcurrencyIT {
 
     private String createTenant(String code, String subdomain) throws Exception {
         String body = """
-                {"code":"%s","subdomain":"%s","displayName":{"de":"%s"}}
+                {"code":"%s","subdomain":"%s","displayName":{"de":"%s","fr":"%s","it":"%s","en":"%s"}}
                 """.formatted(code, subdomain, code);
         ResponseEntity<String> r = rest.exchange("/api/v1/tenant", HttpMethod.POST,
                 new HttpEntity<>(body, admin()), String.class);
@@ -97,7 +97,7 @@ class AntragsTypPublishConcurrencyIT {
 
     private String createAntragsTyp(HttpHeaders h, String key) throws Exception {
         String body = """
-                {"key":"%s","title":{"de":"%s"}}
+                {"key":"%s","title":{"de":"%s","fr":"%s","it":"%s","en":"%s"}}
                 """.formatted(key, key);
         ResponseEntity<String> r = rest.exchange("/api/v1/antragstyp", HttpMethod.POST,
                 new HttpEntity<>(body, h), String.class);
@@ -108,8 +108,8 @@ class AntragsTypPublishConcurrencyIT {
     private String createDraftMajor(HttpHeaders h, String antragstypId) throws Exception {
         String body = """
                 {"formDefinition":{"fields":[
-                  {"key":"a","type":"TEXT","required":true,"label":{"de":"A"}}
-                ]},"workflowBpmn":"<bpmn/>","sfActionBindings":{}}
+                  {"key":"a","type":"TEXT","required":true,"label":{"de":"A","fr":"A","it":"A","en":"A"}}
+                ]},"sfActionBindings":{}}
                 """;
         ResponseEntity<String> r = rest.exchange("/api/v1/antragstyp/" + antragstypId + "/versions",
                 HttpMethod.POST, new HttpEntity<>(body, h), String.class);
