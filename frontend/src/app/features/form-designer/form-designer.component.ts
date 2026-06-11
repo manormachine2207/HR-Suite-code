@@ -51,12 +51,25 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   errorDetail = '';
 
   section: 'form' | 'flow' | 'publish' = 'form';
+  /**
+   * Snapshot of the canvas warning count, taken on tab switch. The publish tab must
+   * NOT call flowCanvas.warnings() from its template: the ViewChild is seeded via
+   * ngAfterViewChecked, so a live call flips mid-CD-cycle and throws NG0100 (zoneless).
+   */
+  publishGraphWarningCount = 0;
   availableRefs: string[] = [];
   draftVersionId: string | null = null;
   publishedKey: string | null = null;
   publishing = false;
   /** True after a successful publish — blocks a second (409) publish of the same draft. */
   publishDone = false;
+
+  showSection(section: 'form' | 'flow' | 'publish'): void {
+    if (section === 'publish') {
+      this.publishGraphWarningCount = this.flowCanvas?.warnings().length ?? 0;
+    }
+    this.section = section;
+  }
 
   private pendingGraph: GraphDefinition | null = null;
   private canvasSeeded = false;

@@ -12,9 +12,9 @@
   </header>
 
   <nav class="builder-tabs">
-    <button type="button" [class.active]="section === 'form'" (click)="section = 'form'">{{ 'builder.form' | translate }}</button>
-    <button type="button" [class.active]="section === 'flow'" (click)="section = 'flow'">{{ 'builder.flow' | translate }}</button>
-    <button type="button" [class.active]="section === 'publish'" (click)="section = 'publish'">{{ 'builder.publish' | translate }}</button>
+    <button type="button" [class.active]="section === 'form'" (click)="showSection('form')">{{ 'builder.form' | translate }}</button>
+    <button type="button" [class.active]="section === 'flow'" (click)="showSection('flow')">{{ 'builder.flow' | translate }}</button>
+    <button type="button" [class.active]="section === 'publish'" (click)="showSection('publish')">{{ 'builder.publish' | translate }}</button>
   </nav>
 
   @if (loading) {
@@ -170,7 +170,7 @@
         <button type="button" (click)="save()" [disabled]="saving || !canSave">{{ 'builder.saveDraft' | translate }}</button>
         <button type="button" (click)="publish()" [disabled]="publishing || publishDone || !canPublish">{{ 'builder.publish' | translate }}</button>
         @if (!draftVersionId) { <p class="hint">{{ 'builder.publishNeedsDraft' | translate }}</p> }
-        @if ((flowCanvas?.warnings() ?? []).length) { <p class="hint">{{ 'builder.publishGraphWarnings' | translate }}</p> }
+        @if (publishGraphWarningCount > 0) { <p class="hint">{{ 'builder.publishGraphWarnings' | translate }}</p> }
         @if (savedMajor !== null) { <p class="ok">{{ 'builder.savedMajor' | translate }} {{ savedMajor }}</p> }
         @if (publishDone) {
           <p class="ok" role="status">{{ 'builder.published' | translate }} {{ publishedKey ?? '' }}</p>
