@@ -50,9 +50,9 @@ class N8nActionDelegateTest {
     @Test
     void runsActionAndSetsStatusOnSuccess() {
         stubExecution();
-        ActionExecution succeeded = new ActionExecution(TENANT, "pi-1", "ad", "provision-ad-account");
+        ActionExecution succeeded = new ActionExecution(TENANT, "pi-1", "antrag-1", "ad", "provision-ad-account");
         succeeded.markSucceeded();
-        when(service.run(eq("pi-1"), eq("ad"), eq("provision-ad-account"), any())).thenReturn(succeeded);
+        when(service.run(eq("pi-1"), any(), eq("ad"), eq("provision-ad-account"), any())).thenReturn(succeeded);
 
         delegate().execute(execution);
 
@@ -62,9 +62,9 @@ class N8nActionDelegateTest {
     @Test
     void throwsBpmnErrorWhenDead() {
         stubExecution();
-        ActionExecution dead = new ActionExecution(TENANT, "pi-1", "ad", "provision-ad-account");
+        ActionExecution dead = new ActionExecution(TENANT, "pi-1", "antrag-1", "ad", "provision-ad-account");
         dead.markDead("boom");
-        when(service.run(any(), any(), any(), any())).thenReturn(dead);
+        when(service.run(any(), any(), any(), any(), any())).thenReturn(dead);
 
         assertThatThrownBy(() -> delegate().execute(execution))
                 .isInstanceOf(BpmnError.class);
@@ -77,9 +77,9 @@ class N8nActionDelegateTest {
         Expression mappingExpr = mock(Expression.class);
         when(mappingExpr.getValue(execution)).thenReturn("{\"upn\":\"a@b.ch\"}");
 
-        ActionExecution succeeded = new ActionExecution(TENANT, "pi-1", "ad", "provision-ad-account");
+        ActionExecution succeeded = new ActionExecution(TENANT, "pi-1", "antrag-1", "ad", "provision-ad-account");
         succeeded.markSucceeded();
-        when(service.run(eq("pi-1"), eq("ad"), eq("provision-ad-account"), any())).thenReturn(succeeded);
+        when(service.run(eq("pi-1"), any(), eq("ad"), eq("provision-ad-account"), any())).thenReturn(succeeded);
 
         N8nActionDelegate d = delegate();
         d.setInputMappingJson(mappingExpr);
@@ -90,7 +90,7 @@ class N8nActionDelegateTest {
         // Verify the parsed map was actually forwarded to the service (not an empty map)
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Map<String, Object>> inputCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(service).run(eq("pi-1"), eq("ad"), eq("provision-ad-account"), inputCaptor.capture());
+        verify(service).run(eq("pi-1"), any(), eq("ad"), eq("provision-ad-account"), inputCaptor.capture());
         assertThat(inputCaptor.getValue()).containsExactlyEntriesOf(Map.of("upn", "a@b.ch"));
     }
 }

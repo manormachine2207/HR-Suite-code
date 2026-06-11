@@ -72,6 +72,12 @@ public class AntragsTypService {
         return antragsTypRepository.findAllByOrderByCreatedAtDesc();
     }
 
+    /** LIVE types only — what non-authoring roles (applicant, hr-reviewer) get to see. */
+    @Transactional(readOnly = true)
+    public List<AntragsTyp> listLiveDefinitions() {
+        return antragsTypRepository.findByStatusOrderByCreatedAtDesc(AntragsTypStatus.LIVE);
+    }
+
     @Transactional(readOnly = true)
     public AntragsTyp getDefinition(UUID id) {
         return antragsTypRepository.findById(id)

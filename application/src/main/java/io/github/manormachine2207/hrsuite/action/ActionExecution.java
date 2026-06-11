@@ -28,6 +28,15 @@ public class ActionExecution {
     @Column(name = "process_instance_id", nullable = false, updatable = false, length = 256)
     private String processInstanceId;
 
+    /**
+     * Stable idempotency anchor across process instances: the Flowable business key
+     * (= antrag id). A resubmit after rollback starts a NEW process instance, so
+     * {@code processInstanceId} alone cannot deduplicate side effects (Review 2026-06-12).
+     * Nullable for non-antrag processes.
+     */
+    @Column(name = "business_key", updatable = false, length = 64)
+    private String businessKey;
+
     @Column(name = "step_key", nullable = false, updatable = false, length = 128)
     private String stepKey;
 
@@ -53,10 +62,12 @@ public class ActionExecution {
     protected ActionExecution() {
     }
 
-    public ActionExecution(UUID tenantId, String processInstanceId, String stepKey, String ref) {
+    public ActionExecution(UUID tenantId, String processInstanceId, String businessKey,
+                           String stepKey, String ref) {
         this.id = UuidCreator.getTimeOrderedEpoch();
         this.tenantId = tenantId;
         this.processInstanceId = processInstanceId;
+        this.businessKey = businessKey;
         this.stepKey = stepKey;
         this.ref = ref;
         this.status = ActionStatus.PENDING;

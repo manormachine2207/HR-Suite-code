@@ -13,4 +13,6 @@ public interface AntragsTypRepository extends JpaRepository<AntragsTyp, UUID> {
     Optional<AntragsTyp> findByKey(String key);
 
     List<AntragsTyp> findAllByOrderByCreatedAtDesc();
+
+    List<AntragsTyp> findByStatusOrderByCreatedAtDesc(AntragsTypStatus status);
 }

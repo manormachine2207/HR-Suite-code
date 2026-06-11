@@ -65,7 +65,8 @@ public class N8nActionDelegate implements JavaDelegate {
         Map<String, Object> input = raw instanceof Map ? (Map<String, Object>) raw : Map.of();
 
         ActionExecution result = actionExecutionService.run(
-                execution.getProcessInstanceId(), stepKey, refValue, input);
+                execution.getProcessInstanceId(), execution.getProcessInstanceBusinessKey(),
+                stepKey, refValue, input);
 
         execution.setVariable("actionStatus", result.getStatus().name());
         if (result.getStatus() == ActionStatus.DEAD || result.getStatus() == ActionStatus.FAILED) {
