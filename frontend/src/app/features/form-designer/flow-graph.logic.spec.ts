@@ -49,13 +49,45 @@ describe('flow-graph.logic', () => {
         { id: 'e3', source: 'x', target: 'a' },   // XOR outgoing WITHOUT condition
       ],
     };
-    const codes = validateGraph(g).map(w => w.code);
+    const warnings = validateGraph(g);
+    const codes = warnings.map(w => w.code);
     expect(codes).toContain('NO_START');
     expect(codes).toContain('NO_END');
     expect(codes).toContain('INVALID_KEY');
     expect(codes).toContain('DUPLICATE_KEY');
     expect(codes).toContain('DISCONNECTED');
     expect(codes).toContain('XOR_UNCONDITIONED');
+  });
+
+  it('validateGraph emits i18n message keys + params instead of hardcoded German (BDR-005)', () => {
+    const g: GraphDefinition = {
+      nodes: [
+        { id: 'a', type: 'FORM', position: { x: 0, y: 0 }, data: { key: 'bad-key' } },
+        { id: 'b', type: 'FORM', position: { x: 0, y: 0 }, data: { key: 'bad-key' } },
+        { id: 'x', type: 'XOR', position: { x: 0, y: 0 }, data: { key: 'gw' } },
+        { id: 'd', type: 'ACTION', position: { x: 0, y: 0 }, data: { key: 'd', ref: 'r' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'a', target: 'b' },
+        { id: 'e2', source: 'b', target: 'x' },
+        { id: 'e3', source: 'x', target: 'a' },
+      ],
+    };
+    const byCode = (code: string) => validateGraph(g).find(w => w.code === code)!;
+
+    expect(byCode('NO_START').messageKey).toBe('flow.canvas.warning.noStart');
+    expect(byCode('NO_END').messageKey).toBe('flow.canvas.warning.noEnd');
+    expect(byCode('INVALID_KEY').messageKey).toBe('flow.canvas.warning.invalidKey');
+    expect(byCode('INVALID_KEY').params).toEqual({ key: 'bad-key' });
+    expect(byCode('DUPLICATE_KEY').messageKey).toBe('flow.canvas.warning.duplicateKey');
+    expect(byCode('DUPLICATE_KEY').params).toEqual({ key: 'bad-key' });
+    expect(byCode('DISCONNECTED').messageKey).toBe('flow.canvas.warning.disconnected');
+    expect(byCode('XOR_UNCONDITIONED').messageKey).toBe('flow.canvas.warning.xorUnconditioned');
+
+    // No warning carries a hardcoded (German) message anymore.
+    for (const w of validateGraph(g)) {
+      expect(w).not.toHaveProperty('message');
+    }
   });
 
   it('validateGraph returns empty for a valid linear START->ACTION->END', () => {

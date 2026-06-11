@@ -8,6 +8,13 @@ export const routes: Routes = [
       import('./features/home/home.component').then(m => m.HomeComponent),
   },
   {
+    // The Oblique master-layout logo links to /home; without this redirect that link
+    // fell through to the wildcard 404 (whose escape link used to loop back to /home).
+    path: 'home',
+    redirectTo: '',
+    pathMatch: 'full',
+  },
+  {
     path: 'antragstypen',
     loadComponent: () =>
       import('./features/antragstyp/antragstyp-list.component').then(m => m.AntragstypListComponent),

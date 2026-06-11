@@ -8,6 +8,11 @@ import {
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { importProvidersFrom } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeDeCh from '@angular/common/locales/de-CH';
+import localeFrCh from '@angular/common/locales/fr-CH';
+import localeItCh from '@angular/common/locales/it-CH';
+import localeEnCh from '@angular/common/locales/en-CH';
 import { provideObliqueConfiguration } from '@oblique/oblique';
 import { provideTranslateService } from '@ngx-translate/core';
 import { OAuthModule, OAuthService } from 'angular-oauth2-oidc';
@@ -16,6 +21,13 @@ import { routes } from './app.routes';
 import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
 import { translateHttpLoaderFactory } from './core/i18n/translate-http-loader.factory';
 import { DevAuthInterceptor } from './core/auth/dev-auth.interceptor';
+
+// DatePipe locales for the four UI languages (BDR-005). Dates are rendered with the
+// active language's Swiss locale (see core/i18n/locale-text.ts → dateLocaleFor).
+registerLocaleData(localeDeCh);
+registerLocaleData(localeFrCh);
+registerLocaleData(localeItCh);
+registerLocaleData(localeEnCh);
 
 export const appConfig: ApplicationConfig = {
   providers: [

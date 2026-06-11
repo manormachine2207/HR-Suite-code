@@ -39,8 +39,8 @@ export function validateGraph(g: GraphDefinition): GraphWarning[] {
   const w: GraphWarning[] = [];
   const byType = (t: NodeType) => g.nodes.filter(n => n.type === t);
 
-  if (byType('START').length === 0) w.push({ code: 'NO_START', message: 'Kein START-Knoten.' });
-  if (byType('END').length === 0) w.push({ code: 'NO_END', message: 'Kein END-Knoten.' });
+  if (byType('START').length === 0) w.push({ code: 'NO_START', messageKey: 'flow.canvas.warning.noStart' });
+  if (byType('END').length === 0) w.push({ code: 'NO_END', messageKey: 'flow.canvas.warning.noEnd' });
 
   // keys: required + pattern + unique (only for key-bearing types)
   const keyed = g.nodes.filter(n => KEY_TYPES.includes(n.type));
@@ -48,19 +48,19 @@ export function validateGraph(g: GraphDefinition): GraphWarning[] {
   for (const n of keyed) {
     const key = n.data.key ?? '';
     if (!NODE_KEY_PATTERN.test(key)) {
-      w.push({ code: 'INVALID_KEY', nodeId: n.id, message: `Ungültiger key "${key}".` });
+      w.push({ code: 'INVALID_KEY', nodeId: n.id, messageKey: 'flow.canvas.warning.invalidKey', params: { key } });
     }
     seen.set(key, (seen.get(key) ?? 0) + 1);
   }
   for (const [key, count] of seen) {
-    if (key && count > 1) w.push({ code: 'DUPLICATE_KEY', message: `Doppelter key "${key}".` });
+    if (key && count > 1) w.push({ code: 'DUPLICATE_KEY', messageKey: 'flow.canvas.warning.duplicateKey', params: { key } });
   }
 
   // disconnected: a non-START node with no incoming AND no outgoing edge
   for (const n of g.nodes) {
     const touched = g.edges.some(e => e.source === n.id || e.target === n.id);
     if (!touched && n.type !== 'START') {
-      w.push({ code: 'DISCONNECTED', nodeId: n.id, message: 'Knoten ist nicht verbunden.' });
+      w.push({ code: 'DISCONNECTED', nodeId: n.id, messageKey: 'flow.canvas.warning.disconnected' });
     }
   }
 
@@ -68,7 +68,7 @@ export function validateGraph(g: GraphDefinition): GraphWarning[] {
   for (const x of byType('XOR')) {
     const out = g.edges.filter(e => e.source === x.id);
     if (out.length === 0 || out.some(e => !e.condition || !e.condition.trim())) {
-      w.push({ code: 'XOR_UNCONDITIONED', nodeId: x.id, message: 'XOR-Ausgang ohne Bedingung.' });
+      w.push({ code: 'XOR_UNCONDITIONED', nodeId: x.id, messageKey: 'flow.canvas.warning.xorUnconditioned' });
     }
   }
 

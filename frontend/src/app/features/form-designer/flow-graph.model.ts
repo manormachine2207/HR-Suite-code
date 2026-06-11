@@ -35,4 +35,13 @@ export interface GraphDefinition {
 export const NODE_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
 export const ASSIGNEE_ROLES: readonly string[] = ['hr-reviewer', 'tenant-admin'];
 
-export interface GraphWarning { code: string; nodeId?: string; message: string; }
+/**
+ * Canvas validation warning. `messageKey` is an i18n key (BDR-005 — no hardcoded UI
+ * language in logic); `params` feeds ngx-translate interpolation (e.g. the offending key).
+ */
+export interface GraphWarning {
+  code: string;
+  nodeId?: string;
+  messageKey: string;
+  params?: Record<string, string>;
+}

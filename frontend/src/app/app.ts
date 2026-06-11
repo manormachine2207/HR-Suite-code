@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
-import { ObMasterLayoutModule } from '@oblique/oblique';
+import { ObMasterLayoutModule, ObINavigationLink } from '@oblique/oblique';
 import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
 
 // ObMasterLayoutModule is imported here because ob-master-layout has standalone:false
@@ -20,6 +20,12 @@ export class App implements OnInit {
   private readonly config = inject(RuntimeConfigService);
   private readonly document = inject(DOCUMENT);
 
+  /** Top navigation (Oblique master layout translates the label keys itself). */
+  readonly navigation: ObINavigationLink[] = [
+    { label: 'nav.antragstypen', url: 'antragstypen' },
+    { label: 'nav.antraege', url: 'antraege' },
+  ];
+
   ngOnInit(): void {
     const supported = this.config.get().i18n.supportedLocales;
     const fallback = this.config.get().i18n.defaultLocale;
@@ -29,5 +35,8 @@ export class App implements OnInit {
     const chosen = supported.includes(browser) ? browser : fallback;
     this.translate.use(chosen);
     this.document.documentElement.setAttribute('lang', chosen);
+    // Keep <html lang> in sync when the user switches the language (a11y + e.g. hyphenation).
+    this.translate.onLangChange.subscribe(e =>
+      this.document.documentElement.setAttribute('lang', e.lang));
   }
 }

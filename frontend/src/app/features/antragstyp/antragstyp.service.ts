@@ -35,11 +35,15 @@ export class AntragsTypService {
     return this.http.post<AntragsTypSummary>(`${this.base}/antragstyp`, { key, title });
   }
 
-  /** Creates a new DRAFT major carrying the form, (optional) flow, and (optional) graph definition. */
+  /**
+   * Creates a new DRAFT major carrying the form, (optional) flow, and (optional) graph
+   * definition. `workflowBpmn` is intentionally NOT sent: the backend removed it from
+   * CreateVersionRequest (2026-06-12) — BPMN is compiler output only (ADR-010).
+   */
   createDraftVersion(id: string, formDefinition: FormDefinition,
                      flowDefinition: FlowDefinition | null,
                      graphDefinition: unknown | null = null): Observable<AntragsTypVersion> {
-    const body: Record<string, unknown> = { formDefinition, workflowBpmn: '<bpmn/>', sfActionBindings: {} };
+    const body: Record<string, unknown> = { formDefinition, sfActionBindings: {} };
     if (flowDefinition) {
       body['flowDefinition'] = flowDefinition;
     }
@@ -52,7 +56,7 @@ export class AntragsTypService {
   editDraft(versionId: string, formDefinition: FormDefinition,
             flowDefinition: FlowDefinition | null,
             graphDefinition: unknown | null = null): Observable<AntragsTypVersion> {
-    const body: Record<string, unknown> = { formDefinition, workflowBpmn: '<bpmn/>', sfActionBindings: {} };
+    const body: Record<string, unknown> = { formDefinition, sfActionBindings: {} };
     if (flowDefinition) {
       body['flowDefinition'] = flowDefinition;
     }

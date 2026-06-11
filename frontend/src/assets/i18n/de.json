@@ -29,7 +29,12 @@
       "title": "Neuer Antragstyp",
       "key": "Schlüssel",
       "keyHint": "Nur Kleinbuchstaben, Ziffern, _ und -",
-      "submit": "Anlegen"
+      "submit": "Anlegen",
+      "titleLabel": "Titel (mehrsprachig)",
+      "error": {
+        "conflict": "Ein Antragstyp mit diesem Schlüssel existiert bereits.",
+        "generic": "Anlegen fehlgeschlagen. Bitte versuchen Sie es erneut."
+      }
     }
   },
   "builder": {
@@ -39,7 +44,8 @@
     "saveDraft": "Als Entwurf speichern",
     "savedMajor": "Entwurf gespeichert, Major",
     "published": "Veröffentlicht, Prozess-Key:",
-    "publishDeferred": "Veröffentlichen für Graph-Flows folgt (Compiler = SP1)."
+    "publishDeferred": "Veröffentlichen für Graph-Flows folgt (Compiler = SP1).",
+    "publishNeedsDraft": "Bitte zuerst als Entwurf speichern."
   },
   "flow": {
     "canvas": {
@@ -49,7 +55,15 @@
       "ref": "Aktion (n8n-ref)",
       "delete": "Knoten löschen",
       "selectHint": "Knoten auswählen, um ihn zu bearbeiten.",
-      "noRefs": "Keine n8n-Refs für diesen Tenant — ACTION-Knoten ohne Ref."
+      "noRefs": "Keine n8n-Refs für diesen Tenant — ACTION-Knoten ohne Ref.",
+      "warning": {
+        "noStart": "Kein START-Knoten.",
+        "noEnd": "Kein END-Knoten.",
+        "invalidKey": "Ungültiger Schlüssel \"{{key}}\".",
+        "duplicateKey": "Doppelter Schlüssel \"{{key}}\".",
+        "disconnected": "Knoten ist nicht verbunden.",
+        "xorUnconditioned": "XOR-Ausgang ohne Bedingung."
+      }
     }
   },
   "antrag": {
@@ -73,7 +87,19 @@
     "colType": "Antragstyp",
     "colStatus": "Status",
     "colProcess": "Workflow-Prozess-ID",
-    "colCreated": "Erstellt"
+    "colCreated": "Erstellt",
+    "colActions": "Aktionen",
+    "submitDraft": "Einreichen",
+    "cancelDraft": "Stornieren",
+    "submitSuccess": "Antrag wurde eingereicht.",
+    "cancelSuccess": "Antrag wurde storniert.",
+    "fieldError": {
+      "required": "Pflichtfeld.",
+      "maxLength": "Maximal {{limit}} Zeichen.",
+      "min": "Minimum: {{min}}.",
+      "max": "Maximum: {{max}}.",
+      "invalid": "Ungültiger Wert."
+    }
   },
   "designer": {
     "back": "Zurück zur Liste",
@@ -111,7 +137,25 @@
       "BOOLEAN": "Ja/Nein",
       "SELECT": "Auswahl",
       "MULTI_SELECT": "Mehrfachauswahl"
+    },
+    "error": {
+      "incompatible": "Inkompatible Änderung — eine neue Major-Version ist nötig.",
+      "conflict": "Gerade veröffentlicht — bitte erneut versuchen.",
+      "generic": "Aktion fehlgeschlagen.",
+      "publishRejected": "Veröffentlichen abgelehnt:",
+      "saveBeforePublish": "Ungespeicherte Änderungen sind ungültig und können nicht automatisch gespeichert werden — bitte zuerst gültig speichern."
     }
+  },
+  "status": {
+    "DRAFT": "Entwurf",
+    "LIVE": "Aktiv",
+    "DEPRECATED": "Veraltet",
+    "ARCHIVED": "Archiviert",
+    "SUBMITTED": "Eingereicht",
+    "IN_REVIEW": "In Prüfung",
+    "APPROVED": "Genehmigt",
+    "REJECTED": "Abgelehnt",
+    "CANCELLED": "Storniert"
   },
   "errors": {
     "notFound": "Seite nicht gefunden",

@@ -29,7 +29,9 @@
               </td>
               <td><code class="hr-key">{{ item.key }}</code></td>
               <td>
-                <span class="hr-status" [class]="statusClass(item.status)">{{ item.status }}</span>
+                <span class="hr-status" [class]="statusClass(item.status)">
+                  {{ statusKey(item.status) ? (statusKey(item.status)! | translate) : item.status }}
+                </span>
               </td>
             </tr>
           }

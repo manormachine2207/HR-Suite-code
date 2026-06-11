@@ -48,4 +48,35 @@ describe('AntragstypCreateComponent', () => {
 
     expect(nav).toHaveBeenCalledWith(['/antragstypen', 'at-new', 'designer']);
   });
+
+  it('shows a translated conflict error and re-enables the button on 409 (zoneless regression)', async () => {
+    const fixture = TestBed.createComponent(AntragstypCreateComponent);
+    const cmp = fixture.componentInstance;
+    fixture.detectChanges();
+
+    cmp.form.controls.key.setValue('urlaubsantrag');
+    cmp.titleControl('de').setValue('Urlaub');
+    cmp.submit();
+
+    http.expectOne('/api/v1/antragstyp')
+      .flush({ message: 'Key existiert bereits' }, { status: 409, statusText: 'Conflict' });
+
+    // saving=false + errorKey must be announced to zoneless CD (markForCheck)
+    expect(cmp.saving).toBe(false);
+    expect(cmp.errorKey).toBe('antragstyp.create.error.conflict');
+
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[role="alert"]')).not.toBeNull();
+    expect((el.querySelector('button[type="submit"]') as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('maps non-409 failures to the generic error key', () => {
+    const fixture = TestBed.createComponent(AntragstypCreateComponent);
+    const cmp = fixture.componentInstance;
+    cmp.form.controls.key.setValue('x');
+    cmp.submit();
+    http.expectOne('/api/v1/antragstyp').flush('boom', { status: 500, statusText: 'Server Error' });
+    expect(cmp.errorKey).toBe('antragstyp.create.error.generic');
+  });
 });

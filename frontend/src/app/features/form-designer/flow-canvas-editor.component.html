@@ -60,7 +60,9 @@
 
     @if (warnings().length) {
       <ul class="warnings">
-        @for (w of warnings(); track w.message) { <li>&#9888; {{ w.message }}</li> }
+        @for (w of warnings(); track w.code + (w.nodeId ?? '') + (w.params?.['key'] ?? '')) {
+          <li>&#9888; {{ w.messageKey | translate: w.params }}</li>
+        }
       </ul>
     }
   </aside>

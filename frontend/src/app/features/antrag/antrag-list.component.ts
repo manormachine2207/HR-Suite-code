@@ -1,14 +1,20 @@
 import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
-import { DOCUMENT, DatePipe } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { TranslateModule } from '@ngx-translate/core';
+import { DatePipe } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
 
 import { AntragService } from './antrag.service';
 import { Antrag } from './antrag.model';
+import { initialValueFor, validatorsFor } from './antrag-form.logic';
 import { AntragsTypService } from '../antragstyp/antragstyp.service';
 import { AntragsTypSummary } from '../antragstyp/antragstyp.model';
-import { FormFieldDef, Lang, OptionDef } from '../form-designer/form-definition.model';
+import { FormFieldDef, OptionDef } from '../form-designer/form-definition.model';
+import { dateLocaleFor, resolveLocaleText } from '../../core/i18n/locale-text';
+
+/** Antrag statuses with a `status.*` translation (unknown ones render as raw enum). */
+const KNOWN_STATUSES = new Set(['DRAFT', 'SUBMITTED', 'IN_REVIEW', 'APPROVED', 'REJECTED', 'CANCELLED']);
 
 /**
  * Applicant view of own Anträge plus an inline "neuer Antrag" form. The form picks a
@@ -17,8 +23,9 @@ import { FormFieldDef, Lang, OptionDef } from '../form-designer/form-definition.
  * (ADR-009 §4/§5) — the resulting `workflowProcessId` is surfaced as a list column,
  * which is exactly the end-to-end proof of the workflow wiring.
  *
- * Built deliberately on the (working) antragstyp-list pattern: plain reactive state,
- * pure view helpers, no getters that allocate during change detection.
+ * Zoneless discipline: every async subscribe callback that mutates view state calls
+ * cdr.markForCheck() — including the nested create→submit chain (a missing call there
+ * froze the submit button and tripped NG0100 in dev mode).
  */
 @Component({
   selector: 'app-antrag-list',
@@ -31,15 +38,18 @@ export class AntragListComponent implements OnInit {
   private readonly antragService = inject(AntragService);
   private readonly antragstypService = inject(AntragsTypService);
   private readonly fb = inject(FormBuilder);
-  private readonly document = inject(DOCUMENT);
+  private readonly translate = inject(TranslateService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   antraege: Antrag[] = [];
   liveTypen: AntragsTypSummary[] = [];
+  private typen: AntragsTypSummary[] = [];
   private typTitleById = new Map<string, string>();
 
   loading = true;
   failed = false;
+  /** DatePipe locale for the active UI language (de-CH/fr-CH/it-CH/en-CH). */
+  dateLocale = dateLocaleFor('de');
 
   // --- new-antrag form state ---
   creating = false;
@@ -48,8 +58,27 @@ export class AntragListComponent implements OnInit {
   form: FormGroup = this.fb.group({});
   loadingFields = false;
   submitting = false;
+  /** Full i18n key of the current error (translated in the template). */
   errorKey = '';
+  /** Server-provided ProblemDetail.detail (e.g. submit-422) — shown verbatim. */
+  errorDetail = '';
+  /** i18n key of the last success confirmation (role=status). */
+  successKey = '';
   lastSubmittedId: string | null = null;
+  /** Antrag id whose row action (submit/cancel) is in flight. */
+  rowBusyId: string | null = null;
+
+  constructor() {
+    this.dateLocale = dateLocaleFor(this.translate.getCurrentLang() || 'de');
+    // Language switch: re-resolve cached jsonb titles + date locale in place (BDR-005).
+    this.translate.onLangChange
+      .pipe(takeUntilDestroyed())
+      .subscribe(e => {
+        this.dateLocale = dateLocaleFor(e.lang);
+        this.rebuildTitleMap();
+        this.cdr.markForCheck();
+      });
+  }
 
   ngOnInit(): void {
     this.reload();
@@ -64,8 +93,9 @@ export class AntragListComponent implements OnInit {
     }).subscribe({
       next: ({ antraege, typen }) => {
         this.antraege = antraege;
+        this.typen = typen;
         this.liveTypen = typen.filter(t => t.status === 'LIVE');
-        this.typTitleById = new Map(typen.map(t => [t.id, this.titleOf(t)]));
+        this.rebuildTitleMap();
         this.loading = false;
         this.cdr.markForCheck();
       },
@@ -77,10 +107,16 @@ export class AntragListComponent implements OnInit {
     });
   }
 
+  private rebuildTitleMap(): void {
+    this.typTitleById = new Map(this.typen.map(t => [t.id, this.titleOf(t)]));
+  }
+
   // --- new-antrag panel ---------------------------------------------------
   openCreate(): void {
     this.creating = true;
     this.errorKey = '';
+    this.errorDetail = '';
+    this.successKey = '';
   }
 
   cancelCreate(): void {
@@ -89,6 +125,7 @@ export class AntragListComponent implements OnInit {
     this.fields = [];
     this.form = this.fb.group({});
     this.errorKey = '';
+    this.errorDetail = '';
   }
 
   onTypChange(typId: string): void {
@@ -96,6 +133,7 @@ export class AntragListComponent implements OnInit {
     this.fields = [];
     this.form = this.fb.group({});
     this.errorKey = '';
+    this.errorDetail = '';
     if (!typId) {
       return;
     }
@@ -110,7 +148,7 @@ export class AntragListComponent implements OnInit {
       },
       error: () => {
         this.loadingFields = false;
-        this.errorKey = 'loadFieldsError';
+        this.errorKey = 'antrag.loadFieldsError';
         this.cdr.markForCheck();
       }
     });
@@ -119,9 +157,9 @@ export class AntragListComponent implements OnInit {
   private buildForm(defs: FormFieldDef[]): void {
     const group: Record<string, unknown> = {};
     for (const f of defs) {
-      const initial: unknown = f.type === 'BOOLEAN' ? false : f.type === 'MULTI_SELECT' ? [] : '';
-      // Required applies to value-bearing controls; a checkbox is valid either way.
-      group[f.key] = f.required && f.type !== 'BOOLEAN' ? [initial, Validators.required] : [initial];
+      // Validators are derived from the published formDefinition (required + TEXT
+      // maxLength + NUMBER min/max) so the user gets inline feedback pre-submit.
+      group[f.key] = [initialValueFor(f), validatorsFor(f)];
     }
     this.fields = defs;
     this.form = this.fb.group(group);
@@ -134,6 +172,8 @@ export class AntragListComponent implements OnInit {
     }
     this.submitting = true;
     this.errorKey = '';
+    this.errorDetail = '';
+    this.successKey = '';
     const payload = this.form.value as Record<string, unknown>;
     this.antragService.create(this.selectedTypId, payload).subscribe({
       next: created => {
@@ -142,27 +182,91 @@ export class AntragListComponent implements OnInit {
             this.lastSubmittedId = submitted.id;
             this.submitting = false;
             this.cancelCreate();
+            this.successKey = 'antrag.submitSuccess';
+            this.cdr.markForCheck();
             this.reload();
           },
-          error: () => {
+          error: e => {
             this.submitting = false;
-            this.errorKey = 'submitError';
+            // The draft exists — after reload its row offers Einreichen/Stornieren.
+            this.applyError(e, 'antrag.submitError');
+            this.cdr.markForCheck();
             this.reload();
           }
         });
       },
-      error: () => {
+      error: e => {
         this.submitting = false;
-        this.errorKey = 'createError';
+        this.applyError(e, 'antrag.createError');
         this.cdr.markForCheck();
       }
     });
   }
 
+  // --- row actions for DRAFT Anträge (failed submits) ----------------------
+  submitDraft(a: Antrag): void {
+    this.rowBusyId = a.id;
+    this.errorKey = '';
+    this.errorDetail = '';
+    this.successKey = '';
+    this.antragService.submit(a.id).subscribe({
+      next: submitted => {
+        this.rowBusyId = null;
+        this.lastSubmittedId = submitted.id;
+        this.successKey = 'antrag.submitSuccess';
+        this.cdr.markForCheck();
+        this.reload();
+      },
+      error: e => {
+        this.rowBusyId = null;
+        this.applyError(e, 'antrag.submitError');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  cancelDraft(a: Antrag): void {
+    this.rowBusyId = a.id;
+    this.errorKey = '';
+    this.errorDetail = '';
+    this.successKey = '';
+    this.antragService.cancel(a.id).subscribe({
+      next: () => {
+        this.rowBusyId = null;
+        this.successKey = 'antrag.cancelSuccess';
+        this.cdr.markForCheck();
+        this.reload();
+      },
+      error: e => {
+        this.rowBusyId = null;
+        this.applyError(e, 'antrag.cancelError');
+        this.cdr.markForCheck();
+      }
+    });
+  }
+
+  /**
+   * Prefers the backend ProblemDetail.detail (e.g. the 422 payload-validation message
+   * from POST /antrag/{id}/submit) and falls back to a translated generic key.
+   */
+  private applyError(e: unknown, fallbackKey: string): void {
+    const detail = (e as { error?: { detail?: unknown } })?.error?.detail;
+    if (typeof detail === 'string' && detail.trim().length > 0) {
+      this.errorDetail = detail;
+      this.errorKey = '';
+    } else {
+      this.errorDetail = '';
+      this.errorKey = fallbackKey;
+    }
+  }
+
   // --- pure view helpers --------------------------------------------------
+  private activeLang(): string {
+    return this.translate.getCurrentLang() || 'de';
+  }
+
   private titleOf(t: AntragsTypSummary): string {
-    const lang = this.document.documentElement.lang || 'de';
-    return t.title?.[lang] ?? t.title?.['de'] ?? t.key;
+    return resolveLocaleText(t.title, this.activeLang(), t.key);
   }
 
   typTitle(antragstypId: string): string {
@@ -170,13 +274,46 @@ export class AntragListComponent implements OnInit {
   }
 
   fieldLabel(f: FormFieldDef): string {
-    const lang = (this.document.documentElement.lang || 'de') as Lang;
-    return f.label?.[lang] ?? f.label?.de ?? f.key;
+    return resolveLocaleText(f.label, this.activeLang(), f.key);
   }
 
   optionLabel(o: OptionDef): string {
-    const lang = (this.document.documentElement.lang || 'de') as Lang;
-    return o.label?.[lang] ?? o.label?.de ?? o.value;
+    return resolveLocaleText(o.label, this.activeLang(), o.value);
+  }
+
+  /** i18n key of the first validation error of a field, or null when the field is fine. */
+  fieldErrorKey(f: FormFieldDef): string | null {
+    const c = this.form.get(f.key);
+    if (!c || c.valid || !(c.touched || c.dirty)) {
+      return null;
+    }
+    if (c.hasError('required')) {
+      return 'antrag.fieldError.required';
+    }
+    if (c.hasError('maxlength')) {
+      return 'antrag.fieldError.maxLength';
+    }
+    if (c.hasError('min')) {
+      return 'antrag.fieldError.min';
+    }
+    if (c.hasError('max')) {
+      return 'antrag.fieldError.max';
+    }
+    return 'antrag.fieldError.invalid';
+  }
+
+  /** Interpolation params ({{limit}}) for the field error message. */
+  fieldErrorParams(f: FormFieldDef): Record<string, unknown> {
+    return {
+      limit: f.validation?.maxLength ?? '',
+      min: f.validation?.min ?? '',
+      max: f.validation?.max ?? ''
+    };
+  }
+
+  /** `status.*` i18n key for known Antrag statuses, null for unknown (renders raw). */
+  statusKey(status: string): string | null {
+    return KNOWN_STATUSES.has(status) ? `status.${status}` : null;
   }
 
   statusClass(status: string): string {

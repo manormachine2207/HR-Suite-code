@@ -29,7 +29,12 @@
       "title": "Nouveau type de demande",
       "key": "Clé",
       "keyHint": "Minuscules, chiffres, _ et - uniquement",
-      "submit": "Créer"
+      "submit": "Créer",
+      "titleLabel": "Titre (multilingue)",
+      "error": {
+        "conflict": "Un type de demande avec cette clé existe déjà.",
+        "generic": "La création a échoué. Veuillez réessayer."
+      }
     }
   },
   "builder": {
@@ -39,7 +44,8 @@
     "saveDraft": "Enregistrer le brouillon",
     "savedMajor": "Brouillon enregistré, version majeure",
     "published": "Publié, clé du processus :",
-    "publishDeferred": "La publication des flux graphiques est à venir (compilateur = SP1)."
+    "publishDeferred": "La publication des flux graphiques est à venir (compilateur = SP1).",
+    "publishNeedsDraft": "Veuillez d'abord enregistrer comme brouillon."
   },
   "flow": {
     "canvas": {
@@ -49,7 +55,15 @@
       "ref": "Action (référence n8n)",
       "delete": "Supprimer le nœud",
       "selectHint": "Sélectionner un nœud pour le modifier.",
-      "noRefs": "Aucune référence n8n pour ce tenant — nœuds ACTION sans référence."
+      "noRefs": "Aucune référence n8n pour ce tenant — nœuds ACTION sans référence.",
+      "warning": {
+        "noStart": "Aucun nœud START.",
+        "noEnd": "Aucun nœud END.",
+        "invalidKey": "Clé « {{key}} » invalide.",
+        "duplicateKey": "Clé « {{key}} » en double.",
+        "disconnected": "Le nœud n'est pas connecté.",
+        "xorUnconditioned": "Sortie XOR sans condition."
+      }
     }
   },
   "antrag": {
@@ -73,7 +87,19 @@
     "colType": "Type de demande",
     "colStatus": "Statut",
     "colProcess": "ID du processus de workflow",
-    "colCreated": "Créée"
+    "colCreated": "Créée",
+    "colActions": "Actions",
+    "submitDraft": "Soumettre",
+    "cancelDraft": "Annuler la demande",
+    "submitSuccess": "La demande a été soumise.",
+    "cancelSuccess": "La demande a été annulée.",
+    "fieldError": {
+      "required": "Champ obligatoire.",
+      "maxLength": "{{limit}} caractères au maximum.",
+      "min": "Minimum : {{min}}.",
+      "max": "Maximum : {{max}}.",
+      "invalid": "Valeur invalide."
+    }
   },
   "designer": {
     "back": "Retour à la liste",
@@ -111,7 +137,25 @@
       "BOOLEAN": "Oui/Non",
       "SELECT": "Sélection",
       "MULTI_SELECT": "Sélection multiple"
+    },
+    "error": {
+      "incompatible": "Modification incompatible — une nouvelle version majeure est nécessaire.",
+      "conflict": "Vient d'être publié — veuillez réessayer.",
+      "generic": "L'action a échoué.",
+      "publishRejected": "Publication refusée :",
+      "saveBeforePublish": "Les modifications non enregistrées sont invalides et ne peuvent pas être enregistrées automatiquement — veuillez d'abord enregistrer un état valide."
     }
+  },
+  "status": {
+    "DRAFT": "Brouillon",
+    "LIVE": "Actif",
+    "DEPRECATED": "Obsolète",
+    "ARCHIVED": "Archivé",
+    "SUBMITTED": "Soumise",
+    "IN_REVIEW": "En cours d'examen",
+    "APPROVED": "Approuvée",
+    "REJECTED": "Rejetée",
+    "CANCELLED": "Annulée"
   },
   "errors": {
     "notFound": "Page introuvable",

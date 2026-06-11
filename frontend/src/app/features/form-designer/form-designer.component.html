@@ -73,9 +73,9 @@
             <legend>{{ 'designer.labels' | translate }}</legend>
             <div class="hr-grid hr-grid--labels">
               @for (l of langs; track l) {
-                <label class="hr-field">
+                <label class="hr-field" [for]="'fld-' + i + '-label-' + l">
                   <span>{{ l | uppercase }}</span>
-                  <input type="text" [formControlName]="l" autocomplete="off" />
+                  <input type="text" [id]="'fld-' + i + '-label-' + l" [formControlName]="l" autocomplete="off" />
                 </label>
               }
             </div>
@@ -120,9 +120,10 @@
                     </label>
                     <ng-container formGroupName="label">
                       @for (l of langs; track l) {
-                        <label class="hr-field hr-field--sm">
+                        <label class="hr-field hr-field--sm" [for]="'fld-' + i + '-opt-' + oi + '-label-' + l">
                           <span>{{ l | uppercase }}</span>
-                          <input type="text" [formControlName]="l" autocomplete="off" />
+                          <input type="text" [id]="'fld-' + i + '-opt-' + oi + '-label-' + l"
+                                 [formControlName]="l" autocomplete="off" />
                         </label>
                       }
                     </ng-container>
@@ -146,8 +147,10 @@
             <a routerLink="/antragstypen">{{ 'designer.back' | translate }}</a>
           </div>
         }
-        @if (errorMsg) {
-          <div class="hr-state hr-state--error" role="alert">{{ 'designer.saveError' | translate }} {{ errorMsg }}</div>
+        @if (errorKey || errorDetail) {
+          <div class="hr-state hr-state--error" role="alert">
+            {{ 'designer.saveError' | translate }} {{ errorKey ? (errorKey | translate) : '' }} {{ errorDetail }}
+          </div>
         }
         <button type="button" class="hr-btn hr-btn--primary" (click)="save()" [disabled]="!canSave">
           {{ (saving ? 'designer.saving' : 'designer.save') | translate }}
@@ -165,11 +168,16 @@
     @if (section === 'publish') {
       <section class="publish">
         <button type="button" (click)="save()" [disabled]="saving || !canSave">{{ 'builder.saveDraft' | translate }}</button>
-        <button type="button" (click)="publish()" [disabled]="publishing || !canPublish">{{ 'builder.publish' | translate }}</button>
+        <button type="button" (click)="publish()" [disabled]="publishing || publishDone || !canPublish">{{ 'builder.publish' | translate }}</button>
+        @if (!draftVersionId) { <p class="hint">{{ 'builder.publishNeedsDraft' | translate }}</p> }
         @if (flowCanvas?.toGraphDefinition()) { <p class="hint">{{ 'builder.publishDeferred' | translate }}</p> }
         @if (savedMajor !== null) { <p class="ok">{{ 'builder.savedMajor' | translate }} {{ savedMajor }}</p> }
-        @if (publishedKey) { <p class="ok">{{ 'builder.published' | translate }} {{ publishedKey }}</p> }
-        @if (errorMsg) { <p class="error" role="alert">{{ errorMsg }}</p> }
+        @if (publishDone) {
+          <p class="ok" role="status">{{ 'builder.published' | translate }} {{ publishedKey ?? '' }}</p>
+        }
+        @if (errorKey || errorDetail) {
+          <p class="error" role="alert">{{ errorKey ? (errorKey | translate) : '' }} {{ errorDetail }}</p>
+        }
       </section>
     }
   }
