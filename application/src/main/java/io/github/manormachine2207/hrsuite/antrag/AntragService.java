@@ -69,6 +69,9 @@ public class AntragService {
         PublishedMajorRef major = antragsTypService.findPublishedMajor(antrag.getAntragstypId())
                 .orElseThrow(() -> new AntragExceptions.IllegalState(
                         "antragstyp has no published major to pin: " + antrag.getAntragstypId()));
+        // System boundary of the submission path (ADR-009 §4, Review 2026-06-12): the
+        // payload must match the form definition that is about to be pinned. Throws 422.
+        antragsTypService.validatePayloadForPublishedMajor(antrag.getAntragstypId(), antrag.getPayload());
         antrag.submit(major.versionId(), major.minor());
         // Start the pinned major's process instance (ADR-009 §5), in this transaction.
         // Guard the key: majors published before the workflow cut have none.

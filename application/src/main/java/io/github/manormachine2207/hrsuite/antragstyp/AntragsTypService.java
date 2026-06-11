@@ -5,6 +5,8 @@ import com.github.f4b6a3.uuid.UuidCreator;
 import io.github.manormachine2207.hrsuite.antragstyp.flow.BpmnCompiler;
 import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
+import io.github.manormachine2207.hrsuite.antragstyp.form.FormI18nValidator;
+import io.github.manormachine2207.hrsuite.antragstyp.form.PayloadValidator;
 import io.github.manormachine2207.hrsuite.antragstyp.version.ChangeClassification;
 import io.github.manormachine2207.hrsuite.antragstyp.version.CompatibilityClassifier;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
@@ -101,6 +103,27 @@ public class AntragsTypService {
                 .map(v -> new PublishedMajorRef(v.getId(), v.getMinor(), v.getProcessDefinitionKey()));
     }
 
+    /**
+     * Validates an antrag payload against the published major's FormDefinition — the
+     * submission system boundary (ADR-009 §4, Review 2026-06-12). Lives here so the
+     * FormDefinition never crosses the module boundary; the antrag module calls this
+     * via the module's public API.
+     *
+     * @throws AntragsTypExceptions.NotFound when no published major exists
+     * @throws AntragsTypExceptions.Invalid  when the payload does not match (HTTP 422)
+     */
+    @Transactional(readOnly = true)
+    public void validatePayloadForPublishedMajor(UUID antragstypId, Map<String, Object> payload) {
+        AntragsTypVersion v = versionRepository.findByAntragstypIdAndStatus(antragstypId, VersionStatus.PUBLISHED)
+                .orElseThrow(() -> new AntragsTypExceptions.NotFound(
+                        "antragstyp has no published major: " + antragstypId));
+        List<String> errors = PayloadValidator.errors(v.getFormDefinition(), payload);
+        if (!errors.isEmpty()) {
+            throw new AntragsTypExceptions.Invalid(
+                    "payload does not match the published form definition: " + String.join("; ", errors));
+        }
+    }
+
     // Security (Review 2026-06-12): clients can no longer supply workflowBpmn. BPMN is
     // exclusively compiler output (ADR-010 "HR sieht kein BPMN") — deploying raw client
     // XML would let Flowable evaluate arbitrary expressions against the Spring context.
@@ -176,13 +199,21 @@ public class AntragsTypService {
         if (target.getStatus() != VersionStatus.DRAFT) {
             throw new AntragsTypExceptions.IllegalState("only DRAFT versions can be published: " + versionId);
         }
+        AntragsTyp at = getDefinition(antragstypId);
+        // Publish-Quality-Gate (BDR-005, Review 2026-06-12): everything an applicant sees
+        // must exist in all four languages BEFORE anything goes live. Checked before the
+        // demote so a failing gate leaves the previously published major untouched.
+        List<String> i18nIssues = FormI18nValidator.issues(at.getTitle(), target.getFormDefinition());
+        if (!i18nIssues.isEmpty()) {
+            throw new AntragsTypExceptions.Invalid(
+                    "i18n incomplete (BDR-005, de/fr/it/en required): " + String.join("; ", i18nIssues));
+        }
         // Demote the current published major (if any) BEFORE promoting the target.
         versionRepository.findByAntragstypIdAndStatus(antragstypId, VersionStatus.PUBLISHED)
                 .ifPresent(prev -> prev.setStatus(VersionStatus.DEPRECATED));
 
         target.publish(publishedBy);
 
-        AntragsTyp at = getDefinition(antragstypId);
         // Deploy the major's BPMN to the engine and record the handles (ADR-009 §5).
         // Runs in this transaction (Flowable joins the Spring tx), so deploy + promote are
         // atomic. Only compiler output or the default placeholder is ever deployed — a
