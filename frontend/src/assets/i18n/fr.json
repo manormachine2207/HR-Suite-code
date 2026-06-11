@@ -44,8 +44,8 @@
     "saveDraft": "Enregistrer le brouillon",
     "savedMajor": "Brouillon enregistré, version majeure",
     "published": "Publié, clé du processus :",
-    "publishDeferred": "La publication des flux graphiques est à venir (compilateur = SP1).",
-    "publishNeedsDraft": "Veuillez d'abord enregistrer comme brouillon."
+    "publishNeedsDraft": "Veuillez d'abord enregistrer comme brouillon.",
+    "publishGraphWarnings": "Le graphe de flux contient encore des avertissements — le serveur valide entièrement à la publication."
   },
   "flow": {
     "canvas": {
@@ -62,8 +62,14 @@
         "invalidKey": "Clé « {{key}} » invalide.",
         "duplicateKey": "Clé « {{key}} » en double.",
         "disconnected": "Le nœud n'est pas connecté.",
-        "xorUnconditioned": "Sortie XOR sans condition."
-      }
+        "xorUnconditioned": "XOR : au plus une sortie sans condition (défaut) est autorisée.",
+        "xorBadCondition": "Condition non valable \"{{condition}}\" — forme admise : variable == 'valeur' (ou !=)."
+      },
+      "edges": "Arêtes",
+      "edgeLabel": "Libellé de l'arête",
+      "edgeCondition": "Condition (sortie XOR)",
+      "edgeConditionHint": "Forme : variable == 'valeur' (ou !=). Exactement une arête sans condition sert de chemin par défaut.",
+      "deleteEdge": "Supprimer l'arête"
     }
   },
   "antrag": {

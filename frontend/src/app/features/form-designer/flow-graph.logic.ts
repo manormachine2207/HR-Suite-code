@@ -1,5 +1,6 @@
 import {
-  GraphDefinition, GraphNode, GraphWarning, NodeType, NODE_KEY_PATTERN,
+  GraphDefinition, GraphEdge, GraphNode, GraphWarning, NodeType,
+  NODE_KEY_PATTERN, EDGE_CONDITION_PATTERN,
 } from './flow-graph.model';
 
 let _seq = 0;
@@ -33,6 +34,23 @@ export function connect(g: GraphDefinition, source: string, target: string, sour
   return { ...g, edges: [...g.edges, edge] };
 }
 
+/** Patches label/condition of one edge immutably (SP1 edge inspector). */
+export function updateEdge(
+  g: GraphDefinition,
+  edgeId: string,
+  patch: Pick<Partial<GraphEdge>, 'label' | 'condition'>,
+): GraphDefinition {
+  return {
+    ...g,
+    edges: g.edges.map(e => (e.id === edgeId ? { ...e, ...patch } : e)),
+  };
+}
+
+/** Removes one edge immutably (SP1: a mis-drawn edge no longer requires deleting a node). */
+export function removeEdge(g: GraphDefinition, edgeId: string): GraphDefinition {
+  return { ...g, edges: g.edges.filter(e => e.id !== edgeId) };
+}
+
 const KEY_TYPES: NodeType[] = ['FORM', 'APPROVAL', 'ACTION', 'XOR', 'AND'];
 
 export function validateGraph(g: GraphDefinition): GraphWarning[] {
@@ -64,11 +82,24 @@ export function validateGraph(g: GraphDefinition): GraphWarning[] {
     }
   }
 
-  // XOR outgoing edges must all carry a condition
+  // XOR semantics (aligned with the backend GraphValidator, SP1): at most ONE
+  // outgoing edge without a condition (= default branch); conditions follow the
+  // closed syntax `var == 'value'` — never free-form JUEL.
   for (const x of byType('XOR')) {
     const out = g.edges.filter(e => e.source === x.id);
-    if (out.length === 0 || out.some(e => !e.condition || !e.condition.trim())) {
+    const unconditioned = out.filter(e => !e.condition || !e.condition.trim());
+    if (out.length === 0 || (out.length > 1 && unconditioned.length > 1)) {
       w.push({ code: 'XOR_UNCONDITIONED', nodeId: x.id, messageKey: 'flow.canvas.warning.xorUnconditioned' });
+    }
+  }
+  for (const e of g.edges) {
+    const condition = e.condition?.trim();
+    if (condition && !EDGE_CONDITION_PATTERN.test(condition)) {
+      w.push({
+        code: 'XOR_BAD_CONDITION',
+        messageKey: 'flow.canvas.warning.xorBadCondition',
+        params: { condition },
+      });
     }
   }
 

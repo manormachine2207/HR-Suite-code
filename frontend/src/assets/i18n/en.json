@@ -44,8 +44,8 @@
     "saveDraft": "Save draft",
     "savedMajor": "Draft saved, major version",
     "published": "Published, process key:",
-    "publishDeferred": "Publishing graph flows is coming (compiler = SP1).",
-    "publishNeedsDraft": "Please save as draft first."
+    "publishNeedsDraft": "Please save as draft first.",
+    "publishGraphWarnings": "The flow graph still has hints — the server validates fully on publish."
   },
   "flow": {
     "canvas": {
@@ -62,8 +62,14 @@
         "invalidKey": "Invalid key \"{{key}}\".",
         "duplicateKey": "Duplicate key \"{{key}}\".",
         "disconnected": "Node is not connected.",
-        "xorUnconditioned": "XOR outlet without condition."
-      }
+        "xorUnconditioned": "XOR: at most one branch without a condition (default) is allowed.",
+        "xorBadCondition": "Invalid condition \"{{condition}}\" — allowed form: variable == 'value' (or !=)."
+      },
+      "edges": "Edges",
+      "edgeLabel": "Edge label",
+      "edgeCondition": "Condition (XOR branch)",
+      "edgeConditionHint": "Form: variable == 'value' (or !=). Exactly one edge without a condition acts as the default path.",
+      "deleteEdge": "Delete edge"
     }
   },
   "antrag": {

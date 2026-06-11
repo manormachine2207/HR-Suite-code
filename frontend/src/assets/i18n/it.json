@@ -44,8 +44,8 @@
     "saveDraft": "Salva bozza",
     "savedMajor": "Bozza salvata, versione maggiore",
     "published": "Pubblicato, chiave del processo:",
-    "publishDeferred": "La pubblicazione dei flussi grafici è in arrivo (compilatore = SP1).",
-    "publishNeedsDraft": "Salvare prima come bozza."
+    "publishNeedsDraft": "Salvare prima come bozza.",
+    "publishGraphWarnings": "Il grafo del flusso contiene ancora avvertenze — il server convalida completamente alla pubblicazione."
   },
   "flow": {
     "canvas": {
@@ -62,8 +62,14 @@
         "invalidKey": "Chiave «{{key}}» non valida.",
         "duplicateKey": "Chiave «{{key}}» duplicata.",
         "disconnected": "Il nodo non è collegato.",
-        "xorUnconditioned": "Uscita XOR senza condizione."
-      }
+        "xorUnconditioned": "XOR: è ammessa al massimo un'uscita senza condizione (default).",
+        "xorBadCondition": "Condizione non valida \"{{condition}}\" — forma ammessa: variabile == 'valore' (oppure !=)."
+      },
+      "edges": "Collegamenti",
+      "edgeLabel": "Etichetta del collegamento",
+      "edgeCondition": "Condizione (uscita XOR)",
+      "edgeConditionHint": "Forma: variabile == 'valore' (oppure !=). Esattamente un collegamento senza condizione è il percorso predefinito.",
+      "deleteEdge": "Elimina collegamento"
     }
   },
   "antrag": {

@@ -150,9 +150,13 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
     return !this.saving && this.fields.length > 0 && this.fields.controls.every(c => this.keyError(c as FormGroup) === null);
   }
 
-  /** Publish is disabled whenever a graph exists (compiler is SP1). */
+  /**
+   * SP1 (ADR-012): graphs compile at publish now — the SP2 lock is gone. A saved
+   * draft is the only precondition; the server's GraphValidator answers 422 with
+   * the full issue list for an uncompilable graph (surfaced via errorDetail).
+   */
   get canPublish(): boolean {
-    return !!this.draftVersionId && !this.flowCanvas?.toGraphDefinition();
+    return !!this.draftVersionId;
   }
 
   /** True when the editor state differs from the last saved server state. */

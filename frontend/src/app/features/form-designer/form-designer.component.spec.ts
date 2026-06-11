@@ -97,7 +97,7 @@ describe('FormDesignerComponent — canvas seeding', () => {
     req.flush({ ...DRAFT_VERSION, minor: 1 });
   });
 
-  it('canPublish is false when canvas has a graph, true when empty', () => {
+  it('canPublish only requires a saved draft — graphs publish too (ADR-012 SP1)', () => {
     fixture.detectChanges();
 
     http.expectOne('/api/v1/antragstyp/at-1').flush({ id: 'at-1', key: 'urlaubsantrag' });
@@ -106,11 +106,11 @@ describe('FormDesignerComponent — canvas seeding', () => {
 
     fixture.detectChanges();
 
-    // draftVersionId is set from the loaded draft; canvas has 2 nodes → canPublish false
+    // SP2 locked publish whenever a graph existed; SP1 compiles graphs at publish,
+    // so a saved draft with a canvas graph is publishable now.
     expect(cmp.draftVersionId).toBe('v-1');
-    expect(cmp.canPublish).toBe(false);
+    expect(cmp.canPublish).toBe(true);
 
-    // Clear the canvas → toGraphDefinition() returns null; draftVersionId still set → canPublish true
     cmp.flowCanvas!.loadGraph(null);
     expect(cmp.canPublish).toBe(true);
   });

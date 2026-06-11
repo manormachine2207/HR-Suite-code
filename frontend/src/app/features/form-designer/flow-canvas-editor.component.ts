@@ -15,10 +15,13 @@ import {
   addNode,
   connect,
   emptyGraph,
+  removeEdge,
   removeNode,
+  updateEdge,
   validateGraph,
   cloneGraph,
 } from './flow-graph.logic';
+import { GraphEdge } from './flow-graph.model';
 
 @Component({
   selector: 'app-flow-canvas-editor',
@@ -34,11 +37,24 @@ export class FlowCanvasEditorComponent {
 
   readonly graph = signal<GraphDefinition>(emptyGraph());
   readonly selectedNodeId = signal<string | null>(null);
+  readonly selectedEdgeId = signal<string | null>(null);
   readonly warnings = computed<GraphWarning[]>(() => validateGraph(this.graph()));
 
   readonly selectedNode = computed<GraphNode | null>(() => {
     const id = this.selectedNodeId();
     return id ? (this.graph().nodes.find(n => n.id === id) ?? null) : null;
+  });
+
+  readonly selectedEdge = computed<GraphEdge | null>(() => {
+    const id = this.selectedEdgeId();
+    return id ? (this.graph().edges.find(e => e.id === id) ?? null) : null;
+  });
+
+  /** Conditions only make sense on XOR outgoing edges (SP1, mirrors backend rule). */
+  readonly selectedEdgeSourceIsXor = computed<boolean>(() => {
+    const e = this.selectedEdge();
+    if (!e) return false;
+    return this.graph().nodes.find(n => n.id === e.source)?.type === 'XOR';
   });
 
   /** vflow-compatible node array, re-derived from domain graph signal. */
@@ -89,6 +105,35 @@ export class FlowCanvasEditorComponent {
   onSelectionChange(changes: NodeSelectedChange[]): void {
     const selected = changes.find(c => c.selected);
     this.selectedNodeId.set(selected ? selected.id : null);
+    if (selected) this.selectedEdgeId.set(null);
+  }
+
+  // ---- edge editing (SP1) -------------------------------------------------
+
+  selectEdge(id: string): void {
+    this.selectedEdgeId.set(this.selectedEdgeId() === id ? null : id);
+    this.selectedNodeId.set(null);
+  }
+
+  patchSelectedEdge(patch: Pick<Partial<GraphEdge>, 'label' | 'condition'>): void {
+    const id = this.selectedEdgeId();
+    if (id) this.graph.set(updateEdge(this.graph(), id, patch));
+  }
+
+  removeSelectedEdge(): void {
+    const id = this.selectedEdgeId();
+    if (!id) return;
+    this.graph.set(removeEdge(this.graph(), id));
+    this.selectedEdgeId.set(null);
+  }
+
+  /** Human-readable edge caption for the inspector list: `key → key` (falls back to type). */
+  edgeDisplay(e: GraphEdge): string {
+    const name = (id: string) => {
+      const n = this.graph().nodes.find(x => x.id === id);
+      return n ? (n.data.key ?? n.type) : id;
+    };
+    return `${name(e.source)} → ${name(e.target)}`;
   }
 
   /** Persist drag-position changes emitted by changesController (nodesChanges.position). */

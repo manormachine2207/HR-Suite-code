@@ -33,6 +33,13 @@ export interface GraphDefinition {
 
 /** Mirrors backend BpmnCompiler key constraint (becomes BPMN id + JUEL var in SP1). */
 export const NODE_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
+
+/**
+ * Mirrors the backend GraphValidator CONDITION_PATTERN (SP1): XOR edge conditions are a
+ * closed language — `variable == 'value'` or `!=` — never free-form JUEL (injection channel).
+ */
+export const EDGE_CONDITION_PATTERN =
+  /^\s*[A-Za-z][A-Za-z0-9_]*\s*(==|!=)\s*'[A-Za-z0-9_ .\-äöüÄÖÜéèêàçÉÈÀ]*'\s*$/;
 export const ASSIGNEE_ROLES: readonly string[] = ['hr-reviewer', 'tenant-admin'];
 
 /**

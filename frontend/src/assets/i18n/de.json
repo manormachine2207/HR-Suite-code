@@ -44,8 +44,8 @@
     "saveDraft": "Als Entwurf speichern",
     "savedMajor": "Entwurf gespeichert, Major",
     "published": "Veröffentlicht, Prozess-Key:",
-    "publishDeferred": "Veröffentlichen für Graph-Flows folgt (Compiler = SP1).",
-    "publishNeedsDraft": "Bitte zuerst als Entwurf speichern."
+    "publishNeedsDraft": "Bitte zuerst als Entwurf speichern.",
+    "publishGraphWarnings": "Der Flow-Graph hat noch Hinweise — der Server prüft beim Veröffentlichen vollständig."
   },
   "flow": {
     "canvas": {
@@ -62,8 +62,14 @@
         "invalidKey": "Ungültiger Schlüssel \"{{key}}\".",
         "duplicateKey": "Doppelter Schlüssel \"{{key}}\".",
         "disconnected": "Knoten ist nicht verbunden.",
-        "xorUnconditioned": "XOR-Ausgang ohne Bedingung."
-      }
+        "xorUnconditioned": "XOR: höchstens ein Ausgang ohne Bedingung (Default) erlaubt.",
+        "xorBadCondition": "Ungültige Bedingung \"{{condition}}\" — erlaubt ist: variable == 'wert' (oder !=)."
+      },
+      "edges": "Kanten",
+      "edgeLabel": "Kanten-Beschriftung",
+      "edgeCondition": "Bedingung (XOR-Ausgang)",
+      "edgeConditionHint": "Form: variable == 'wert' (oder !=). Genau eine Kante ohne Bedingung ist der Default-Pfad.",
+      "deleteEdge": "Kante löschen"
     }
   },
   "antrag": {
