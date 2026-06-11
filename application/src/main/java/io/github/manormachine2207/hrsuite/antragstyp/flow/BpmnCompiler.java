@@ -47,6 +47,14 @@ public final class BpmnCompiler {
         validateKey(processKey, "processKey");
         for (FlowStep step : flow.steps()) {
             validateKey(step.key(), "step key");
+            // Outcomes are interpolated into JUEL expressions, sequenceFlow ids and
+            // endEvent ids below. Enforcing the key pattern here closes the JUEL/XML
+            // injection channel (display labels are an editor/i18n concern, not this value).
+            if (step instanceof ApprovalStep a) {
+                for (String outcome : a.outcomes()) {
+                    validateKey(outcome, "outcome");
+                }
+            }
         }
         var elements = new ArrayList<String>();
         var seqFlows = new ArrayList<String>();
@@ -139,22 +147,31 @@ public final class BpmnCompiler {
             seqFlows.add(sf("sf_" + from + "_" + s.key(), from, s.key(), null));
         }
 
-        // Exclusive gateway — no 'default' attr; all outgoing flows have conditionExpressions
-        elements.add("<exclusiveGateway id=\"%s\" name=\"%s_decision\"/>"
-                .formatted(gwId, s.key()));
+        // Exclusive gateway with a default flow: the LAST outcome's flow is the gateway
+        // default (deny-by-default — an outcome value outside the declared list routes to
+        // the most conservative, terminal path instead of failing the complete command or,
+        // worse, silently continuing like an approval). The default flow carries no
+        // conditionExpression per BPMN semantics.
+        int last = s.outcomes().size() - 1;
+        String defaultFlowId = (last == 0)
+                ? "sf_" + gwId + "_continue"
+                : "sf_" + gwId + "_" + s.outcomes().get(last);
+        elements.add("<exclusiveGateway id=\"%s\" name=\"%s_decision\" default=\"%s\"/>"
+                .formatted(gwId, s.key(), defaultFlowId));
         seqFlows.add(sf("sf_" + s.key() + "_" + gwId, s.key(), gwId, null));
 
-        // First outcome → continue to next step
+        // First outcome → continue to next step (unconditional when it is the default)
         String mainOutcome = s.outcomes().get(0);
         seqFlows.add(sf("sf_" + gwId + "_continue", gwId, to,
-                "${%s_outcome == '%s'}".formatted(s.key(), mainOutcome)));
+                (last == 0) ? null : "${%s_outcome == '%s'}".formatted(s.key(), mainOutcome)));
 
-        // Remaining outcomes → dedicated end events (terminal, e.g. reject)
+        // Remaining outcomes → dedicated end events (terminal, e.g. reject);
+        // the last one is the gateway default and therefore unconditional.
         for (int i = 1; i < s.outcomes().size(); i++) {
             String outcome = s.outcomes().get(i);
             String endId = "end_" + s.key() + "_" + outcome;
             seqFlows.add(sf("sf_" + gwId + "_" + outcome, gwId, endId,
-                    "${%s_outcome == '%s'}".formatted(s.key(), outcome)));
+                    (i == last) ? null : "${%s_outcome == '%s'}".formatted(s.key(), outcome)));
             elements.add("<endEvent id=\"" + endId + "\"/>");
         }
     }
