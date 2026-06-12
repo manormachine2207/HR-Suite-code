@@ -280,6 +280,38 @@ class AntragsTypServiceTest {
                 .deploy(any(), anyString(), any(), any());
     }
 
+    // ---- findDeclaredOutcomes (ADR-013) -------------------------------------
+    @Test
+    void declaredOutcomesComeFromFlowDefinitionApprovalStep() {
+        var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, UUID.randomUUID(), 1,
+                form(text("a", true, 100)), null, Map.of());
+        v.setFlowDefinition(new io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition(List.of(
+                new io.github.manormachine2207.hrsuite.antragstyp.flow.ApprovalStep(
+                        "freigabe", Map.of("de", "F"), "hr-reviewer", List.of("approve", "reject", "escalate")))));
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+
+        assertThat(service.findDeclaredOutcomes(v.getId(), "freigabe"))
+                .containsExactly("approve", "reject", "escalate");
+        assertThat(service.findDeclaredOutcomes(v.getId(), "anderer_step")).isEmpty();
+    }
+
+    @Test
+    void declaredOutcomesAreDerivedFromGraphXorConditions() throws Exception {
+        var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, UUID.randomUUID(), 1,
+                form(text("a", true, 100)), null, Map.of());
+        v.setGraphDefinition(new com.fasterxml.jackson.databind.ObjectMapper().readTree("""
+                {"nodes":[],"edges":[
+                   {"id":"e1","source":"x","target":"a","condition":"freigabe_outcome == 'approve'"},
+                   {"id":"e2","source":"x","target":"b","condition":"freigabe_outcome == 'zurueckweisen'"},
+                   {"id":"e3","source":"x","target":"c"}]}
+                """));
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+
+        assertThat(service.findDeclaredOutcomes(v.getId(), "freigabe"))
+                .containsExactlyInAnyOrder("approve", "zurueckweisen");
+        assertThat(service.findDeclaredOutcomes(v.getId(), "anderer")).isEmpty();
+    }
+
     // ---- validatePayloadForPublishedMajor ----------------------------------
     @Test
     void validatePayloadRejectsMismatchWithInvalid() {
