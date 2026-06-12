@@ -41,6 +41,10 @@
       "aufgaben": {
         "title": "Compiti",
         "description": "Esaminare i compiti aperti e decidere sulle richieste."
+      },
+      "hilfe": {
+        "title": "Aiuto",
+        "description": "Guide e tour guidati."
       }
     }
   },
@@ -92,6 +96,29 @@
       "stateDirty": "Modifiche non salvate",
       "stateNew": "Non ancora salvato",
       "edit": "Modifica"
+    },
+    "tourStart": "Avvia il tour",
+    "help": {
+      "toggle": "Come funziona questo passaggio?",
+      "form": {
+        "p1": "Definisci i campi che i richiedenti compilano all'inoltro.",
+        "p2": "La chiave identifica tecnicamente un campo e funge da nome di variabile nel flusso; deve essere univoca per modulo.",
+        "p3": "Le etichette sono multilingue: per la pubblicazione sono obbligatori tedesco, francese, italiano e inglese.",
+        "p4": "Salva regolarmente come bozza — il tipo di richiesta va online solo nel passaggio «Pubblica»."
+      },
+      "flow": {
+        "p1": "Modella il flusso come grafo: inizio, modulo, approvazione, azione, diramazione (XOR), parallelo (AND) e fine.",
+        "p2": "Aggiungi i nodi dalla palette a sinistra; traccia gli archi dall'uscita destra di un nodo all'ingresso sinistro del successivo.",
+        "p3": "Le uscite di una diramazione XOR ricevono condizioni nella forma variable == 'valore' (oppure !=); la variabile è una chiave di campo o l'esito di un'approvazione.",
+        "p4": "Esattamente un arco XOR resta senza condizione — è il percorso predefinito se nessuna condizione è soddisfatta.",
+        "p5": "Gli avvisi nell'inspector a destra mostrano i punti aperti; alla pubblicazione il server convalida il grafo in modo definitivo."
+      },
+      "publish": {
+        "p1": "Il riepilogo mostra campi, nodi e archi nonché lo stato di salvataggio della bozza.",
+        "p2": "Alla pubblicazione il server convalida completamente il grafo (inizio/fine, raggiungibilità, condizioni XOR) ed esige titolo ed etichette in tutte e quattro le lingue.",
+        "p3": "La pubblicazione mette la versione LIVE: i richiedenti possono inoltrare richieste da subito; per ogni tipo di richiesta è live esattamente una versione.",
+        "p4": "Le modifiche valide non salvate vengono salvate automaticamente prima della pubblicazione."
+      }
     }
   },
   "flow": {
@@ -130,6 +157,13 @@
         "zoomIn": "Ingrandire",
         "zoomOut": "Ridurre",
         "fit": "Adattare la vista"
+      },
+      "empty": {
+        "title": "Come costruire un flusso",
+        "step1": "Aggiungi un nodo di inizio dalla palette.",
+        "step2": "Aggiungi i passaggi e collegali trascinando dall'uscita all'ingresso.",
+        "step3": "Imposta le condizioni sulle uscite delle diramazioni XOR (variable == 'valore').",
+        "paletteHint": "La palette dei nodi si trova a sinistra del canvas."
       }
     }
   },
@@ -175,7 +209,6 @@
     "loading": "Caricamento …",
     "addField": "Aggiungi campo",
     "fieldCount": "Campi",
-    "noFields": "Ancora nessun campo. Aggiungi il primo campo.",
     "key": "Chiave del campo",
     "type": "Tipo",
     "required": "Obbligatorio",
@@ -211,6 +244,11 @@
       "generic": "Azione non riuscita.",
       "publishRejected": "Pubblicazione rifiutata:",
       "saveBeforePublish": "Le modifiche non salvate non sono valide e non possono essere salvate automaticamente — salvare prima uno stato valido."
+    },
+    "saveDisabledReason": "È richiesto almeno un campo con una chiave valida.",
+    "emptyState": {
+      "title": "Aggiungi il tuo primo campo del modulo",
+      "body": "I campi definiscono ciò che i richiedenti compilano. Ogni campo richiede una chiave univoca ed etichette in quattro lingue."
     }
   },
   "review": {
@@ -269,5 +307,104 @@
     "feedbackBody": "Si prega di segnalare gli ostacoli ai responsabili del progetto tramite il repository pubblico.",
     "preparationHeading": "Redazione di questa dichiarazione",
     "preparationBody": "Questa dichiarazione è stata redatta il 28.05.2026 e sarà aggiornata ad ogni rilascio produttivo."
+  },
+  "help": {
+    "title": "Centro assistenza",
+    "lead": "Guide passo per passo e tour guidati per HR-Suite.",
+    "headerAria": "Apri il centro assistenza",
+    "guides": {
+      "title": "Guide per ruolo",
+      "designer": {
+        "title": "HR designer: creare e pubblicare un tipo di richiesta",
+        "step1": "Apri «Tipi di richiesta» e crea la chiave e il titolo nelle quattro lingue tramite «Nuovo tipo di richiesta».",
+        "step2": "Definisci i campi nel passaggio «Modulo» del builder; ogni campo richiede una chiave univoca.",
+        "step3": "Cura le etichette dei campi in tedesco, francese, italiano e inglese — senza traduzioni complete il server rifiuta la pubblicazione.",
+        "step4": "Modella il flusso nel passaggio «Flusso»: imposta il nodo di inizio, aggiungi i passaggi (modulo, approvazione, azione), collega gli archi trascinando, imposta il nodo di fine.",
+        "step5": "Imposta condizioni sulle uscite XOR nella forma variable == 'valore' (oppure !=); esattamente un arco resta senza condizione come percorso predefinito.",
+        "step6": "Salva come bozza e controlla il riepilogo nel passaggio «Pubblica».",
+        "step7": "Pubblica: la versione va LIVE e il flusso viene messo a disposizione come processo."
+      },
+      "applicant": {
+        "title": "Richiedenti: inoltrare e seguire una richiesta",
+        "step1": "Apri «Le mie richieste» e scegli «Nuova richiesta».",
+        "step2": "Seleziona un tipo di richiesta pubblicato; il modulo appare automaticamente.",
+        "step3": "Compila i campi e inoltra con «Crea e inoltra».",
+        "step4": "Segui lo stato della tua richiesta nell'elenco (ad es. Inoltrata, Conclusa).",
+        "step5": "Puoi inoltrare o annullare le bozze in un secondo momento."
+      },
+      "reviewer": {
+        "title": "Revisori: esaminare i compiti e decidere",
+        "step1": "Apri «Compiti» — lì trovi i compiti di revisione aperti.",
+        "step2": "Apri i dati della richiesta tramite «Dettagli».",
+        "step3": "Inserisci un commento se necessario.",
+        "step4": "Decidi con «Approva» o «Rifiuta» — oppure concludi il compito.",
+        "step5": "La richiesta riceve poi automaticamente il nuovo stato."
+      }
+    },
+    "tours": {
+      "title": "Tour guidati",
+      "lead": "I tour evidenziano gli elementi più importanti direttamente nell'interfaccia.",
+      "startDashboard": "Avvia il tour della dashboard",
+      "startBuilder": "Avvia il tour del builder",
+      "builderHint": "Il tour del builder si svolge nel builder stesso: apri un tipo di richiesta in «Tipi di richiesta» e avvia il tour con il pulsante «Avvia il tour» accanto ai passaggi."
+    }
+  },
+  "tour": {
+    "next": "Avanti",
+    "prev": "Indietro",
+    "done": "Fine",
+    "progress": "{{current}} di {{total}}",
+    "dashboard": {
+      "welcome": {
+        "title": "Benvenuto in HR-Suite",
+        "desc": "Questo breve tour mostra gli elementi più importanti della dashboard. Puoi uscire in qualsiasi momento con Esc."
+      },
+      "search": {
+        "title": "Cercare i moduli",
+        "desc": "Filtra le schede dei moduli in tempo reale — la ricerca considera titolo e descrizione nella lingua attiva."
+      },
+      "favorite": {
+        "title": "Preferiti",
+        "desc": "Con la stella contrassegni i moduli come preferiti; il filtro «Mostra solo i moduli preferiti» nasconde il resto."
+      },
+      "card": {
+        "title": "Aprire i moduli",
+        "desc": "Ogni scheda apre un modulo, ad es. i tipi di richiesta per gli HR designer; i chip mostrano i ruoli tipici."
+      },
+      "help": {
+        "title": "Aiuto in ogni momento",
+        "desc": "Il punto interrogativo nell'intestazione porta al centro assistenza con le guide e questi tour."
+      }
+    },
+    "builder": {
+      "stepper": {
+        "title": "Tre passaggi verso il tipo di richiesta",
+        "desc": "Il builder guida attraverso Modulo, Flusso e Pubblica; puoi cambiare passaggio in qualsiasi momento."
+      },
+      "toolbar": {
+        "title": "Gestire i campi",
+        "desc": "Qui vedi il numero di campi e ne aggiungi di nuovi."
+      },
+      "fieldcard": {
+        "title": "La scheda del campo",
+        "desc": "Per ogni campo definisci chiave, tipo, obbligatorietà, etichette multilingue e convalida."
+      },
+      "flow": {
+        "title": "Il passaggio Flusso",
+        "desc": "Qui modelli il flusso della richiesta come grafo."
+      },
+      "palette": {
+        "title": "Palette dei nodi",
+        "desc": "Aggiungi nodi con un clic: inizio, modulo, approvazione, azione, XOR, AND, fine."
+      },
+      "canvas": {
+        "title": "Canvas",
+        "desc": "Disponi i nodi trascinandoli e traccia gli archi dall'uscita all'ingresso; l'inspector a destra modifica selezione e archi."
+      },
+      "publish": {
+        "title": "Riepilogo e pubblicazione",
+        "desc": "Controlla campi, nodi e stato di salvataggio — «Pubblica» mette il tipo di richiesta LIVE."
+      }
+    }
   }
 }

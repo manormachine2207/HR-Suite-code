@@ -16,6 +16,8 @@ const T: Record<string, string> = {
   'home.modules.antraege.description': 'Eigene Anträge stellen und ihren Status verfolgen.',
   'home.modules.aufgaben.title': 'Aufgaben',
   'home.modules.aufgaben.description': 'Offene Aufgaben prüfen und Anträge entscheiden.',
+  'home.modules.hilfe.title': 'Hilfe',
+  'home.modules.hilfe.description': 'Anleitungen und geführte Touren.',
 };
 
 const translateFn = (key: string): string => T[key] ?? key;
@@ -23,8 +25,8 @@ const translateFn = (key: string): string => T[key] ?? key;
 const ids = (defs: readonly ModuleCardDef[]): string[] => defs.map(d => d.id);
 
 describe('MODULE_CATALOG', () => {
-  it('declares the three dashboard modules with route + roles', () => {
-    expect(ids(MODULE_CATALOG)).toEqual(['antragstypen', 'antraege', 'aufgaben']);
+  it('declares the four dashboard modules with route + roles', () => {
+    expect(ids(MODULE_CATALOG)).toEqual(['antragstypen', 'antraege', 'aufgaben', 'hilfe']);
     const byId = new Map(MODULE_CATALOG.map(d => [d.id, d]));
     expect(byId.get('antragstypen')!.route).toBe('/antragstypen');
     expect(byId.get('antragstypen')!.roles).toEqual(['hr-designer', 'tenant-admin']);
@@ -32,6 +34,10 @@ describe('MODULE_CATALOG', () => {
     expect(byId.get('antraege')!.roles).toEqual([]);
     expect(byId.get('aufgaben')!.route).toBe('/aufgaben');
     expect(byId.get('aufgaben')!.roles).toEqual(['hr-reviewer', 'tenant-admin']);
+    // ADR-015: help center is for everyone (roles []) behind the ?-circle icon.
+    expect(byId.get('hilfe')!.route).toBe('/hilfe');
+    expect(byId.get('hilfe')!.roles).toEqual([]);
+    expect(byId.get('hilfe')!.icon).toBe('question_circle');
   });
 
   it('every module carries icon + i18n keys in the home.modules.* block', () => {
@@ -45,11 +51,11 @@ describe('MODULE_CATALOG', () => {
 
 describe('filterModules', () => {
   it('returns all modules for an empty search without favorites-only', () => {
-    expect(filterModules(MODULE_CATALOG, '', false, [], translateFn)).toHaveLength(3);
+    expect(filterModules(MODULE_CATALOG, '', false, [], translateFn)).toHaveLength(4);
   });
 
   it('treats whitespace-only search as empty', () => {
-    expect(filterModules(MODULE_CATALOG, '   ', false, [], translateFn)).toHaveLength(3);
+    expect(filterModules(MODULE_CATALOG, '   ', false, [], translateFn)).toHaveLength(4);
   });
 
   it('matches the translated title case-insensitively', () => {

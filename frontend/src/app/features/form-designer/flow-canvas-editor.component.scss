@@ -73,6 +73,61 @@
   overflow: hidden;
 }
 
+/* ADR-015 Ebene 1: centered empty-state overlay; pointer-events: none so the
+ * dotted canvas below stays drag/zoomable and palette clicks land normally. */
+.canvas-empty {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 1rem;
+}
+
+.canvas-empty__card {
+  max-width: 24rem;
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  background: var(--bs-body-bg, #fff);
+  border: 1px dashed var(--bs-border-color, #ced6df);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(15, 30, 50, 0.08);
+  color: var(--bs-body-color, #33404d);
+}
+
+.canvas-empty__icon {
+  width: 2.2rem;
+  height: 2.2rem;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+.canvas-empty__title {
+  margin: 0.5rem 0 0.6rem;
+  font-size: 0.98rem;
+  color: var(--bs-emphasis-color, #1f2d3d);
+}
+
+.canvas-empty__steps {
+  margin: 0 auto 0.6rem;
+  padding: 0;
+  list-style-position: inside;
+  text-align: left;
+  display: inline-block;
+  font-size: 0.86rem;
+
+  li {
+    margin-bottom: 0.3rem;
+  }
+}
+
+.canvas-empty__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
 .canvas-controls {
   position: absolute;
   left: 0.75rem;

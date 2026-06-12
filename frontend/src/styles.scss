@@ -19,3 +19,90 @@
 }
 
 /* Slot fuer HR-Suite-Custom-Klassen — leer im Skelett. */
+
+/* ===========================================================
+ * ADR-015 Ebene 3 — driver.js-Tour-Popover im Oblique-Look
+ *
+ * Basis-CSS kommt aus node_modules/driver.js/dist/driver.css
+ * (angular.json "styles"). Hier nur Token-Overrides: die Klasse
+ * .hr-tour-popover wird vom TourService als popoverClass gesetzt.
+ * =========================================================== */
+
+.driver-popover.hr-tour-popover {
+  border-radius: 0.6rem;
+  box-shadow: 0 4px 18px rgba(15, 30, 50, 0.25);
+  color: var(--hr-text, #1f2d3d);
+  background: var(--hr-background, #fff);
+  font-family: inherit;
+  max-width: 22rem;
+
+  .driver-popover-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--hr-text, #1f2d3d);
+    font-family: inherit;
+  }
+
+  .driver-popover-description {
+    font-size: 0.9rem;
+    color: var(--hr-text, #33404d);
+    font-family: inherit;
+  }
+
+  .driver-popover-progress-text {
+    font-size: 0.78rem;
+    color: var(--ob-text-light, #5a6b7b);
+  }
+
+  /* Buttons: Oblique-/CD-Bund-naher Look statt driver.js-Default
+     (klare Flaechen, sichtbarer Fokusring — SDR-003). */
+  .driver-popover-navigation-btns button {
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-shadow: none;
+    padding: 0.35rem 0.8rem;
+    border-radius: 0.4rem;
+    border: 1px solid var(--hr-border, #d6dce3);
+    background: var(--hr-background, #fff);
+    color: var(--hr-text, #1f2d3d);
+
+    &:hover {
+      background: var(--ob-secondary-50, #f4f7fa);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--hr-primary, #dc0018);
+      outline-offset: 1px;
+    }
+  }
+
+  .driver-popover-next-btn {
+    background: var(--hr-primary, #dc0018);
+    border-color: var(--hr-primary, #dc0018);
+    color: #fff;
+
+    &:hover {
+      background: var(--hr-primary, #dc0018);
+      filter: brightness(0.92);
+    }
+  }
+
+  .driver-popover-close-btn {
+    color: var(--ob-text-light, #5a6b7b);
+  }
+
+  /* Pfeil-Farben an den Popover-Hintergrund angleichen */
+  .driver-popover-arrow-side-left.driver-popover-arrow {
+    border-left-color: var(--hr-background, #fff);
+  }
+  .driver-popover-arrow-side-right.driver-popover-arrow {
+    border-right-color: var(--hr-background, #fff);
+  }
+  .driver-popover-arrow-side-top.driver-popover-arrow {
+    border-top-color: var(--hr-background, #fff);
+  }
+  .driver-popover-arrow-side-bottom.driver-popover-arrow {
+    border-bottom-color: var(--hr-background, #fff);
+  }
+}

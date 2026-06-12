@@ -27,7 +27,7 @@
 </ng-template>
 
 <div class="canvas-wrap">
-  <aside class="palette">
+  <aside class="palette" data-tour="flow-palette">
     <h4 class="palette__title">{{ 'flow.canvas.palette' | translate }}</h4>
     @for (t of nodeTypes; track t) {
       <button type="button" class="palette__item" (click)="addNode(t)"
@@ -56,7 +56,23 @@
          is enough for Angular to match [connect] selector — no explicit `connect` attribute is
          needed (same double-instantiation hazard).
   -->
-  <div class="canvas-host">
+  <div class="canvas-host" data-tour="flow-canvas">
+    <!-- ADR-015 Ebene 1: explaining empty state — vanishes with the first node
+         (signal-driven), pointer-events:none keeps canvas + palette usable. -->
+    @if (graph().nodes.length === 0) {
+      <div class="canvas-empty" role="note">
+        <div class="canvas-empty__card">
+          <svg class="canvas-empty__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><circle cx="5" cy="12" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="6" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="19" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7.3 11.2l9.4-4.2M7.3 12.8l9.4 4.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <h5 class="canvas-empty__title">{{ 'flow.canvas.empty.title' | translate }}</h5>
+          <ol class="canvas-empty__steps">
+            <li>{{ 'flow.canvas.empty.step1' | translate }}</li>
+            <li>{{ 'flow.canvas.empty.step2' | translate }}</li>
+            <li>{{ 'flow.canvas.empty.step3' | translate }}</li>
+          </ol>
+          <p class="canvas-empty__hint">{{ 'flow.canvas.empty.paletteHint' | translate }}</p>
+        </div>
+      </div>
+    }
     <vflow
       class="canvas"
       view="auto"

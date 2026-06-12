@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 import { ObMasterLayoutModule, ObINavigationLink } from '@oblique/oblique';
 import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
 
@@ -11,7 +12,7 @@ import { RuntimeConfigService } from './core/runtime-config/runtime-config.servi
 // imports directly in the @Component imports array. Refs: BDR-008, ADR-007.
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ObMasterLayoutModule, TranslateModule],
+  imports: [RouterOutlet, RouterLink, MatIconModule, ObMasterLayoutModule, TranslateModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

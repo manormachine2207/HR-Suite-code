@@ -1,10 +1,11 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, afterNextRender, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 
 import { MODULE_CATALOG, ModuleCardDef, filterModules } from './module-catalog';
+import { TourService } from '../../core/tour/tour.service';
 
 /** localStorage key holding the favorite module ids as a JSON string[]. */
 export const FAVORITES_STORAGE_KEY = 'hrsuite.favoriteModules';
@@ -31,6 +32,7 @@ export const FAVORITES_STORAGE_KEY = 'hrsuite.favoriteModules';
 })
 export class HomeComponent {
   private readonly translate = inject(TranslateService);
+  private readonly tour = inject(TourService);
 
   readonly search = signal('');
   readonly onlyFavorites = signal(false);
@@ -54,6 +56,12 @@ export class HomeComponent {
     this.translate.onLangChange
       .pipe(takeUntilDestroyed())
       .subscribe(e => this.lang.set(e.lang));
+
+    // ADR-015 Ebene 3: auto-start the dashboard tour on the very first visit
+    // (localStorage-flagged, never again). afterNextRender = browser-only and
+    // the card grid exists, so the tour anchors are measurable (zoneless-safe:
+    // driver.js only overlays the DOM, no Angular bindings involved).
+    afterNextRender(() => this.tour.maybeAutoStartDashboardTour());
   }
 
   isFavorite(id: string): boolean {

@@ -17,6 +17,7 @@ import {
 import { FlowCanvasEditorComponent } from './flow-canvas-editor.component';
 import { GraphDefinition } from './flow-graph.model';
 import { resolveLocaleText } from '../../core/i18n/locale-text';
+import { TourService } from '../../core/tour/tour.service';
 
 @Component({
   selector: 'app-form-designer',
@@ -31,6 +32,7 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly tour = inject(TourService);
 
   @ViewChild(FlowCanvasEditorComponent) flowCanvas?: FlowCanvasEditorComponent;
 
@@ -86,6 +88,21 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
       this.snapshotPublishSummary();
     }
     this.section = section;
+  }
+
+  /**
+   * Manual builder tour (ADR-015 Ebene 3). driver.js runs outside Angular, so
+   * section switches triggered from tour callbacks must mark for check
+   * explicitly — the zoneless scheduler then renders before the tour advances
+   * (TourService waits one macro-task window).
+   */
+  startTour(): void {
+    this.tour.startBuilderTour({
+      showSection: s => {
+        this.showSection(s);
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   /**

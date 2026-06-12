@@ -13,8 +13,11 @@
 
   <!-- SP3: numbered builder stepper (Form → Flow → Publish). Oblique 15.3 ships no
        own stepper component (only the MatStepper i18n shim), so this is custom,
-       styled exclusively with the repo token bridge. -->
-  <nav class="builder-stepper" [attr.aria-label]="'builder.stepsAria' | translate">
+       styled exclusively with the repo token bridge.
+       ADR-015: data-tour attributes are tour anchors — keep in sync with
+       core/tour/tour-definitions.ts when renaming/moving elements. -->
+  <div class="builder-stepper-row">
+  <nav class="builder-stepper" data-tour="builder-stepper" [attr.aria-label]="'builder.stepsAria' | translate">
     <ol>
       @for (s of steps; track s.id; let i = $index) {
         <li class="builder-step"
@@ -43,12 +46,34 @@
       }
     </ol>
   </nav>
+  <!-- ADR-015 Ebene 3: manual builder tour (next to the stepper; auto-start is
+       dashboard-only by decision). -->
+  <button type="button" class="hr-btn hr-btn--ghost builder-tour-btn" (click)="startTour()">
+    <svg class="hr-btn__icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 6.2a1.9 1.9 0 1 1 2.6 1.9c-.6.25-.8.6-.8 1.2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.4" r="0.9" fill="currentColor"/></svg>
+    {{ 'builder.tourStart' | translate }}
+  </button>
+  </div>
 
   @if (loading) {
     <div class="hr-state" role="status">{{ 'designer.loading' | translate }}</div>
   } @else {
     @if (section === 'form') {
-      <div class="hr-toolbar">
+      <!-- ADR-015 Ebene 1: collapsible "how does this step work" (native details/
+           summary — keyboard + aria-expanded for free, SDR-003). -->
+      <details class="hr-step-help">
+        <summary>
+          <span class="hr-step-help__q" aria-hidden="true">?</span>
+          {{ 'builder.help.toggle' | translate }}
+        </summary>
+        <div class="hr-step-help__body">
+          <p>{{ 'builder.help.form.p1' | translate }}</p>
+          <p>{{ 'builder.help.form.p2' | translate }}</p>
+          <p>{{ 'builder.help.form.p3' | translate }}</p>
+          <p>{{ 'builder.help.form.p4' | translate }}</p>
+        </div>
+      </details>
+
+      <div class="hr-toolbar" data-tour="builder-toolbar">
         <span class="hr-fieldcount">{{ 'designer.fieldCount' | translate }}: {{ fields.length }}</span>
         <button type="button" class="hr-btn hr-btn--secondary" (click)="addField()">
           <svg class="hr-btn__icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -57,11 +82,21 @@
       </div>
 
       @if (fields.length === 0) {
-        <div class="hr-state">{{ 'designer.noFields' | translate }}</div>
+        <!-- ADR-015 Ebene 1: explaining empty state with a direct action. -->
+        <div class="hr-empty">
+          <svg class="hr-empty__icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 9h10M7 13h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <p class="hr-empty__title">{{ 'designer.emptyState.title' | translate }}</p>
+          <p class="hr-empty__body">{{ 'designer.emptyState.body' | translate }}</p>
+          <button type="button" class="hr-btn hr-btn--primary" (click)="addField()">
+            <svg class="hr-btn__icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            {{ 'designer.addField' | translate }}
+          </button>
+        </div>
       }
 
       @for (field of fields.controls; track field; let i = $index) {
-        <article class="hr-fieldcard" [formGroup]="field">
+        <article class="hr-fieldcard" [formGroup]="field"
+                 [attr.data-tour]="i === 0 ? 'builder-fieldcard' : null">
           <div class="hr-fieldcard__bar">
             <span class="hr-fieldcard__idx">#{{ i + 1 }}</span>
             <div class="hr-fieldcard__actions">
@@ -74,12 +109,18 @@
             </div>
           </div>
 
-          <div class="hr-grid">
+          <!-- Head row: key / type / required share ONE control baseline (grid,
+               align-items: end + uniform control height). The error line is a
+               RESERVED slot under every column, so a "Key required" message can
+               never shift the layout (Owner-Befund Layout-Feinschliff a). -->
+          <div class="hr-grid hr-grid--head">
             <label class="hr-field">
               <span>{{ 'designer.key' | translate }}</span>
               <input type="text" formControlName="key" [class.hr-invalid]="keyError(field)" autocomplete="off" />
-              @if (keyError(field) === 'required') { <small class="hr-err">{{ 'designer.keyRequired' | translate }}</small> }
-              @if (keyError(field) === 'duplicate') { <small class="hr-err">{{ 'designer.keyDuplicate' | translate }}</small> }
+              <small class="hr-err hr-err--slot" role="status">
+                @if (keyError(field) === 'required') { {{ 'designer.keyRequired' | translate }} }
+                @else if (keyError(field) === 'duplicate') { {{ 'designer.keyDuplicate' | translate }} }
+              </small>
             </label>
 
             <label class="hr-field">
@@ -89,11 +130,15 @@
                   <option [value]="t">{{ ('designer.types.' + t) | translate }}</option>
                 }
               </select>
+              <small class="hr-err hr-err--slot" aria-hidden="true"></small>
             </label>
 
             <label class="hr-field hr-field--check">
-              <input type="checkbox" formControlName="required" />
-              <span>{{ 'designer.required' | translate }}</span>
+              <span class="hr-field--check__row">
+                <input type="checkbox" formControlName="required" />
+                <span>{{ 'designer.required' | translate }}</span>
+              </span>
+              <small class="hr-err hr-err--slot" aria-hidden="true"></small>
             </label>
           </div>
 
@@ -112,7 +157,9 @@
           @if (fieldType(field) === 'TEXT') {
             <fieldset class="hr-sub">
               <legend>{{ 'designer.validation' | translate }}</legend>
-              <div class="hr-grid">
+              <!-- --validation: fixed ≈10rem columns — a lone number input must
+                   not span the full card width (Layout-Feinschliff c). -->
+              <div class="hr-grid hr-grid--validation">
                 <label class="hr-field">
                   <span>{{ 'designer.maxLength' | translate }}</span>
                   <input type="number" min="0" formControlName="maxLength" />
@@ -123,7 +170,7 @@
           @if (fieldType(field) === 'NUMBER') {
             <fieldset class="hr-sub">
               <legend>{{ 'designer.validation' | translate }}</legend>
-              <div class="hr-grid">
+              <div class="hr-grid hr-grid--validation">
                 <label class="hr-field">
                   <span>{{ 'designer.min' | translate }}</span>
                   <input type="number" formControlName="min" />
@@ -180,9 +227,15 @@
             {{ 'designer.saveError' | translate }} {{ errorKey ? (errorKey | translate) : '' }} {{ errorDetail }}
           </div>
         }
-        <button type="button" class="hr-btn hr-btn--primary" (click)="save()" [disabled]="!canSave">
-          {{ (saving ? 'designer.saving' : 'designer.save') | translate }}
-        </button>
+        <div class="hr-save__row">
+          <button type="button" class="hr-btn hr-btn--primary" (click)="save()" [disabled]="!canSave">
+            {{ (saving ? 'designer.saving' : 'designer.save') | translate }}
+          </button>
+          <!-- ADR-015 Ebene 1: a disabled action always explains itself. -->
+          @if (!canSave && !saving) {
+            <span class="hr-disabled-reason" role="note">{{ 'designer.saveDisabledReason' | translate }}</span>
+          }
+        </div>
       </div>
 
       <details class="hr-preview">
@@ -191,14 +244,43 @@
       </details>
     }
 
-    <app-flow-canvas-editor [availableRefs]="availableRefs" [hidden]="section !== 'flow'" />
+    @if (section === 'flow') {
+      <details class="hr-step-help">
+        <summary>
+          <span class="hr-step-help__q" aria-hidden="true">?</span>
+          {{ 'builder.help.toggle' | translate }}
+        </summary>
+        <div class="hr-step-help__body">
+          <p>{{ 'builder.help.flow.p1' | translate }}</p>
+          <p>{{ 'builder.help.flow.p2' | translate }}</p>
+          <p>{{ 'builder.help.flow.p3' | translate }}</p>
+          <p>{{ 'builder.help.flow.p4' | translate }}</p>
+          <p>{{ 'builder.help.flow.p5' | translate }}</p>
+        </div>
+      </details>
+    }
+
+    <app-flow-canvas-editor data-tour="builder-flow" [availableRefs]="availableRefs" [hidden]="section !== 'flow'" />
 
     @if (section === 'publish') {
       <section class="publish">
+        <details class="hr-step-help">
+          <summary>
+            <span class="hr-step-help__q" aria-hidden="true">?</span>
+            {{ 'builder.help.toggle' | translate }}
+          </summary>
+          <div class="hr-step-help__body">
+            <p>{{ 'builder.help.publish.p1' | translate }}</p>
+            <p>{{ 'builder.help.publish.p2' | translate }}</p>
+            <p>{{ 'builder.help.publish.p3' | translate }}</p>
+            <p>{{ 'builder.help.publish.p4' | translate }}</p>
+          </div>
+        </details>
+
         <!-- SP3 summary card: connects the three steps. All numbers are snapshots
              taken in showSection()/snapshotPublishSummary() — never live ViewChild
              calls (NG0100, zoneless). -->
-        <div class="publish-summary">
+        <div class="publish-summary" data-tour="publish-summary">
           <h2 class="publish-summary__title">{{ 'builder.summary.title' | translate }}</h2>
           <dl class="publish-summary__grid">
             <div class="publish-summary__row">
@@ -239,6 +321,9 @@
         <div class="publish-actions">
           <button type="button" class="hr-btn hr-btn--secondary" (click)="save()" [disabled]="saving || !canSave">{{ 'builder.saveDraft' | translate }}</button>
           <button type="button" class="hr-btn hr-btn--primary" (click)="publish()" [disabled]="publishing || publishDone || !canPublish">{{ 'builder.publish' | translate }}</button>
+          @if (!canSave && !saving) {
+            <span class="hr-disabled-reason" role="note">{{ 'designer.saveDisabledReason' | translate }}</span>
+          }
         </div>
         @if (!draftVersionId) { <p class="hint">{{ 'builder.publishNeedsDraft' | translate }}</p> }
         @if (publishGraphWarningCount > 0) { <p class="hint">{{ 'builder.publishGraphWarnings' | translate }}</p> }

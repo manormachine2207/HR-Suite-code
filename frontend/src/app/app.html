@@ -6,5 +6,15 @@
     {{ 'app.title' | translate }}
     <span class="hr-version-badge">{{ version }}</span>
   </span>
+  <!-- ADR-015: help entry as Oblique header control. #obHeaderControl templates are
+       projected by ob-master-layout into the service-navigation list, i.e. next to
+       the language switcher. data-tour anchors the final dashboard-tour step. -->
+  <ng-template #obHeaderControl>
+    <a routerLink="/hilfe" class="hr-header-help" data-tour="header-help"
+       [attr.aria-label]="'help.headerAria' | translate"
+       [title]="'help.headerAria' | translate">
+      <mat-icon svgIcon="question_circle" aria-hidden="true" />
+    </a>
+  </ng-template>
   <router-outlet />
 </ob-master-layout>
