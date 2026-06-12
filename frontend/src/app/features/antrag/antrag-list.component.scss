@@ -200,6 +200,30 @@
   color: var(--bs-emphasis-color, #1f2d3d);
 }
 
+// Row link to the detail page (Cut D) — looks like text, behaves like a real link.
+.hr-detail-link {
+  color: var(--bs-emphasis-color, #1f2d3d);
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--bs-primary, #2570b8);
+    text-decoration: underline;
+  }
+}
+
+// Anchors styled as buttons (Details link) share the .hr-btn look.
+a.hr-btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary, #2570b8);
+    outline-offset: 1px;
+  }
+}
+
 .hr-muted {
   color: var(--bs-secondary-color, #6b7480);
 }

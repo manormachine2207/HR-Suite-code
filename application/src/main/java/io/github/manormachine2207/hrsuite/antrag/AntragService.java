@@ -5,6 +5,7 @@ import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypService;
 import io.github.manormachine2207.hrsuite.antragstyp.PublishedMajorRef;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
 import io.github.manormachine2207.hrsuite.workflow.WorkflowEngine;
+import io.github.manormachine2207.hrsuite.workflow.WorkflowStepInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -129,6 +130,20 @@ public class AntragService {
     @Transactional(readOnly = true)
     public Antrag getOwn(UUID antragId, String subject) {
         return getOwned(antragId, subject);
+    }
+
+    /**
+     * Fortschritt des Antrags-Workflows fuer den Genehmigungsketten-Stepper (Cut D):
+     * die userTask-Schritte der Prozessinstanz in Ausfuehrungsreihenfolge, aus der
+     * Engine-Historie (auch nach Prozessende). Applicant-eigen wie {@link #getOwn}.
+     */
+    @Transactional(readOnly = true)
+    public List<WorkflowStepInfo> progress(UUID antragId, String subject) {
+        Antrag antrag = getOwned(antragId, subject);
+        if (antrag.getWorkflowProcessId() == null) {
+            return List.of();
+        }
+        return workflowEngine.instanceProgress(currentTenant(), antrag.getWorkflowProcessId());
     }
 
     @Transactional(readOnly = true)

@@ -4,6 +4,7 @@ import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypService;
 import io.github.manormachine2207.hrsuite.antragstyp.PublishedMajorRef;
 import io.github.manormachine2207.hrsuite.shared.tenant.TenantContext;
 import io.github.manormachine2207.hrsuite.workflow.WorkflowEngine;
+import io.github.manormachine2207.hrsuite.workflow.WorkflowStepInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -199,6 +201,47 @@ class AntragServiceTest {
 
         assertThatThrownBy(() -> service.cancel(a.getId(), SUBJECT))
                 .isInstanceOf(AntragExceptions.IllegalState.class);
+    }
+
+    // ---- progress (Cut D: Genehmigungsketten-Stepper) ----------------------
+    @Test
+    void progressReturnsEngineStepsForOwnAntrag() {
+        UUID atId = UUID.randomUUID();
+        Antrag a = draft(atId, SUBJECT);
+        a.submit(UUID.randomUUID(), 0);
+        a.attachWorkflowProcess("pi-1");
+        when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
+        when(workflowEngine.instanceProgress(TENANT, "pi-1")).thenReturn(List.of(
+                new WorkflowStepInfo("erfassen", "Erfassen", true, null, null),
+                new WorkflowStepInfo("freigabe", "Freigabe", false, null, null)));
+
+        List<WorkflowStepInfo> steps = service.progress(a.getId(), SUBJECT);
+
+        assertThat(steps).hasSize(2);
+        assertThat(steps.get(0).completed()).isTrue();
+        assertThat(steps.get(1).stepKey()).isEqualTo("freigabe");
+    }
+
+    @Test
+    void progressIsEmptyWithoutProcessInstance() {
+        UUID atId = UUID.randomUUID();
+        Antrag a = draft(atId, SUBJECT);   // DRAFT, no workflowProcessId yet
+        when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
+
+        assertThat(service.progress(a.getId(), SUBJECT)).isEmpty();
+    }
+
+    /** Stepper-Endpoint bleibt Applicant-eigen: fremder Antrag -> NotFound (kein Leak). */
+    @Test
+    void progressOfForeignAntragIsNotFound() {
+        UUID atId = UUID.randomUUID();
+        Antrag a = draft(atId, OTHER_SUBJECT);
+        a.submit(UUID.randomUUID(), 0);
+        a.attachWorkflowProcess("pi-2");
+        when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
+
+        assertThatThrownBy(() -> service.progress(a.getId(), SUBJECT))
+                .isInstanceOf(AntragExceptions.NotFound.class);
     }
 
     @Test

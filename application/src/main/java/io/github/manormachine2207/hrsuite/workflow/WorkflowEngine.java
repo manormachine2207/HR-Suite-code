@@ -46,4 +46,11 @@ public interface WorkflowEngine {
 
     /** True while the process instance still runs (false once it reached an end event). */
     boolean isInstanceRunning(UUID tenantId, String processInstanceId);
+
+    /**
+     * The instance's user-task steps in execution order (completed and currently open),
+     * from the engine's history — available after the instance ended, too. Tenant-scoped;
+     * other tenants' instances yield an empty list.
+     */
+    List<WorkflowStepInfo> instanceProgress(UUID tenantId, String processInstanceId);
 }

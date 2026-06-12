@@ -134,7 +134,12 @@
         <tbody>
           @for (a of antraege; track a.id) {
             <tr [class.hr-row--new]="a.id === lastSubmittedId">
-              <td class="hr-title">{{ typTitle(a.antragstypId) }}</td>
+              <td class="hr-title">
+                <a class="hr-detail-link" [routerLink]="['/antraege', a.id]"
+                   [attr.aria-label]="'antrag.detailsAria' | translate: { title: typTitle(a.antragstypId) }">
+                  {{ typTitle(a.antragstypId) }}
+                </a>
+              </td>
               <td>
                 <span class="hr-status" [class]="statusClass(a.status)">
                   {{ statusKey(a.status) ? (statusKey(a.status)! | translate) : a.status }}
@@ -149,6 +154,10 @@
               </td>
               <td class="hr-muted">{{ a.createdAt | date: 'short' : undefined : dateLocale }}</td>
               <td class="hr-rowactions">
+                <a class="hr-btn hr-btn--sm" [routerLink]="['/antraege', a.id]"
+                   [attr.aria-label]="'antrag.detailsAria' | translate: { title: typTitle(a.antragstypId) }">
+                  {{ 'antrag.details' | translate }}
+                </a>
                 @if (a.status === 'DRAFT') {
                   <button type="button" class="hr-btn hr-btn--sm hr-btn--primary"
                           (click)="submitDraft(a)" [disabled]="rowBusyId !== null">
@@ -158,8 +167,6 @@
                           (click)="cancelDraft(a)" [disabled]="rowBusyId !== null">
                     {{ 'antrag.cancelDraft' | translate }}
                   </button>
-                } @else {
-                  <span class="hr-muted">—</span>
                 }
               </td>
             </tr>
