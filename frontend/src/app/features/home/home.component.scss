@@ -22,6 +22,152 @@
   font-size: 1.05rem;
 }
 
+// --- „Meine Übersicht" KPI row (ADR-017 Stufe 1) -------------------------------
+// Same visual language as .hr-module-card (white card, border, hover lift), but a
+// horizontal icon-bubble + big-number layout so the row reads as KPIs, not modules.
+.hr-kpis {
+  margin-bottom: 2rem;
+}
+
+.hr-kpi-heading {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+.hr-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+
+  @media (max-width: 48rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hr-kpi-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 5.5rem; // identical for skeleton and loaded card → no layout jump
+  padding: 1rem 1.25rem;
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(15, 30, 50, 0.05);
+  text-decoration: none;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:hover {
+    border-color: var(--bs-primary, #2570b8);
+    box-shadow: 0 2px 6px rgba(15, 30, 50, 0.12);
+    text-decoration: none;
+
+    .hr-kpi-value {
+      color: var(--bs-primary, #2570b8);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary, #2570b8);
+    outline-offset: 2px;
+  }
+}
+
+.hr-kpi-icon {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.5rem;
+
+  mat-icon {
+    width: 1.4rem;
+    height: 1.4rem;
+    font-size: 1.4rem;
+  }
+
+  &.is-open {
+    background: var(--bs-info-bg-subtle, #d7eefb);
+    color: var(--bs-info-text-emphasis, #1c5a86);
+  }
+
+  &.is-tasks {
+    background: var(--bs-warning-bg-subtle, #fdf3d9);
+    color: var(--bs-warning-text-emphasis, #8a5a00);
+  }
+
+  &.is-decided {
+    background: var(--bs-success-bg-subtle, #ddf2e3);
+    color: var(--bs-success-text-emphasis, #1e6a3c);
+  }
+}
+
+.hr-kpi-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.hr-kpi-value {
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--bs-emphasis-color, #1f2d3d);
+  font-variant-numeric: tabular-nums;
+}
+
+.hr-kpi-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+// Skeleton variant: greyed shapes with a soft pulse, same card metrics as loaded.
+.hr-kpi-card.is-skeleton {
+  pointer-events: none;
+
+  .hr-kpi-icon,
+  .hr-kpi-bar {
+    background: var(--bs-secondary-bg-subtle, #eef1f4);
+    animation: hr-kpi-pulse 1.4s ease-in-out infinite;
+  }
+
+  .hr-kpi-bar {
+    display: block;
+    border-radius: 0.25rem;
+
+    &.is-value {
+      width: 3rem;
+      height: 1.65rem;
+      margin-bottom: 0.35rem;
+    }
+
+    &.is-label {
+      width: 9rem;
+      height: 0.8rem;
+    }
+  }
+}
+
+@keyframes hr-kpi-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hr-kpi-card.is-skeleton .hr-kpi-icon,
+  .hr-kpi-card.is-skeleton .hr-kpi-bar {
+    animation: none;
+  }
+}
+
 // --- toolbar: search + favorites toggle --------------------------------------
 .hr-toolbar {
   display: flex;
