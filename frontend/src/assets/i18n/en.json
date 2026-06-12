@@ -8,7 +8,8 @@
     "conformite": "Accessibility Statement",
     "language": "Language",
     "antragstypen": "Request Types",
-    "antraege": "My Requests"
+    "antraege": "My Requests",
+    "aufgaben": "Tasks"
   },
   "footer": {
     "legal": "Legal",
@@ -152,6 +153,38 @@
       "saveBeforePublish": "Unsaved changes are invalid and cannot be saved automatically — please save a valid state first."
     }
   },
+  "review": {
+    "listTitle": "Open tasks",
+    "lead": "Overview of open review tasks.",
+    "loading": "Loading …",
+    "empty": "No open tasks.",
+    "loadError": "Tasks could not be loaded.",
+    "forbidden": "You are not authorized to view tasks.",
+    "colType": "Request type",
+    "colStep": "Step",
+    "colApplicant": "Applicant",
+    "colStatus": "Request status",
+    "colReceived": "Received",
+    "colActions": "Actions",
+    "showDetail": "Details",
+    "hideDetail": "Hide",
+    "detailTitle": "Task",
+    "payload": "Request data",
+    "payloadEmpty": "No request data available.",
+    "colKey": "Field",
+    "colValue": "Value",
+    "comment": "Comment",
+    "completeAction": "Complete",
+    "completing": "Completing …",
+    "completeSuccess": "Task completed. New request status:",
+    "completeError": "The task could not be completed.",
+    "loadDetailError": "The task could not be loaded.",
+    "close": "Close",
+    "outcome": {
+      "approve": "Approve",
+      "reject": "Reject"
+    }
+  },
   "status": {
     "DRAFT": "Draft",
     "LIVE": "Live",
@@ -161,7 +194,8 @@
     "IN_REVIEW": "In review",
     "APPROVED": "Approved",
     "REJECTED": "Rejected",
-    "CANCELLED": "Cancelled"
+    "CANCELLED": "Cancelled",
+    "COMPLETED": "Completed"
   },
   "errors": {
     "notFound": "Page not found",

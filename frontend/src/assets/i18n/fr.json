@@ -8,7 +8,8 @@
     "conformite": "Déclaration d'accessibilité",
     "language": "Langue",
     "antragstypen": "Types de demande",
-    "antraege": "Mes demandes"
+    "antraege": "Mes demandes",
+    "aufgaben": "Tâches"
   },
   "footer": {
     "legal": "Mentions légales",
@@ -152,6 +153,38 @@
       "saveBeforePublish": "Les modifications non enregistrées sont invalides et ne peuvent pas être enregistrées automatiquement — veuillez d'abord enregistrer un état valide."
     }
   },
+  "review": {
+    "listTitle": "Tâches ouvertes",
+    "lead": "Aperçu des tâches d'examen ouvertes.",
+    "loading": "Chargement …",
+    "empty": "Aucune tâche ouverte.",
+    "loadError": "Les tâches n'ont pas pu être chargées.",
+    "forbidden": "Vous n'êtes pas autorisé à consulter les tâches.",
+    "colType": "Type de demande",
+    "colStep": "Étape",
+    "colApplicant": "Demandeur",
+    "colStatus": "Statut de la demande",
+    "colReceived": "Reçue le",
+    "colActions": "Actions",
+    "showDetail": "Détails",
+    "hideDetail": "Masquer",
+    "detailTitle": "Tâche",
+    "payload": "Données de la demande",
+    "payloadEmpty": "Aucune donnée de demande disponible.",
+    "colKey": "Champ",
+    "colValue": "Valeur",
+    "comment": "Commentaire",
+    "completeAction": "Terminer",
+    "completing": "Finalisation …",
+    "completeSuccess": "Tâche terminée. Nouveau statut de la demande :",
+    "completeError": "La tâche n'a pas pu être terminée.",
+    "loadDetailError": "La tâche n'a pas pu être chargée.",
+    "close": "Fermer",
+    "outcome": {
+      "approve": "Approuver",
+      "reject": "Rejeter"
+    }
+  },
   "status": {
     "DRAFT": "Brouillon",
     "LIVE": "Actif",
@@ -161,7 +194,8 @@
     "IN_REVIEW": "En cours d'examen",
     "APPROVED": "Approuvée",
     "REJECTED": "Rejetée",
-    "CANCELLED": "Annulée"
+    "CANCELLED": "Annulée",
+    "COMPLETED": "Terminé"
   },
   "errors": {
     "notFound": "Page introuvable",
