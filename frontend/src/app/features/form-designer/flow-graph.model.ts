@@ -41,7 +41,24 @@ export const NODE_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
 export const EDGE_CONDITION_PATTERN =
   /^\s*[A-Za-z][A-Za-z0-9_]*\s*(==|!=|>=|<=|>|<)\s*('[A-Za-z0-9_ .\-äöüÄÖÜéèêàçÉÈÀ]*'|\d+(\.\d+)?)\s*$/;
 export const EDGE_ORDERING_OPERATORS = ['>', '>=', '<', '<='];
-export const ASSIGNEE_ROLES: readonly string[] = ['hr-reviewer', 'tenant-admin'];
+
+/**
+ * APPROVAL assignee groups offered in the designer (ADR-016): the three tenant-scoped
+ * approver groups (VG / HR-BP / HAL) plus the two pre-existing roles. Values become
+ * Flowable candidateGroups via the backend graph compiler; labels live under the
+ * i18n keys `flow.canvas.role.<value>`. Unknown values from old graphs are surfaced
+ * as an extra "(current: …)" option instead of being silently rewritten.
+ */
+export const ASSIGNEE_ROLES: readonly string[] = [
+  'approver-vg',
+  'approver-hr-bp',
+  'approver-hal',
+  'hr-reviewer',
+  'tenant-admin',
+];
+
+/** Default role of a newly added APPROVAL node (ADR-016 §4). */
+export const DEFAULT_ASSIGNEE_ROLE = 'approver-vg';
 
 /**
  * Canvas validation warning. `messageKey` is an i18n key (BDR-005 — no hardcoded UI

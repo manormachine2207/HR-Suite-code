@@ -31,8 +31,10 @@ import java.util.Set;
 public class DevSecurityConfig {
 
     public static final String DEV_ADMIN_TOKEN = "dev-platform-admin";
-    private static final Set<String> TENANT_ROLES =
-            Set.of("tenant-admin", "hr-designer", "hr-reviewer", "applicant");
+    private static final Set<String> TENANT_ROLES = Set.of(
+            "tenant-admin", "hr-designer", "hr-reviewer", "applicant",
+            // ADR-016: fachliche Genehmiger-Gruppen (VG / HR-BP / HAL)
+            "approver-vg", "approver-hr-bp", "approver-hal");
 
     @Bean
     JwtDecoder devJwtDecoder() {

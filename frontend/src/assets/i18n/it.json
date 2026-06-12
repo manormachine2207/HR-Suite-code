@@ -150,6 +150,14 @@
       "palette": "Nodi",
       "key": "Chiave",
       "assigneeRole": "Ruolo responsabile",
+      "role": {
+        "approver-vg": "Superiore (VG)",
+        "approver-hr-bp": "Business partner HR (HR-BP)",
+        "approver-hal": "Capo divisione (HAL)",
+        "hr-reviewer": "Revisione HR (base)",
+        "tenant-admin": "Admin del tenant"
+      },
+      "roleLegacy": "(attuale: {{value}})",
       "ref": "Azione (riferimento n8n)",
       "delete": "Elimina nodo",
       "selectHint": "Selezionare un nodo per modificarlo.",
@@ -469,6 +477,15 @@
         "title": "Riepilogo e pubblicazione",
         "desc": "Controlla campi, nodi e stato di salvataggio — «Pubblica» mette il tipo di richiesta LIVE."
       }
+    }
+  },
+  "dev": {
+    "roleSwitcher": {
+      "chip": "DEV: {{role}}",
+      "default": "Standard (runtime.json)",
+      "toggleAria": "Cambiare l'identità di sviluppo",
+      "menuAria": "Identità di sviluppo",
+      "hint": "Solo sviluppo: cambia il bearer token di sviluppo e ricarica l'applicazione."
     }
   }
 }

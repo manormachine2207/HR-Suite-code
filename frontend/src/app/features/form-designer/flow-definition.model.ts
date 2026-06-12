@@ -35,5 +35,11 @@ export interface FlowDefinition {
 /** Step key must be a BPMN id + JUEL variable name (mirrors backend BpmnCompiler.KEY_PATTERN). */
 export const STEP_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
 
-/** Assignee roles offerable for APPROVAL steps. */
-export const ASSIGNEE_ROLES: readonly string[] = ['hr-reviewer', 'tenant-admin'];
+/** Assignee roles offerable for APPROVAL steps (kept in sync with flow-graph.model ASSIGNEE_ROLES, ADR-016). */
+export const ASSIGNEE_ROLES: readonly string[] = [
+  'approver-vg',
+  'approver-hr-bp',
+  'approver-hal',
+  'hr-reviewer',
+  'tenant-admin',
+];

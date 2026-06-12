@@ -5,11 +5,12 @@
 # (Erfassung → VG → HR-BP → ggf. HAL), Kosten-Eskalation `kosten > 5000` ⇒ HAL und
 # SF-LMS-Übergabe (ACTION sf-lms-record-learning-events) im Weiterbildungs-Flow.
 #
-# Rollen-Hinweis: VG/HR-BP/HAL existieren noch nicht als Rollen (identity-sp, Cut 4) —
-# alle APPROVAL-Schritte laufen vorerst auf `hr-reviewer`; Schritt-Keys/-Titel tragen
-# bereits die Ziel-Semantik.
+# Rollen (ADR-016): die APPROVAL-Stufen laufen auf den fachlichen Genehmiger-
+# Gruppen approver-vg / approver-hr-bp / approver-hal (Dev-Tokens:
+# dev-approver-vg~<tenant> usw.); Org-Auflösung je Antragsteller bleibt Phase 2.
 #
-# Rerunnable: existierende Keys werden übersprungen (409 → skip).
+# Rerunnable: existierende Keys werden übersprungen (409 → skip);
+# REPUBLISH=1 publiziert für existierende Typen eine NEUE Version (Minor-Bump).
 # Prereqs: Compose-Stack läuft, `curl` + `jq` + `python3`; dev-seed.sh lief einmal
 # (fixer Dev-Tenant + tenant_n8n_config existieren). n8n: docker/n8n/sf-lms-workflow.json
 # importieren + aktivieren (siehe docs/n8n-smoke.md).
@@ -57,13 +58,13 @@ def field(key, ftype, required, label):
 BEGRUENDUNG = field("begruendung", "TEXT", True,
                     L("Begründung", "Justification", "Motivazione", "Reason"))
 
-# Stufen-Vokabular (Keys tragen die Ziel-Semantik; Rolle vorerst hr-reviewer, s.o.)
+# Stufen-Vokabular mit den fachlichen Genehmiger-Gruppen (ADR-016).
 STUFEN = {
     "vg":    ("vg_freigabe",   L("Freigabe Vorgesetzte:r", "Approbation supérieur·e", "Approvazione superiore", "Supervisor approval")),
     "hr_bp": ("hr_bp_pruefung", L("Prüfung HR-Businesspartner", "Examen HR Business Partner", "Verifica HR Business Partner", "HR business partner review")),
     "hal":   ("hal_freigabe",  L("Freigabe HAL", "Approbation chef·fe de division", "Approvazione capo divisione", "Head-of-division approval")),
 }
-ROLE = "hr-reviewer"
+ROLES = {"vg": "approver-vg", "hr_bp": "approver-hr-bp", "hal": "approver-hal"}
 
 def chain_graph(stufen, cost_xor_var=None, action=None):
     """Erfassung -> je Stufe APPROVAL + Entscheid-XOR (approve -> weiter,
@@ -82,7 +83,7 @@ def chain_graph(stufen, cost_xor_var=None, action=None):
     def approval(stufe_id, x, first):
         key, title = STUFEN[stufe_id]
         nodes.append({"id": f"n_{key}", "type": "APPROVAL", "position": {"x": x, "y": 0},
-                      "data": {"key": key, "title": title, "role": ROLE}})
+                      "data": {"key": key, "title": title, "assigneeRole": ROLES[stufe_id]}})
         nodes.append({"id": f"n_{key}_x", "type": "XOR", "position": {"x": x + 140, "y": 0},
                       "data": {"key": f"{key}_entscheid",
                                "title": L("Entscheid", "Décision", "Decisione", "Decision")}})
@@ -118,7 +119,7 @@ def chain_graph(stufen, cost_xor_var=None, action=None):
                                "title": L("Kostenprüfung", "Contrôle des coûts", "Controllo costi", "Cost check")}})
         hal_key, hal_title = STUFEN["hal"]
         nodes.append({"id": "n_hal_esc", "type": "APPROVAL", "position": {"x": x + 140, "y": -160},
-                      "data": {"key": hal_key, "title": hal_title, "role": ROLE}})
+                      "data": {"key": hal_key, "title": hal_title, "assigneeRole": ROLES["hal"]}})
         nodes.append({"id": "n_hal_esc_x", "type": "XOR", "position": {"x": x + 300, "y": -160},
                       "data": {"key": f"{hal_key}_entscheid",
                                "title": L("Entscheid", "Décision", "Decisione", "Decision")}})
@@ -250,18 +251,33 @@ TYPES = [
      "stufen": ["vg", "hr_bp"], "cost_var": "kosten"},
 ]
 
+import os
+REPUBLISH = os.environ.get("REPUBLISH") == "1"
+
 ok = skipped = failed = 0
+existing = {}
+status, listing = call("GET", "/antragstyp")
+if status == 200:
+    existing = {a["key"]: a["id"] for a in listing}
+
 for t in TYPES:
     status, created = call("POST", "/antragstyp", {"key": t["key"], "title": t["title"]})
-    if status == 409:
-        print(f"  {t['key']}: existiert bereits -> übersprungen")
+    if status == 409 and not REPUBLISH:
+        print(f"  {t['key']}: existiert bereits -> übersprungen (REPUBLISH=1 für neue Version)")
         skipped += 1
         continue
-    if status not in (200, 201):
+    if status == 409:
+        at_id = existing.get(t["key"])
+        if not at_id:
+            print(f"  {t['key']}: existiert, aber nicht auffindbar -> übersprungen")
+            failed += 1
+            continue
+    elif status not in (200, 201):
         print(f"  {t['key']}: FEHLER beim Anlegen ({status}): {created}")
         failed += 1
         continue
-    at_id = created["id"]
+    else:
+        at_id = created["id"]
     graph = chain_graph(t["stufen"], t.get("cost_var"), t.get("action"))
     status, version = call("POST", f"/antragstyp/{at_id}/versions", {
         "formDefinition": {"fields": t["fields"]},

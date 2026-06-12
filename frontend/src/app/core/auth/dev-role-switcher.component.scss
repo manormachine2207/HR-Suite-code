@@ -1,0 +1,101 @@
+// Dev role switcher (ADR-016): discreet amber chip in the Oblique header controls,
+// visually related to .hr-version-badge but clearly marked as a dev-only tool.
+
+.hr-dev-switcher {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.hr-dev-switcher__chip {
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: var(--bs-warning-bg-subtle, #fff3cd);
+  color: var(--bs-warning-text-emphasis, #664d03);
+  border: 1px solid var(--bs-warning-border-subtle, #ffe69c);
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover {
+    background: var(--bs-warning-border-subtle, #ffe69c);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ob-primary, #dc0018);
+    outline-offset: 1px;
+  }
+}
+
+.hr-dev-switcher__menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  z-index: 1100; // above the Oblique sticky header content
+  min-width: 14rem;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #dbe1e8);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.25rem rgb(0 0 0 / 15%);
+}
+
+.hr-dev-switcher__hint {
+  margin: 0 0 0.25rem;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.7rem;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+.hr-dev-switcher__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: none;
+  border-radius: 0.3rem;
+  background: transparent;
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bs-secondary-bg-subtle, #eef1f4);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ob-primary, #dc0018);
+    outline-offset: -2px;
+  }
+
+  &--active {
+    font-weight: 600;
+  }
+
+  &--default {
+    border-top: 1px solid var(--bs-border-color, #dbe1e8);
+    border-radius: 0 0 0.3rem 0.3rem;
+    margin-top: 0.15rem;
+    padding-top: 0.5rem;
+  }
+}
+
+.hr-dev-switcher__role {
+  font-family: var(--bs-font-monospace, monospace);
+}
+
+.hr-dev-switcher__item--default .hr-dev-switcher__role {
+  font-family: inherit;
+}
+
+.hr-dev-switcher__check {
+  color: var(--ob-primary, #dc0018);
+}

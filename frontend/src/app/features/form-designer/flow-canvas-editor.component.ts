@@ -75,6 +75,19 @@ export class FlowCanvasEditorComponent {
     return id ? (this.graph().nodes.find(n => n.id === id) ?? null) : null;
   });
 
+  /**
+   * ADR-016: role of the selected APPROVAL node when it is OUTSIDE the known
+   * ASSIGNEE_ROLES vocabulary (old graphs / hand-edited definitions). The template
+   * renders it as an extra "(current: …)" option so loading + saving an old graph
+   * never silently rewrites the role.
+   */
+  readonly selectedNodeLegacyRole = computed<string | null>(() => {
+    const n = this.selectedNode();
+    if (n?.type !== 'APPROVAL') return null;
+    const role = n.data.assigneeRole;
+    return role && !ASSIGNEE_ROLES.includes(role) ? role : null;
+  });
+
   readonly selectedEdge = computed<GraphEdge | null>(() => {
     const id = this.selectedEdgeId();
     return id ? (this.graph().edges.find(e => e.id === id) ?? null) : null;
