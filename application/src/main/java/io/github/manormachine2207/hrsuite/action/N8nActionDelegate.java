@@ -9,7 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * BPMN {@code serviceTask} bridge to the action layer (ADR-010 L2). Referenced from
@@ -63,6 +66,7 @@ public class N8nActionDelegate implements JavaDelegate {
         }
         @SuppressWarnings("unchecked")
         Map<String, Object> input = raw instanceof Map ? (Map<String, Object>) raw : Map.of();
+        input = resolvePlaceholders(input, execution);
 
         ActionExecution result = actionExecutionService.run(
                 execution.getProcessInstanceId(), execution.getProcessInstanceBusinessKey(),
@@ -72,5 +76,34 @@ public class N8nActionDelegate implements JavaDelegate {
         if (result.getStatus() == ActionStatus.DEAD || result.getStatus() == ActionStatus.FAILED) {
             throw new BpmnError("ACTION_FAILED", "action " + refValue + " ended " + result.getStatus());
         }
+    }
+
+    private static final Pattern PLACEHOLDER = Pattern.compile("^\\$\\{([A-Za-z][A-Za-z0-9_]*)\\}$");
+
+    /**
+     * Mapping-Werte der Form {@code ${var}} (ganzer Wert = genau ein Variablenname)
+     * werden gegen Prozessvariablen aufgeloest — der Wert behaelt seinen Typ. Bewusst
+     * eine geschlossene Syntax, KEIN JUEL (Tenet 1; das BPMN-Feld ist ein
+     * {@code flowable:string}-Literal, die Engine evaluiert hier nichts): alles, was
+     * nicht exakt dem Muster entspricht, geht literal durch. Fehlende Variablen werden
+     * weggelassen statt {@code null} zu senden (Datenminimierung, Kap. 12.2).
+     */
+    private static Map<String, Object> resolvePlaceholders(Map<String, Object> input,
+                                                           DelegateExecution execution) {
+        Map<String, Object> resolved = new LinkedHashMap<>();
+        for (Map.Entry<String, Object> entry : input.entrySet()) {
+            if (entry.getValue() instanceof String s) {
+                Matcher m = PLACEHOLDER.matcher(s);
+                if (m.matches()) {
+                    Object value = execution.getVariable(m.group(1));
+                    if (value != null) {
+                        resolved.put(entry.getKey(), value);
+                    }
+                    continue;
+                }
+            }
+            resolved.put(entry.getKey(), entry.getValue());
+        }
+        return resolved;
     }
 }

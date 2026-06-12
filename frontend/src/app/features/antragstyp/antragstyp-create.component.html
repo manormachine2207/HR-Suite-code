@@ -5,35 +5,70 @@
 
   <header class="hr-head">
     <h1 id="create-title">{{ 'antragstyp.create.title' | translate }}</h1>
+    <p class="hr-lead">{{ 'antragstyp.create.lead' | translate }}</p>
   </header>
+
+  <ol class="hr-steps" [attr.aria-label]="'antragstyp.create.steps.label' | translate">
+    <li class="hr-steps__item hr-steps__item--active">
+      <span class="hr-steps__num">1</span>{{ 'antragstyp.create.steps.one' | translate }}
+    </li>
+    <li class="hr-steps__item">
+      <span class="hr-steps__num">2</span>{{ 'antragstyp.create.steps.two' | translate }}
+    </li>
+    <li class="hr-steps__item">
+      <span class="hr-steps__num">3</span>{{ 'antragstyp.create.steps.three' | translate }}
+    </li>
+  </ol>
 
   @if (errorKey) { <p class="hr-alert" role="alert">{{ errorKey | translate }}</p> }
 
   <form class="hr-card" [formGroup]="form" (ngSubmit)="submit()">
-    <label class="hr-field" for="at-key">
-      <span>{{ 'antragstyp.create.key' | translate }}</span>
-      <input id="at-key" formControlName="key" autocomplete="off"
-             [class.hr-invalid]="form.controls['key'].touched && form.controls['key'].invalid" />
-      <small class="hr-err hr-err--slot" role="status">
-        @if (form.controls['key'].touched && form.controls['key'].invalid) {
-          {{ 'antragstyp.create.keyHint' | translate }}
-        }
-      </small>
-    </label>
-
-    <fieldset class="hr-langs" formGroupName="title">
-      <legend>{{ 'antragstyp.create.titleLabel' | translate }}</legend>
+    <fieldset class="hr-section" formGroupName="title">
+      <legend class="hr-section__head">{{ 'antragstyp.create.titleLabel' | translate }}</legend>
+      <p class="hr-section__desc">{{ 'antragstyp.create.titleHint' | translate }}</p>
       <div class="hr-langs__grid">
         @for (lang of langs; track lang) {
           <label class="hr-field" [for]="'at-title-' + lang">
-            <span>{{ lang | uppercase }}</span>
-            <input [id]="'at-title-' + lang" [formControlName]="lang" autocomplete="off" />
+            <span class="hr-field__label">
+              <span class="hr-lang-chip" [class.hr-lang-chip--lead]="lang === 'de'">{{ lang | uppercase }}</span>
+              {{ 'antragstyp.create.lang.' + lang | translate }}
+              @if (lang === 'de') { <span class="hr-required" aria-hidden="true">*</span> }
+            </span>
+            <input [id]="'at-title-' + lang" [formControlName]="lang" autocomplete="off"
+                   [placeholder]="'antragstyp.create.titlePlaceholder.' + lang | translate"
+                   [class.hr-invalid]="lang === 'de' && titleControl('de').touched && titleControl('de').invalid" />
+            @if (lang === 'de') {
+              <small class="hr-err hr-err--slot" role="status">
+                @if (titleControl('de').touched && titleControl('de').invalid) {
+                  {{ 'antragstyp.create.titleRequired' | translate }}
+                }
+              </small>
+            }
           </label>
         }
       </div>
     </fieldset>
 
+    <div class="hr-section">
+      <h2 class="hr-section__head">{{ 'antragstyp.create.key' | translate }}</h2>
+      <p class="hr-section__desc">{{ 'antragstyp.create.keyHelp' | translate }}</p>
+      <label class="hr-field hr-field--key" for="at-key">
+        <input id="at-key" formControlName="key" autocomplete="off" spellcheck="false"
+               [attr.aria-label]="'antragstyp.create.key' | translate"
+               [placeholder]="'antragstyp.create.keyPlaceholder' | translate"
+               [class.hr-invalid]="form.controls['key'].touched && form.controls['key'].invalid" />
+        <small class="hr-err hr-err--slot" role="status">
+          @if (form.controls['key'].touched && form.controls['key'].invalid) {
+            {{ 'antragstyp.create.keyHint' | translate }}
+          }
+        </small>
+      </label>
+    </div>
+
     <div class="hr-actions">
+      <a class="hr-btn hr-btn--ghost" routerLink="/antragstypen">
+        {{ 'antragstyp.create.cancel' | translate }}
+      </a>
       <button type="submit" class="hr-btn hr-btn--primary" [disabled]="saving">
         <svg class="hr-btn__icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         {{ 'antragstyp.create.submit' | translate }}

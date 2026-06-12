@@ -61,12 +61,36 @@
       "title": "Neuer Antragstyp",
       "key": "Schlüssel",
       "keyHint": "Nur Kleinbuchstaben, Ziffern, _ und -",
-      "submit": "Anlegen",
+      "submit": "Erstellen & Designer öffnen",
       "titleLabel": "Titel (mehrsprachig)",
       "error": {
         "conflict": "Ein Antragstyp mit diesem Schlüssel existiert bereits.",
         "generic": "Anlegen fehlgeschlagen. Bitte versuchen Sie es erneut."
-      }
+      },
+      "lead": "Lege einen neuen Antragstyp an. Formular, Genehmigungskette und Aktionen gestaltest du anschließend im Designer.",
+      "steps": {
+        "label": "Nächste Schritte",
+        "one": "Grunddaten anlegen",
+        "two": "Formular & Flow gestalten",
+        "three": "Publizieren"
+      },
+      "keyHelp": "Technischer Bezeichner des Antragstyps — wird aus dem deutschen Titel vorgeschlagen und ist Teil der Prozess-Kennung. Nur Kleinbuchstaben, Ziffern, _ und -.",
+      "keyPlaceholder": "z. B. weiterbildung",
+      "titleHint": "Der deutsche Titel ist Pflicht; Französisch, Italienisch und Englisch kannst du bis zum Publizieren ergänzen (dann sind alle vier Pflicht).",
+      "titleRequired": "Deutscher Titel ist erforderlich.",
+      "titlePlaceholder": {
+        "de": "z. B. Aus- und Weiterbildung",
+        "fr": "p. ex. Formation continue",
+        "it": "ad es. Formazione continua",
+        "en": "e.g. Training & development"
+      },
+      "lang": {
+        "de": "Deutsch",
+        "fr": "Französisch",
+        "it": "Italienisch",
+        "en": "Englisch"
+      },
+      "cancel": "Abbrechen"
     }
   },
   "builder": {

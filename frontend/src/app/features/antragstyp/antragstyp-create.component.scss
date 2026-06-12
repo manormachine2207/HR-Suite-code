@@ -1,6 +1,6 @@
 /* Create page in the shared builder look (token bridge `var(--bs-*, fallback)`,
-   same control metrics as the designer — Owner-Feedback 2026-06-12: this was the
-   last unstyled page). */
+   same control metrics as the designer). Owner-Feedback 2026-06-12 (2x): the page
+   must guide — lead text, next-steps strip, sectioned card, action footer. */
 .hr-create {
   max-width: 46rem;
   margin: 0 auto;
@@ -18,9 +18,65 @@
   &:hover { text-decoration: underline; }
 }
 
-.hr-head h1 {
+.hr-head {
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+
+  .hr-lead {
+    margin: 0.35rem 0 0;
+    max-width: 38rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+}
+
+/* "So geht's weiter"-strip: mirrors the designer stepper so creating a type and
+   designing it read as one journey. */
+.hr-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.5rem;
   margin: 0;
-  font-size: 1.6rem;
+  padding: 0.65rem 0.9rem;
+  list-style: none;
+  border: 1px solid var(--bs-border-color, #e1e6eb);
+  border-radius: 0.5rem;
+  background: var(--bs-tertiary-bg, #f6f8fa);
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.85rem;
+    color: var(--bs-secondary-color, #5a6b7b);
+
+    &--active {
+      color: var(--bs-body-color, #1f2d3d);
+      font-weight: 600;
+
+      .hr-steps__num {
+        background: var(--bs-primary, #1f6feb);
+        border-color: var(--bs-primary, #1f6feb);
+        color: #fff;
+      }
+    }
+  }
+
+  &__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.35rem;
+    height: 1.35rem;
+    border: 1px solid var(--bs-border-color, #ced6df);
+    border-radius: 50%;
+    background: var(--bs-body-bg, #fff);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
 }
 
 .hr-alert {
@@ -34,12 +90,41 @@
 .hr-card {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.25rem;
+  gap: 1.4rem;
+  padding: 1.5rem;
   border: 1px solid var(--bs-border-color, #e1e6eb);
   border-radius: 0.5rem;
   background: var(--bs-body-bg, #fff);
   box-shadow: 0 1px 2px rgba(31, 45, 61, 0.05);
+}
+
+.hr-section {
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  &__head {
+    margin: 0;
+    padding: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+
+  &__desc {
+    margin: 0.3rem 0 0.85rem;
+    max-width: 36rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+
+  & + .hr-section {
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--bs-border-color, #edf1f5);
+  }
 }
 
 .hr-field {
@@ -48,7 +133,10 @@
   gap: 0.25rem;
   font-size: 0.85rem;
 
-  span {
+  &__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     color: var(--bs-secondary-color, #5a6b7b);
     font-weight: 500;
   }
@@ -63,6 +151,8 @@
     background: var(--bs-body-bg, #fff);
     color: var(--bs-body-color, #1f2d3d);
 
+    &::placeholder { color: var(--bs-tertiary-color, #9aa7b4); }
+
     &:focus {
       outline: 2px solid var(--bs-primary, #1f6feb);
       outline-offset: 1px;
@@ -70,7 +160,40 @@
 
     &.hr-invalid { border-color: var(--bs-danger, #b00020); }
   }
+
+  /* Technical identifier: compact + monospace so it reads as "system value". */
+  &--key {
+    max-width: 22rem;
+
+    input {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.88rem;
+    }
+  }
 }
+
+.hr-lang-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.9rem;
+  padding: 0.1rem 0.3rem;
+  border: 1px solid var(--bs-border-color, #ced6df);
+  border-radius: 0.3rem;
+  background: var(--bs-tertiary-bg, #f6f8fa);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--bs-secondary-color, #5a6b7b);
+
+  &--lead {
+    background: var(--bs-primary-bg-subtle, #e7f0fe);
+    border-color: var(--bs-primary, #1f6feb);
+    color: var(--bs-primary, #1f6feb);
+  }
+}
+
+.hr-required { color: var(--bs-danger, #b00020); }
 
 /* Reserved error line — messages never shift the layout (same pattern as designer). */
 .hr-err--slot {
@@ -79,36 +202,26 @@
   color: var(--bs-danger, #b00020);
 }
 
-.hr-langs {
-  margin: 0;
-  padding: 0;
-  border: 0;
+.hr-langs__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem 1.25rem;
 
-  legend {
-    padding: 0;
-    margin-bottom: 0.5rem;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--bs-secondary-color, #5a6b7b);
-  }
-
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
-
-    @media (max-width: 48rem) {
-      grid-template-columns: repeat(2, 1fr);
-    }
+  @media (max-width: 36rem) {
+    grid-template-columns: 1fr;
   }
 }
 
 .hr-actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 0.75rem;
+  margin: 0 -1.5rem -1.5rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--bs-border-color, #edf1f5);
+  background: var(--bs-tertiary-bg, #fafbfc);
+  border-radius: 0 0 0.5rem 0.5rem;
 }
 
 .hr-btn {
@@ -121,6 +234,7 @@
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
+  text-decoration: none;
 
   &__icon {
     width: 0.85rem;
@@ -130,6 +244,14 @@
   &--primary {
     background: var(--bs-primary, #1f6feb);
     color: #fff;
+  }
+
+  &--ghost {
+    background: transparent;
+    border-color: var(--bs-border-color, #ced6df);
+    color: var(--bs-body-color, #1f2d3d);
+
+    &:hover { background: var(--bs-secondary-bg, #eef2f6); }
   }
 
   &:disabled {
