@@ -1,6 +1,142 @@
-.create { max-width: 40rem; margin: 1rem auto; display: flex; flex-direction: column; gap: 1rem; }
-.create label { display: block; margin: .25rem 0; }
-.create input { width: 100%; padding: .4rem; }
-.lang-field { margin: .25rem 0; }
-.error { color: #b00020; }
-.hint { color: #8a6d00; font-size: .85rem; }
+/* Create page in the shared builder look (token bridge `var(--bs-*, fallback)`,
+   same control metrics as the designer — Owner-Feedback 2026-06-12: this was the
+   last unstyled page). */
+.hr-create {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hr-crumbs a {
+  font-size: 0.9rem;
+  text-decoration: none;
+  color: var(--bs-primary, #1f6feb);
+
+  &:hover { text-decoration: underline; }
+}
+
+.hr-head h1 {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.hr-alert {
+  margin: 0;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.4rem;
+  background: var(--bs-danger-bg-subtle, #fdecea);
+  color: var(--bs-danger-text-emphasis, #8a1622);
+}
+
+.hr-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--bs-border-color, #e1e6eb);
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg, #fff);
+  box-shadow: 0 1px 2px rgba(31, 45, 61, 0.05);
+}
+
+.hr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+
+  span {
+    color: var(--bs-secondary-color, #5a6b7b);
+    font-weight: 500;
+  }
+
+  input {
+    box-sizing: border-box;
+    min-height: var(--hr-control-h, 2.25rem);
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--bs-border-color, #ced6df);
+    border-radius: 0.35rem;
+    font-size: 0.92rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #1f2d3d);
+
+    &:focus {
+      outline: 2px solid var(--bs-primary, #1f6feb);
+      outline-offset: 1px;
+    }
+
+    &.hr-invalid { border-color: var(--bs-danger, #b00020); }
+  }
+}
+
+/* Reserved error line — messages never shift the layout (same pattern as designer). */
+.hr-err--slot {
+  min-height: 1rem;
+  font-size: 0.78rem;
+  color: var(--bs-danger, #b00020);
+}
+
+.hr-langs {
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  legend {
+    padding: 0;
+    margin-bottom: 0.5rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+
+    @media (max-width: 48rem) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+.hr-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hr-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.4rem;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &__icon {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  &--primary {
+    background: var(--bs-primary, #1f6feb);
+    color: #fff;
+  }
+
+  &:disabled {
+    background: var(--bs-secondary-bg, #eef2f6);
+    color: var(--bs-secondary-color, #5a6b7b);
+    border-color: var(--bs-border-color, #d6dce3);
+    opacity: 1;
+    cursor: not-allowed;
+  }
+}

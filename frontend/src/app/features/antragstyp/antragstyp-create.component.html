@@ -1,26 +1,43 @@
-<section class="create">
-  <a routerLink="/antragstypen">&larr; {{ 'antragstyp.listTitle' | translate }}</a>
-  <h1>{{ 'antragstyp.create.title' | translate }}</h1>
+<section class="hr-create" aria-labelledby="create-title">
+  <nav class="hr-crumbs">
+    <a routerLink="/antragstypen">&larr; {{ 'antragstyp.listTitle' | translate }}</a>
+  </nav>
 
-  @if (errorKey) { <p class="error" role="alert">{{ errorKey | translate }}</p> }
+  <header class="hr-head">
+    <h1 id="create-title">{{ 'antragstyp.create.title' | translate }}</h1>
+  </header>
 
-  <form [formGroup]="form" (ngSubmit)="submit()">
-    <label for="at-key">{{ 'antragstyp.create.key' | translate }}</label>
-    <input id="at-key" formControlName="key" autocomplete="off" />
-    @if (form.controls['key'].touched && form.controls['key'].invalid) {
-      <p class="hint">{{ 'antragstyp.create.keyHint' | translate }}</p>
-    }
+  @if (errorKey) { <p class="hr-alert" role="alert">{{ errorKey | translate }}</p> }
 
-    <fieldset formGroupName="title">
+  <form class="hr-card" [formGroup]="form" (ngSubmit)="submit()">
+    <label class="hr-field" for="at-key">
+      <span>{{ 'antragstyp.create.key' | translate }}</span>
+      <input id="at-key" formControlName="key" autocomplete="off"
+             [class.hr-invalid]="form.controls['key'].touched && form.controls['key'].invalid" />
+      <small class="hr-err hr-err--slot" role="status">
+        @if (form.controls['key'].touched && form.controls['key'].invalid) {
+          {{ 'antragstyp.create.keyHint' | translate }}
+        }
+      </small>
+    </label>
+
+    <fieldset class="hr-langs" formGroupName="title">
       <legend>{{ 'antragstyp.create.titleLabel' | translate }}</legend>
-      @for (lang of langs; track lang) {
-        <div class="lang-field">
-          <label [for]="'at-title-' + lang">{{ lang | uppercase }}</label>
-          <input [id]="'at-title-' + lang" [formControlName]="lang" autocomplete="off" />
-        </div>
-      }
+      <div class="hr-langs__grid">
+        @for (lang of langs; track lang) {
+          <label class="hr-field" [for]="'at-title-' + lang">
+            <span>{{ lang | uppercase }}</span>
+            <input [id]="'at-title-' + lang" [formControlName]="lang" autocomplete="off" />
+          </label>
+        }
+      </div>
     </fieldset>
 
-    <button type="submit" [disabled]="saving">{{ 'antragstyp.create.submit' | translate }}</button>
+    <div class="hr-actions">
+      <button type="submit" class="hr-btn hr-btn--primary" [disabled]="saving">
+        <svg class="hr-btn__icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        {{ 'antragstyp.create.submit' | translate }}
+      </button>
+    </div>
   </form>
 </section>
