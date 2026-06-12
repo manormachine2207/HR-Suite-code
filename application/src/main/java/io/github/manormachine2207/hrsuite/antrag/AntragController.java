@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.antrag;
 
+import io.github.manormachine2207.hrsuite.antrag.dto.AntragProgressResponse;
 import io.github.manormachine2207.hrsuite.antrag.dto.AntragResponse;
 import io.github.manormachine2207.hrsuite.antrag.dto.CreateAntragRequest;
 import io.github.manormachine2207.hrsuite.antrag.dto.EditDraftRequest;
@@ -75,6 +76,16 @@ public class AntragController {
     @PreAuthorize(APPLICANT)
     public AntragResponse get(@PathVariable("id") UUID id, @AuthenticationPrincipal Jwt jwt) {
         return AntragResponse.from(service.getOwn(id, jwt.getSubject()));
+    }
+
+    /** Workflow-Fortschritt fuer den Genehmigungsketten-Stepper (Cut D), applicant-eigen. */
+    @GetMapping("/{id}/progress")
+    @PreAuthorize(APPLICANT)
+    public AntragProgressResponse progress(@PathVariable("id") UUID id,
+                                           @AuthenticationPrincipal Jwt jwt) {
+        Antrag antrag = service.getOwn(id, jwt.getSubject());
+        return AntragProgressResponse.from(antrag.getId(), antrag.getWorkflowProcessId(),
+                service.progress(id, jwt.getSubject()));
     }
 
     @GetMapping

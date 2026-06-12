@@ -1,0 +1,170 @@
+<section class="hr-antrag-detail" aria-labelledby="antrag-detail-title">
+  <p class="hr-back">
+    <a routerLink="/antraege">← {{ 'antrag.detail.back' | translate }}</a>
+  </p>
+
+  @if (loading) {
+    <div class="hr-state" role="status">{{ 'antrag.detail.loading' | translate }}</div>
+  } @else if (failed || !antrag) {
+    <div class="hr-state hr-state--error" role="alert">{{ 'antrag.detail.loadError' | translate }}</div>
+  } @else {
+    <header class="hr-head">
+      <div class="hr-head__row">
+        <h1 id="antrag-detail-title">{{ title }}</h1>
+        <span class="hr-status" [class]="statusClass">
+          {{ statusKey ? (statusKey! | translate) : antrag.status }}
+        </span>
+      </div>
+      <p class="hr-lead">
+        @if (antrag.submittedAt) {
+          {{ 'antrag.detail.submittedAt' | translate }}
+          {{ antrag.submittedAt | date: 'medium' : undefined : dateLocale }}
+        } @else {
+          {{ 'antrag.detail.createdAt' | translate }}
+          {{ antrag.createdAt | date: 'medium' : undefined : dateLocale }}
+        }
+      </p>
+    </header>
+
+    @if (successKey) {
+      <div class="hr-state hr-state--ok" role="status">{{ successKey | translate }}</div>
+    }
+    @if (errorKey || errorDetail) {
+      <div class="hr-state hr-state--error" role="alert">
+        {{ errorDetail || (errorKey | translate) }}
+      </div>
+    }
+
+    <!-- Approval-chain stepper (Cut D): one circle per Flowable user task, in
+         execution order. Renders only what the history delivers. -->
+    <div class="hr-card hr-section" [class.hr-section--cancelled]="antrag.status === 'CANCELLED'">
+      <h2 class="hr-section__title">{{ 'antrag.detail.stepperTitle' | translate }}</h2>
+      @if (stepRows.length === 0) {
+        <p class="hr-hint">{{ 'antrag.detail.noWorkflow' | translate }}</p>
+      } @else {
+        <ol class="hr-stepper" [attr.aria-label]="'antrag.detail.stepperTitle' | translate">
+          @for (row of stepRows; track row.step.stepKey; let i = $index) {
+            <li class="hr-step" [class]="'hr-step--' + row.state"
+                [attr.aria-current]="row.state === 'active' ? 'step' : null">
+              <span class="hr-step__circle" aria-hidden="true">
+                @switch (row.state) {
+                  @case ('done') {
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 8.5 6.5 12 13 4.5" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  }
+                  @case ('rejected') {
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round"/>
+                    </svg>
+                  }
+                  @case ('cancelled') {
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round"/>
+                    </svg>
+                  }
+                  @default {
+                    {{ i + 1 }}
+                  }
+                }
+              </span>
+              <span class="hr-step__text">
+                <span class="hr-step__title">{{ row.step.name }}</span>
+                <span class="sr-only">({{ ('antrag.detail.step.' + row.state) | translate }})</span>
+                @if (row.step.completedAt) {
+                  <span class="hr-step__date">
+                    {{ row.step.completedAt | date: 'short' : undefined : dateLocale }}
+                  </span>
+                } @else if (row.state === 'active') {
+                  <span class="hr-step__date">{{ 'antrag.detail.step.active' | translate }}</span>
+                }
+              </span>
+            </li>
+          }
+        </ol>
+        @if (antrag.status === 'CANCELLED') {
+          <p class="hr-cancelled-hint">{{ 'antrag.detail.cancelledHint' | translate }}</p>
+        }
+      }
+    </div>
+
+    <!-- Payload as key/value table -->
+    <div class="hr-card hr-section">
+      <h2 class="hr-section__title">{{ 'antrag.detail.payloadTitle' | translate }}</h2>
+      @if (rows.length === 0) {
+        <p class="hr-hint">{{ 'antrag.detail.payloadEmpty' | translate }}</p>
+      } @else {
+        <table class="hr-table" [attr.aria-label]="'antrag.detail.payloadTitle' | translate">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'antrag.detail.colKey' | translate }}</th>
+              <th scope="col">{{ 'antrag.detail.colValue' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows; track row.key) {
+              <tr>
+                <td><code class="hr-key">{{ row.key }}</code></td>
+                <td>{{ row.value }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <!-- Trace box: technical references for support tickets (ADR-009 §5 visibility) -->
+    <div class="hr-card hr-section hr-trace">
+      <h2 class="hr-section__title">{{ 'antrag.detail.trace.title' | translate }}</h2>
+      <dl class="hr-trace__list">
+        <div class="hr-trace__row">
+          <dt>{{ 'antrag.detail.trace.antragId' | translate }}</dt>
+          <dd>
+            <code class="hr-key">{{ antrag.id }}</code>
+            <button type="button" class="hr-btn hr-btn--sm" (click)="copy(antrag.id, 'antragId')"
+                    [attr.aria-label]="'antrag.detail.trace.copyAria' | translate: { label: ('antrag.detail.trace.antragId' | translate) }">
+              {{ (copied === 'antragId' ? 'antrag.detail.trace.copied' : 'antrag.detail.trace.copy') | translate }}
+            </button>
+          </dd>
+        </div>
+        <div class="hr-trace__row">
+          <dt>{{ 'antrag.detail.trace.processId' | translate }}</dt>
+          <dd>
+            @if (antrag.workflowProcessId) {
+              <code class="hr-key">{{ antrag.workflowProcessId }}</code>
+              <button type="button" class="hr-btn hr-btn--sm" (click)="copy(antrag.workflowProcessId!, 'processId')"
+                      [attr.aria-label]="'antrag.detail.trace.copyAria' | translate: { label: ('antrag.detail.trace.processId' | translate) }">
+                {{ (copied === 'processId' ? 'antrag.detail.trace.copied' : 'antrag.detail.trace.copy') | translate }}
+              </button>
+            } @else {
+              <span class="hr-muted">{{ 'antrag.detail.trace.noProcess' | translate }}</span>
+            }
+          </dd>
+        </div>
+        @if (antrag.antragstypVersionId) {
+          <div class="hr-trace__row">
+            <dt>{{ 'antrag.detail.trace.version' | translate }}</dt>
+            <dd><code class="hr-key">{{ antrag.antragstypVersionId }}</code></dd>
+          </div>
+        }
+        @if (antrag.submittedMinor !== null && antrag.submittedMinor !== undefined) {
+          <div class="hr-trace__row">
+            <dt>{{ 'antrag.detail.trace.minor' | translate }}</dt>
+            <dd><code class="hr-key">{{ antrag.submittedMinor }}</code></dd>
+          </div>
+        }
+      </dl>
+    </div>
+
+    @if (cancelAllowed) {
+      <div class="hr-form-actions">
+        <button type="button" class="hr-btn hr-btn--danger" (click)="withdraw()" [disabled]="cancelling">
+          {{ (cancelling ? 'antrag.detail.withdrawing' : 'antrag.detail.withdraw') | translate }}
+        </button>
+      </div>
+    }
+  }
+</section>

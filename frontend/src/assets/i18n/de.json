@@ -194,12 +194,52 @@
     "cancelDraft": "Stornieren",
     "submitSuccess": "Antrag wurde eingereicht.",
     "cancelSuccess": "Antrag wurde storniert.",
+    "cancelError": "Antrag konnte nicht storniert werden.",
     "fieldError": {
       "required": "Pflichtfeld.",
       "maxLength": "Maximal {{limit}} Zeichen.",
       "min": "Minimum: {{min}}.",
       "max": "Maximum: {{max}}.",
       "invalid": "Ungültiger Wert."
+    },
+    "details": "Details",
+    "detailsAria": "Details zum Antrag «{{title}}» anzeigen",
+    "detail": {
+      "back": "Zurück zur Liste",
+      "loading": "Wird geladen …",
+      "loadError": "Antrag konnte nicht geladen werden.",
+      "submittedAt": "Eingereicht am",
+      "createdAt": "Erstellt am",
+      "stepperTitle": "Genehmigungskette",
+      "noWorkflow": "Noch kein Workflow gestartet.",
+      "cancelledHint": "Der Antrag wurde storniert — der Workflow wurde abgebrochen.",
+      "step": {
+        "done": "abgeschlossen",
+        "active": "aktiv",
+        "pending": "ausstehend",
+        "rejected": "abgelehnt",
+        "cancelled": "abgebrochen"
+      },
+      "payloadTitle": "Antragsdaten",
+      "payloadEmpty": "Keine Antragsdaten vorhanden.",
+      "colKey": "Feld",
+      "colValue": "Wert",
+      "trace": {
+        "title": "Technische Referenzen",
+        "antragId": "Antrag-ID",
+        "processId": "Workflow-Prozess-ID",
+        "noProcess": "Kein Workflow-Prozess",
+        "version": "Antragstyp-Version",
+        "minor": "Eingereichte Minor-Version",
+        "copy": "Kopieren",
+        "copied": "Kopiert!",
+        "copyAria": "{{label}} in die Zwischenablage kopieren"
+      },
+      "withdraw": "Zurückziehen",
+      "withdrawing": "Wird zurückgezogen …",
+      "cancelConfirm": "Möchten Sie diesen Antrag wirklich zurückziehen?",
+      "cancelSuccess": "Antrag wurde zurückgezogen.",
+      "cancelError": "Antrag konnte nicht zurückgezogen werden."
     }
   },
   "designer": {

@@ -2,19 +2,18 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
 
 import { AntragService } from './antrag.service';
 import { Antrag } from './antrag.model';
 import { initialValueFor, validatorsFor } from './antrag-form.logic';
+import { antragStatusClass, antragStatusKey } from './antrag-status';
 import { AntragsTypService } from '../antragstyp/antragstyp.service';
 import { AntragsTypSummary } from '../antragstyp/antragstyp.model';
 import { FormFieldDef, OptionDef } from '../form-designer/form-definition.model';
 import { dateLocaleFor, resolveLocaleText } from '../../core/i18n/locale-text';
-
-/** Antrag statuses with a `status.*` translation (unknown ones render as raw enum). */
-const KNOWN_STATUSES = new Set(['DRAFT', 'SUBMITTED', 'IN_REVIEW', 'APPROVED', 'REJECTED', 'CANCELLED']);
 
 /**
  * Applicant view of own Anträge plus an inline "neuer Antrag" form. The form picks a
@@ -30,7 +29,7 @@ const KNOWN_STATUSES = new Set(['DRAFT', 'SUBMITTED', 'IN_REVIEW', 'APPROVED', '
 @Component({
   selector: 'app-antrag-list',
   standalone: true,
-  imports: [TranslateModule, ReactiveFormsModule, DatePipe],
+  imports: [TranslateModule, ReactiveFormsModule, DatePipe, RouterLink],
   templateUrl: './antrag-list.component.html',
   styleUrl: './antrag-list.component.scss'
 })
@@ -313,18 +312,10 @@ export class AntragListComponent implements OnInit {
 
   /** `status.*` i18n key for known Antrag statuses, null for unknown (renders raw). */
   statusKey(status: string): string | null {
-    return KNOWN_STATUSES.has(status) ? `status.${status}` : null;
+    return antragStatusKey(status);
   }
 
   statusClass(status: string): string {
-    switch (status) {
-      case 'SUBMITTED': return 'is-submitted';
-      case 'IN_REVIEW': return 'is-review';
-      case 'APPROVED': return 'is-approved';
-      case 'REJECTED': return 'is-rejected';
-      case 'CANCELLED': return 'is-cancelled';
-      case 'DRAFT': return 'is-draft';
-      default: return 'is-default';
-    }
+    return antragStatusClass(status);
   }
 }

@@ -18,3 +18,27 @@ export interface Antrag {
   createdAt: string;
   updatedAt: string;
 }
+
+/**
+ * One user task of the Flowable process instance, in execution order (from the
+ * Flowable history, so it stays available after the process has ended).
+ * Mirrors `AntragProgressResponse.Step` of `GET /api/v1/antrag/{id}/progress`.
+ */
+export interface AntragProgressStep {
+  stepKey: string;
+  name: string;
+  completed: boolean;
+  startedAt?: string | null;
+  completedAt?: string | null;
+}
+
+/**
+ * Workflow progress of an Antrag for the approval-chain stepper (Cut D).
+ * `steps` is empty for drafts (no process yet) and for Anträge submitted before
+ * the workflow cut; `workflowProcessId` doubles as the trace reference.
+ */
+export interface AntragProgress {
+  antragId: string;
+  workflowProcessId: string | null;
+  steps: AntragProgressStep[];
+}

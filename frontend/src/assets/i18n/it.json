@@ -194,12 +194,52 @@
     "cancelDraft": "Annulla richiesta",
     "submitSuccess": "La richiesta è stata inoltrata.",
     "cancelSuccess": "La richiesta è stata annullata.",
+    "cancelError": "Impossibile annullare la richiesta.",
     "fieldError": {
       "required": "Campo obbligatorio.",
       "maxLength": "Massimo {{limit}} caratteri.",
       "min": "Minimo: {{min}}.",
       "max": "Massimo: {{max}}.",
       "invalid": "Valore non valido."
+    },
+    "details": "Dettagli",
+    "detailsAria": "Mostra i dettagli della richiesta «{{title}}»",
+    "detail": {
+      "back": "Torna all'elenco",
+      "loading": "Caricamento …",
+      "loadError": "Impossibile caricare la richiesta.",
+      "submittedAt": "Inoltrata il",
+      "createdAt": "Creata il",
+      "stepperTitle": "Catena di approvazione",
+      "noWorkflow": "Nessun workflow ancora avviato.",
+      "cancelledHint": "La richiesta è stata annullata — il workflow è stato interrotto.",
+      "step": {
+        "done": "conclusa",
+        "active": "in corso",
+        "pending": "in attesa",
+        "rejected": "respinta",
+        "cancelled": "interrotta"
+      },
+      "payloadTitle": "Dati della richiesta",
+      "payloadEmpty": "Nessun dato della richiesta disponibile.",
+      "colKey": "Campo",
+      "colValue": "Valore",
+      "trace": {
+        "title": "Riferimenti tecnici",
+        "antragId": "ID della richiesta",
+        "processId": "ID processo del workflow",
+        "noProcess": "Nessun processo del workflow",
+        "version": "Versione del tipo di richiesta",
+        "minor": "Versione minore inoltrata",
+        "copy": "Copia",
+        "copied": "Copiato!",
+        "copyAria": "Copia {{label}} negli appunti"
+      },
+      "withdraw": "Ritira la richiesta",
+      "withdrawing": "Ritiro in corso …",
+      "cancelConfirm": "Vuoi davvero ritirare questa richiesta?",
+      "cancelSuccess": "La richiesta è stata ritirata.",
+      "cancelError": "Impossibile ritirare la richiesta."
     }
   },
   "designer": {

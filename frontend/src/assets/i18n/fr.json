@@ -194,12 +194,52 @@
     "cancelDraft": "Annuler la demande",
     "submitSuccess": "La demande a été soumise.",
     "cancelSuccess": "La demande a été annulée.",
+    "cancelError": "La demande n'a pas pu être annulée.",
     "fieldError": {
       "required": "Champ obligatoire.",
       "maxLength": "{{limit}} caractères au maximum.",
       "min": "Minimum : {{min}}.",
       "max": "Maximum : {{max}}.",
       "invalid": "Valeur invalide."
+    },
+    "details": "Détails",
+    "detailsAria": "Afficher les détails de la demande «{{title}}»",
+    "detail": {
+      "back": "Retour à la liste",
+      "loading": "Chargement …",
+      "loadError": "La demande n'a pas pu être chargée.",
+      "submittedAt": "Soumise le",
+      "createdAt": "Créée le",
+      "stepperTitle": "Chaîne d'approbation",
+      "noWorkflow": "Aucun workflow démarré pour l'instant.",
+      "cancelledHint": "La demande a été annulée — le workflow a été interrompu.",
+      "step": {
+        "done": "terminée",
+        "active": "en cours",
+        "pending": "en attente",
+        "rejected": "rejetée",
+        "cancelled": "interrompue"
+      },
+      "payloadTitle": "Données de la demande",
+      "payloadEmpty": "Aucune donnée de demande disponible.",
+      "colKey": "Champ",
+      "colValue": "Valeur",
+      "trace": {
+        "title": "Références techniques",
+        "antragId": "ID de la demande",
+        "processId": "ID du processus de workflow",
+        "noProcess": "Aucun processus de workflow",
+        "version": "Version du type de demande",
+        "minor": "Version mineure soumise",
+        "copy": "Copier",
+        "copied": "Copié !",
+        "copyAria": "Copier {{label}} dans le presse-papiers"
+      },
+      "withdraw": "Retirer la demande",
+      "withdrawing": "Retrait en cours …",
+      "cancelConfirm": "Voulez-vous vraiment retirer cette demande ?",
+      "cancelSuccess": "La demande a été retirée.",
+      "cancelError": "La demande n'a pas pu être retirée."
     }
   },
   "designer": {

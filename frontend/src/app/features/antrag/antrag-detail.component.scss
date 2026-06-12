@@ -1,0 +1,420 @@
+// Detail page for one Antrag (Cut D). Mirrors the antrag-list visual language
+// (Oblique/Bootstrap --bs-* tokens with hex fallbacks) and borrows the connected
+// horizontal stepper look from the builder stepper (BIT prototype style).
+
+.hr-antrag-detail {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+/* visually hidden, screen-reader accessible (step state) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.hr-back {
+  margin: 0 0 1rem;
+
+  a {
+    color: var(--bs-primary, #2570b8);
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+}
+
+.hr-head {
+  margin-bottom: 1.25rem;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--bs-emphasis-color, #1f2d3d);
+    overflow-wrap: anywhere;
+  }
+}
+
+.hr-lead {
+  margin: 0.4rem 0 0;
+  color: var(--bs-secondary-color, #5a6b7b);
+  font-size: 1.05rem;
+}
+
+.hr-state {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: var(--bs-secondary-color, #5a6b7b);
+  background: var(--bs-tertiary-bg, #f4f7fa);
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+
+  &--error {
+    color: var(--bs-danger-text-emphasis, #b3000c);
+    background: var(--bs-danger-bg-subtle, #fbe6e7);
+    border-color: var(--bs-danger-border-subtle, #f3c0c3);
+  }
+
+  &--ok {
+    color: var(--bs-success-text-emphasis, #1d6f3a);
+    background: var(--bs-success-bg-subtle, #e3f4e8);
+    border-color: var(--bs-success-border-subtle, #bfe6cb);
+  }
+}
+
+.hr-hint {
+  margin: 0;
+  color: var(--bs-secondary-color, #5a6b7b);
+  font-size: 0.95rem;
+}
+
+.hr-card {
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg, #fff);
+  box-shadow: 0 1px 2px rgba(15, 30, 50, 0.05);
+}
+
+.hr-section {
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+
+  &__title {
+    margin: 0 0 1rem;
+    font-size: 1.15rem;
+    color: var(--bs-emphasis-color, #1f2d3d);
+  }
+
+  // CANCELLED Antrag: the whole chain greys out.
+  &--cancelled .hr-stepper {
+    opacity: 0.6;
+  }
+}
+
+/* ===========================================================
+ * Approval-chain stepper — connected circles, one per user task
+ * =========================================================== */
+
+.hr-stepper {
+  display: flex;
+  align-items: flex-start;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hr-step {
+  display: flex;
+  align-items: flex-start;
+  flex: 1 1 0;
+  min-width: 0;
+  gap: 0.6rem;
+
+  /* connecting line between the steps */
+  &:not(:first-child)::before {
+    content: '';
+    flex: 1 0 1.5rem;
+    height: 2px;
+    margin-top: 1.1rem;
+    margin-right: 0.6rem;
+    background: var(--bs-border-color, #d6dce3);
+  }
+
+  &--done:not(:first-child)::before,
+  &--active:not(:first-child)::before,
+  &--rejected:not(:first-child)::before {
+    background: var(--bs-primary, #2570b8);
+  }
+
+  &__circle {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    border: 2px solid var(--bs-border-color, #d6dce3);
+    background: var(--bs-secondary-bg, #eef2f6);
+    color: var(--bs-secondary-color, #5a6b7b);
+    font-weight: 700;
+    font-size: 0.95rem;
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
+
+  &--done &__circle {
+    border-color: var(--bs-success-text-emphasis, #1d6f3a);
+    background: var(--bs-success-text-emphasis, #1d6f3a);
+    color: #fff;
+  }
+
+  // Current step: filled primary circle with a soft pulsing halo.
+  &--active &__circle {
+    border-color: var(--bs-primary, #2570b8);
+    background: var(--bs-primary, #2570b8);
+    color: #fff;
+    animation: hr-step-pulse 2s ease-out infinite;
+  }
+
+  &--rejected &__circle {
+    border-color: var(--bs-danger-text-emphasis, #b3000c);
+    background: var(--bs-danger-text-emphasis, #b3000c);
+    color: #fff;
+  }
+
+  &--cancelled &__circle {
+    border-color: var(--bs-border-color, #d6dce3);
+    background: var(--bs-secondary-bg, #eef2f6);
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding-top: 0.2rem;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: var(--bs-emphasis-color, #1f2d3d);
+    overflow-wrap: anywhere;
+  }
+
+  &--active &__title {
+    color: var(--bs-primary, #2570b8);
+  }
+
+  &--rejected &__title {
+    color: var(--bs-danger-text-emphasis, #b3000c);
+  }
+
+  &__date {
+    margin-top: 0.1rem;
+    font-size: 0.78rem;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+}
+
+@keyframes hr-step-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(37, 112, 184, 0.45); }
+  70% { box-shadow: 0 0 0 8px rgba(37, 112, 184, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 112, 184, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hr-step--active .hr-step__circle {
+    animation: none;
+  }
+}
+
+.hr-cancelled-hint {
+  margin: 1rem 0 0;
+  color: var(--bs-secondary-color, #5a6b7b);
+  font-size: 0.9rem;
+}
+
+/* ===========================================================
+ * Payload table
+ * =========================================================== */
+
+.hr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+
+  thead th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #5a6b7b);
+    background: var(--bs-tertiary-bg, #f6f8fa);
+    border-bottom: 1px solid var(--bs-border-color, #e0e5ea);
+    padding: 0.7rem 1rem;
+  }
+
+  tbody td {
+    padding: 0.7rem 1rem;
+    border-top: 1px solid var(--bs-border-color, #eef1f4);
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ===========================================================
+ * Trace box
+ * =========================================================== */
+
+.hr-trace {
+  &__list {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+
+    dt {
+      flex: 0 0 14rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--bs-body-color, #33404d);
+    }
+
+    dd {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+      flex-wrap: wrap;
+    }
+  }
+}
+
+.hr-key {
+  font-family: var(--bs-font-monospace, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 0.82rem;
+  background: var(--bs-secondary-bg, #eef2f6);
+  border: 1px solid var(--bs-border-color, #dde3ea);
+  border-radius: 4px;
+  padding: 0.1rem 0.45rem;
+  color: var(--bs-body-color, #33404d);
+  overflow-wrap: anywhere;
+}
+
+.hr-muted {
+  color: var(--bs-secondary-color, #6b7480);
+}
+
+/* ===========================================================
+ * Status badge + actions (shared look with antrag-list)
+ * =========================================================== */
+
+.hr-status {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+
+  &.is-submitted {
+    background: var(--bs-info-bg-subtle, #d7eefb);
+    color: var(--bs-info-text-emphasis, #1c5a86);
+    border-color: var(--bs-info-border-subtle, #b3ddf4);
+  }
+
+  &.is-approved {
+    background: var(--bs-success-bg-subtle, #e3f4e8);
+    color: var(--bs-success-text-emphasis, #1d6f3a);
+    border-color: var(--bs-success-border-subtle, #bfe6cb);
+  }
+
+  &.is-rejected {
+    background: var(--bs-danger-bg-subtle, #fbe6e7);
+    color: var(--bs-danger-text-emphasis, #b3000c);
+    border-color: var(--bs-danger-border-subtle, #f3c0c3);
+  }
+
+  &.is-review {
+    background: var(--bs-warning-bg-subtle, #fbecd6);
+    color: var(--bs-warning-text-emphasis, #8a5a00);
+    border-color: var(--bs-warning-border-subtle, #f0d6a8);
+  }
+
+  &.is-draft,
+  &.is-cancelled,
+  &.is-default {
+    background: var(--bs-secondary-bg-subtle, #eef1f4);
+    color: var(--bs-secondary-color, #5a6b7b);
+    border-color: var(--bs-border-color, #dbe1e8);
+  }
+}
+
+.hr-form-actions {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.hr-btn {
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 0.5rem 1.1rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--bs-border-color, #c9d2db);
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #33404d);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary, #2570b8);
+    outline-offset: 1px;
+  }
+
+  &--sm {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.6rem;
+  }
+
+  &--danger {
+    border-color: var(--bs-danger-text-emphasis, #b3000c);
+    color: var(--bs-danger-text-emphasis, #b3000c);
+
+    &:hover:not(:disabled) {
+      background: var(--bs-danger-bg-subtle, #fbe6e7);
+    }
+  }
+}
+
+/* Stack the stepper vertically on narrow screens */
+@media (max-width: 40rem) {
+  .hr-stepper {
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .hr-step {
+    flex: none;
+
+    &:not(:first-child)::before {
+      display: none;
+    }
+  }
+}

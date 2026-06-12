@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 import { RuntimeConfigService } from '../../core/runtime-config/runtime-config.service';
-import { Antrag } from './antrag.model';
+import { Antrag, AntragProgress } from './antrag.model';
 
 /**
  * Client for the Antrag API (`/api/v1/antrag`). Covers the applicant path:
@@ -21,6 +21,15 @@ export class AntragService {
 
   listOwn(): Observable<Antrag[]> {
     return this.http.get<Antrag[]>(`${this.base}/antrag`);
+  }
+
+  get(id: string): Observable<Antrag> {
+    return this.http.get<Antrag>(`${this.base}/antrag/${id}`);
+  }
+
+  /** Workflow progress (user tasks in execution order) for the detail stepper (Cut D). */
+  progress(id: string): Observable<AntragProgress> {
+    return this.http.get<AntragProgress>(`${this.base}/antrag/${id}/progress`);
   }
 
   create(antragstypId: string, payload: Record<string, unknown>): Observable<Antrag> {

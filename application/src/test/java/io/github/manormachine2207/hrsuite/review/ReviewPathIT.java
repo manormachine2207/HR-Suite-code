@@ -120,6 +120,20 @@ class ReviewPathIT {
         assertThat(firstComplete.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(JSON.readTree(firstComplete.getBody()).get("antragStatus").asText()).isEqualTo("IN_REVIEW");
 
+        // Fortschritt mid-flight (Cut D): erfassen abgeschlossen, freigabe offen
+        JsonNode progress = JSON.readTree(rest.exchange("/api/v1/antrag/" + antragId + "/progress",
+                HttpMethod.GET, new HttpEntity<>(applicant), String.class).getBody());
+        assertThat(progress.get("steps").size()).isEqualTo(2);
+        assertThat(progress.get("steps").get(0).get("stepKey").asText()).isEqualTo("erfassen");
+        assertThat(progress.get("steps").get(0).get("completed").asBoolean()).isTrue();
+        assertThat(progress.get("steps").get(1).get("stepKey").asText()).isEqualTo("freigabe");
+        assertThat(progress.get("steps").get(1).get("completed").asBoolean()).isFalse();
+
+        // Fremder Nutzer (Reviewer ist nicht Antragsteller) sieht den Fortschritt nicht
+        assertThat(rest.exchange("/api/v1/antrag/" + antragId + "/progress",
+                HttpMethod.GET, new HttpEntity<>(reviewer), String.class).getStatusCode())
+                .isEqualTo(HttpStatus.NOT_FOUND);
+
         // APPROVAL-Task (candidate group hr-reviewer) mit deklariertem Outcome
         JsonNode approvalTasks = JSON.readTree(rest.exchange("/api/v1/task", HttpMethod.GET,
                 new HttpEntity<>(reviewer), String.class).getBody());
@@ -144,6 +158,14 @@ class ReviewPathIT {
         JsonNode finalAntrag = JSON.readTree(rest.exchange("/api/v1/antrag/" + antragId,
                 HttpMethod.GET, new HttpEntity<>(applicant), String.class).getBody());
         assertThat(finalAntrag.get("status").asText()).isEqualTo("APPROVED");
+
+        // Fortschritt bleibt nach Prozessende lesbar (Historie): beide Schritte abgeschlossen
+        JsonNode finalProgress = JSON.readTree(rest.exchange("/api/v1/antrag/" + antragId + "/progress",
+                HttpMethod.GET, new HttpEntity<>(applicant), String.class).getBody());
+        assertThat(finalProgress.get("steps").size()).isEqualTo(2);
+        assertThat(finalProgress.get("steps").get(1).get("completed").asBoolean()).isTrue();
+        assertThat(finalProgress.get("steps").get(1).get("completedAt").asText()).isNotEmpty();
+        assertThat(finalProgress.get("workflowProcessId").asText()).isNotEmpty();
 
         // Inbox ist leer
         assertThat(JSON.readTree(rest.exchange("/api/v1/task", HttpMethod.GET,

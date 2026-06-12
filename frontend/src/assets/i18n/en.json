@@ -194,12 +194,52 @@
     "cancelDraft": "Cancel request",
     "submitSuccess": "The request has been submitted.",
     "cancelSuccess": "The request has been cancelled.",
+    "cancelError": "The request could not be cancelled.",
     "fieldError": {
       "required": "This field is required.",
       "maxLength": "At most {{limit}} characters.",
       "min": "Minimum: {{min}}.",
       "max": "Maximum: {{max}}.",
       "invalid": "Invalid value."
+    },
+    "details": "Details",
+    "detailsAria": "Show details of request “{{title}}”",
+    "detail": {
+      "back": "Back to list",
+      "loading": "Loading …",
+      "loadError": "The request could not be loaded.",
+      "submittedAt": "Submitted on",
+      "createdAt": "Created on",
+      "stepperTitle": "Approval chain",
+      "noWorkflow": "No workflow started yet.",
+      "cancelledHint": "The request was cancelled — the workflow was aborted.",
+      "step": {
+        "done": "completed",
+        "active": "in progress",
+        "pending": "pending",
+        "rejected": "rejected",
+        "cancelled": "aborted"
+      },
+      "payloadTitle": "Request data",
+      "payloadEmpty": "No request data available.",
+      "colKey": "Field",
+      "colValue": "Value",
+      "trace": {
+        "title": "Technical references",
+        "antragId": "Request ID",
+        "processId": "Workflow process ID",
+        "noProcess": "No workflow process",
+        "version": "Request type version",
+        "minor": "Submitted minor version",
+        "copy": "Copy",
+        "copied": "Copied!",
+        "copyAria": "Copy {{label}} to the clipboard"
+      },
+      "withdraw": "Withdraw request",
+      "withdrawing": "Withdrawing …",
+      "cancelConfirm": "Do you really want to withdraw this request?",
+      "cancelSuccess": "The request has been withdrawn.",
+      "cancelError": "The request could not be withdrawn."
     }
   },
   "designer": {

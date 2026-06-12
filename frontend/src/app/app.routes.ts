@@ -35,6 +35,12 @@ export const routes: Routes = [
       import('./features/antrag/antrag-list.component').then(m => m.AntragListComponent),
   },
   {
+    // Detail page with the approval-chain stepper (Cut D).
+    path: 'antraege/:id',
+    loadComponent: () =>
+      import('./features/antrag/antrag-detail.component').then(m => m.AntragDetailComponent),
+  },
+  {
     path: 'aufgaben',
     loadComponent: () =>
       import('./features/review/task-list.component').then(m => m.TaskListComponent),
