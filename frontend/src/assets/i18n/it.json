@@ -73,7 +73,26 @@
     "savedMajor": "Bozza salvata, versione maggiore",
     "published": "Pubblicato, chiave del processo:",
     "publishNeedsDraft": "Salvare prima come bozza.",
-    "publishGraphWarnings": "Il grafo del flusso contiene ancora avvertenze — il server convalida completamente alla pubblicazione."
+    "publishGraphWarnings": "Il grafo del flusso contiene ancora avvertenze — il server convalida completamente alla pubblicazione.",
+    "stepsAria": "Passaggi del builder",
+    "stepVisited": "visitato",
+    "stepDesc": {
+      "form": "Definire i campi che i richiedenti compilano",
+      "flow": "Modellare il flusso come grafo",
+      "publish": "Verificare e pubblicare"
+    },
+    "summary": {
+      "title": "Riepilogo",
+      "fieldCount": "{{count}} campi",
+      "formWarning": "Nessun campo valido — verificare il passaggio «Modulo».",
+      "flowCount": "{{nodes}} nodi, {{edges}} collegamenti",
+      "flowHints": "{{count}} avvisi sul canvas",
+      "state": "Stato",
+      "stateSaved": "Salvato (v{{major}})",
+      "stateDirty": "Modifiche non salvate",
+      "stateNew": "Non ancora salvato",
+      "edit": "Modifica"
+    }
   },
   "flow": {
     "canvas": {
@@ -97,7 +116,21 @@
       "edgeLabel": "Etichetta del collegamento",
       "edgeCondition": "Condizione (uscita XOR)",
       "edgeConditionHint": "Forma: variabile == 'valore' (oppure !=). Esattamente un collegamento senza condizione è il percorso predefinito.",
-      "deleteEdge": "Elimina collegamento"
+      "deleteEdge": "Elimina collegamento",
+      "type": {
+        "START": "Inizio",
+        "FORM": "Modulo",
+        "APPROVAL": "Approvazione",
+        "ACTION": "Azione",
+        "XOR": "Diramazione (XOR)",
+        "AND": "Parallelo (AND)",
+        "END": "Fine"
+      },
+      "controls": {
+        "zoomIn": "Ingrandire",
+        "zoomOut": "Ridurre",
+        "fit": "Adattare la vista"
+      }
     }
   },
   "antrag": {

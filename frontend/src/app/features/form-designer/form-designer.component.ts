@@ -51,12 +51,28 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   errorDetail = '';
 
   section: 'form' | 'flow' | 'publish' = 'form';
+  /** SP3 builder stepper: the three sections as numbered, connected steps. */
+  readonly steps: ReadonlyArray<{ id: 'form' | 'flow' | 'publish'; titleKey: string; descKey: string }> = [
+    { id: 'form', titleKey: 'builder.form', descKey: 'builder.stepDesc.form' },
+    { id: 'flow', titleKey: 'builder.flow', descKey: 'builder.stepDesc.flow' },
+    { id: 'publish', titleKey: 'builder.publish', descKey: 'builder.stepDesc.publish' },
+  ];
+  /** Steps the user has opened at least once (visited state in the stepper). */
+  readonly visited = new Set<'form' | 'flow' | 'publish'>(['form']);
   /**
    * Snapshot of the canvas warning count, taken on tab switch. The publish tab must
    * NOT call flowCanvas.warnings() from its template: the ViewChild is seeded via
    * ngAfterViewChecked, so a live call flips mid-CD-cycle and throws NG0100 (zoneless).
+   * SP3 extends the same snapshot pattern to the summary card numbers below.
    */
   publishGraphWarningCount = 0;
+  publishNodeCount = 0;
+  publishEdgeCount = 0;
+  publishFieldCount = 0;
+  publishFieldsInvalid = false;
+  publishDirty = false;
+  /** Major of the current DRAFT (from load or last save) — shown in the summary card. */
+  draftMajor: number | null = null;
   availableRefs: string[] = [];
   draftVersionId: string | null = null;
   publishedKey: string | null = null;
@@ -65,10 +81,26 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   publishDone = false;
 
   showSection(section: 'form' | 'flow' | 'publish'): void {
+    this.visited.add(section);
     if (section === 'publish') {
-      this.publishGraphWarningCount = this.flowCanvas?.warnings().length ?? 0;
+      this.snapshotPublishSummary();
     }
     this.section = section;
+  }
+
+  /**
+   * Captures every number the publish summary card shows (snapshot pattern, see
+   * `publishGraphWarningCount` doc above). Re-run after save/publish completes so
+   * the card never shows stale state while staying NG0100-safe.
+   */
+  private snapshotPublishSummary(): void {
+    this.publishGraphWarningCount = this.flowCanvas?.warnings().length ?? 0;
+    const g = this.flowCanvas?.toGraphDefinition() ?? null;
+    this.publishNodeCount = g?.nodes.length ?? 0;
+    this.publishEdgeCount = g?.edges.length ?? 0;
+    this.publishFieldCount = this.fields.length;
+    this.publishFieldsInvalid = this.fields.controls.some(c => this.keyError(c as FormGroup) !== null);
+    this.publishDirty = this.isDirty;
   }
 
   private pendingGraph: GraphDefinition | null = null;
@@ -100,6 +132,7 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
       const draft = versions.find(v => v.status === 'DRAFT');
       const source = draft ?? versions[0];
       this.draftVersionId = draft?.id ?? null;
+      this.draftMajor = draft?.major ?? null;
 
       const defs = source?.formDefinition?.fields ?? [];
       for (const f of (defs.length ? defs : [null])) {
@@ -233,6 +266,7 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
 
     return save$.pipe(tap(v => {
       this.savedMajor = v.major;
+      this.draftMajor = v.major;
       this.draftVersionId = v.id;
       this.lastSavedSnapshot = this.currentSnapshot();
       this.publishDone = false;
@@ -251,6 +285,10 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
     this.persistDraft$().subscribe({
       next: () => {
         this.saving = false;
+        // Saving from the publish step: keep the summary card current (snapshot pattern).
+        if (this.section === 'publish') {
+          this.snapshotPublishSummary();
+        }
         this.cdr.markForCheck();
       },
       error: (e) => {
@@ -283,6 +321,10 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
         this.publishing = false;
         this.publishDone = true;
         this.publishedKey = v.processDefinitionKey ?? null;
+        // The auto-save before publish may have cleared the dirty state — refresh the card.
+        if (this.section === 'publish') {
+          this.snapshotPublishSummary();
+        }
         this.cdr.markForCheck();
       },
       error: (e) => {

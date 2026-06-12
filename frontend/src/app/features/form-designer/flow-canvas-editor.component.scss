@@ -1,46 +1,356 @@
+/* SP3 Builder-UX: n8n-like canvas. Token discipline per BDR-008 — every color
+ * goes through var(--…) with the repo-wide fallback palette; literal hex only
+ * where no token exists (type accent hues) or where CSS vars cannot resolve
+ * (vflow SVG background input, see component TS). */
+
 .canvas-wrap {
   display: grid;
-  grid-template-columns: 10rem 1fr 16rem;
-  gap: 0.5rem;
-  height: 32rem;
+  grid-template-columns: 12rem minmax(0, 1fr) 19rem;
+  gap: 1rem;
+  height: 34rem;
 }
+
+/* ---- palette ------------------------------------------------------------ */
 
 .palette {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+  overflow-y: auto;
+}
+
+.palette__title {
+  margin: 0 0 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+.palette__item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--bs-border-color, #d6dce3);
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #1f2d3d);
+  font-size: 0.85rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: var(--bs-primary, #1f6feb);
+    background: var(--bs-tertiary-bg, #f4f7fa);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.palette__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- canvas ------------------------------------------------------------- */
+
+.canvas-host {
+  position: relative;
+  min-width: 0;
 }
 
 .canvas {
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  min-height: 32rem;
+  display: block;
+  height: 100%;
+  border: 1px solid var(--bs-border-color, #d6dce3);
+  border-radius: 0.6rem;
+  overflow: hidden;
 }
 
-.inspector {
-  border-left: 1px solid #eee;
-  padding-left: 0.5rem;
+.canvas-controls {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 10;
   display: flex;
   flex-direction: column;
+  gap: 0.25rem;
+
+  button {
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--bs-border-color, #d6dce3);
+    border-radius: 0.4rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-secondary-color, #5a6b7b);
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(15, 30, 50, 0.1);
+
+    svg {
+      width: 0.9rem;
+      height: 0.9rem;
+    }
+
+    &:hover {
+      color: var(--bs-primary, #1f6feb);
+      border-color: var(--bs-primary, #1f6feb);
+    }
+  }
+}
+
+/* ---- node card (rendered inside the vflow html-template) ----------------- */
+
+.flow-node {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  box-sizing: border-box;
+  width: 190px;          /* keep in sync with DEFAULT_NODE_SIZE (flow-graph.logic.ts) */
+  height: 64px;
+  padding: 0.55rem 0.7rem;
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #d6dce3);
+  border-radius: 0.6rem;
+  box-shadow: 0 1px 3px rgba(15, 30, 50, 0.12);
+  cursor: grab;
+
+  &--selected {
+    border-color: var(--bs-primary, #1f6feb);
+    outline: 2px solid var(--bs-primary, #1f6feb);
+    outline-offset: 1px;
+    box-shadow: 0 2px 8px rgba(15, 30, 50, 0.2);
+  }
+}
+
+.flow-node__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.flow-node__title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--bs-emphasis-color, #1f2d3d);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.flow-node__type {
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color, #5a6b7b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- shared type icon ----------------------------------------------------
+ * START green / END grey-red use existing success/danger token fallbacks;
+ * APPROVAL violet and ACTION orange have no Oblique/Bootstrap token — the
+ * literal hues are documented exceptions (decorative, AA-checked on subtle bg). */
+
+.node-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.45rem;
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  &--START {
+    background: var(--bs-success-bg-subtle, #e3f4e8);
+    color: var(--bs-success-text-emphasis, #1d6f3a);
+  }
+
+  &--END {
+    background: var(--bs-danger-bg-subtle, #fbe6e7);
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+
+  &--FORM {
+    background: #e7f0fd;
+    color: var(--bs-primary, #1f6feb);
+  }
+
+  &--APPROVAL {
+    background: #efe7fb; /* violet — no token, see header comment */
+    color: #5f3dc4;
+  }
+
+  &--ACTION {
+    background: #fdeee2; /* orange — no token, see header comment */
+    color: #c2570a;
+  }
+
+  &--XOR,
+  &--AND {
+    background: var(--bs-secondary-bg, #eef2f6);
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+}
+
+/* ---- inspector ------------------------------------------------------------ */
+
+.inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.9rem;
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.6rem;
+  background: var(--bs-body-bg, #fff);
+  overflow-y: auto;
+}
+
+.inspector__head {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
+
+  h4 {
+    margin: 0;
+    font-size: 0.95rem;
+  }
+}
+
+.key-chip {
+  font-family: var(--bs-font-monospace, ui-monospace, Menlo, Consolas, monospace);
+  font-size: 0.72rem;
+  background: var(--bs-secondary-bg, #eef2f6);
+  border: 1px solid var(--bs-border-color, #dde3ea);
+  border-radius: 4px;
+  padding: 0.05rem 0.4rem;
+  color: var(--bs-body-color, #33404d);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .inspector label {
   display: block;
+  font-size: 0.85rem;
+  color: var(--bs-secondary-color, #5a6b7b);
+  font-weight: 500;
 }
 
 .inspector input,
 .inspector select {
+  display: block;
   width: 100%;
+  box-sizing: border-box;
+  margin-top: 0.25rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--bs-border-color, #ced6df);
+  border-radius: 0.35rem;
+  font-size: 0.92rem;
+  font-weight: 400;
+  background: var(--bs-body-bg, #fff);
+  color: var(--bs-body-color, #1f2d3d);
+
+  &:focus {
+    outline: 2px solid var(--bs-primary, #1f6feb);
+    outline-offset: 1px;
+  }
+}
+
+/* tertiary/destructive delete (node + edge) */
+.inspector__delete {
+  align-self: flex-start;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid transparent;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--bs-danger, #b3000c);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bs-danger-bg-subtle, #fbe6e7);
+    border-color: var(--bs-danger-border-subtle, #f3c0c3);
+  }
+}
+
+.edges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px dashed var(--bs-border-color, #e0e5ea);
+  padding-top: 0.6rem;
+
+  h5 {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+}
+
+.edge-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+
+  button {
+    width: 100%;
+    text-align: left;
+    padding: 0.3rem 0.45rem;
+    border: 1px solid transparent;
+    border-radius: 0.35rem;
+    background: transparent;
+    color: var(--bs-body-color, #33404d);
+    font-size: 0.8rem;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--bs-tertiary-bg, #f4f7fa);
+    }
+
+    &.active {
+      border-color: var(--bs-primary, #1f6feb);
+      background: var(--bs-tertiary-bg, #f4f7fa);
+    }
+  }
+}
+
+.cond-chip {
+  margin-left: 0.3rem;
+  font-family: var(--bs-font-monospace, ui-monospace, Menlo, Consolas, monospace);
+  font-style: italic;
+  color: var(--bs-primary, #1f6feb);
 }
 
 .warnings {
-  color: #8a6d00;
+  margin: 0;
+  color: var(--bs-warning-text-emphasis, #8a6d00);
   font-size: 0.85rem;
   padding-left: 1rem;
 }
 
 .hint {
-  color: #777;
+  color: var(--bs-secondary-color, #777);
   font-size: 0.85rem;
 }

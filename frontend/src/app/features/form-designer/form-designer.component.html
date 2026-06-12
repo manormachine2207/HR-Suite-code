@@ -11,10 +11,37 @@
     </p>
   </header>
 
-  <nav class="builder-tabs">
-    <button type="button" [class.active]="section === 'form'" (click)="showSection('form')">{{ 'builder.form' | translate }}</button>
-    <button type="button" [class.active]="section === 'flow'" (click)="showSection('flow')">{{ 'builder.flow' | translate }}</button>
-    <button type="button" [class.active]="section === 'publish'" (click)="showSection('publish')">{{ 'builder.publish' | translate }}</button>
+  <!-- SP3: numbered builder stepper (Form → Flow → Publish). Oblique 15.3 ships no
+       own stepper component (only the MatStepper i18n shim), so this is custom,
+       styled exclusively with the repo token bridge. -->
+  <nav class="builder-stepper" [attr.aria-label]="'builder.stepsAria' | translate">
+    <ol>
+      @for (s of steps; track s.id; let i = $index) {
+        <li class="builder-step"
+            [class.builder-step--active]="section === s.id"
+            [class.builder-step--visited]="visited.has(s.id) && section !== s.id">
+          <button type="button" (click)="showSection(s.id)"
+                  [attr.aria-current]="section === s.id ? 'step' : null">
+            <span class="builder-step__num" aria-hidden="true">
+              @if (visited.has(s.id) && section !== s.id) {
+                <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" focusable="false"><path d="M3 8.5l3.5 3.5 6.5-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              } @else {
+                {{ i + 1 }}
+              }
+            </span>
+            <span class="builder-step__text">
+              <span class="builder-step__title">
+                {{ s.titleKey | translate }}
+                @if (visited.has(s.id) && section !== s.id) {
+                  <span class="sr-only">({{ 'builder.stepVisited' | translate }})</span>
+                }
+              </span>
+              <span class="builder-step__desc">{{ s.descKey | translate }}</span>
+            </span>
+          </button>
+        </li>
+      }
+    </ol>
   </nav>
 
   @if (loading) {
@@ -22,10 +49,11 @@
   } @else {
     @if (section === 'form') {
       <div class="hr-toolbar">
-        <button type="button" class="hr-btn hr-btn--secondary" (click)="addField()">
-          + {{ 'designer.addField' | translate }}
-        </button>
         <span class="hr-fieldcount">{{ 'designer.fieldCount' | translate }}: {{ fields.length }}</span>
+        <button type="button" class="hr-btn hr-btn--secondary" (click)="addField()">
+          <svg class="hr-btn__icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          {{ 'designer.addField' | translate }}
+        </button>
       </div>
 
       @if (fields.length === 0) {
@@ -167,8 +195,51 @@
 
     @if (section === 'publish') {
       <section class="publish">
-        <button type="button" (click)="save()" [disabled]="saving || !canSave">{{ 'builder.saveDraft' | translate }}</button>
-        <button type="button" (click)="publish()" [disabled]="publishing || publishDone || !canPublish">{{ 'builder.publish' | translate }}</button>
+        <!-- SP3 summary card: connects the three steps. All numbers are snapshots
+             taken in showSection()/snapshotPublishSummary() — never live ViewChild
+             calls (NG0100, zoneless). -->
+        <div class="publish-summary">
+          <h2 class="publish-summary__title">{{ 'builder.summary.title' | translate }}</h2>
+          <dl class="publish-summary__grid">
+            <div class="publish-summary__row">
+              <dt>1 · {{ 'builder.form' | translate }}</dt>
+              <dd>
+                <span>{{ 'builder.summary.fieldCount' | translate: { count: publishFieldCount } }}</span>
+                @if (publishFieldCount === 0 || publishFieldsInvalid) {
+                  <span class="publish-summary__warn">&#9888; {{ 'builder.summary.formWarning' | translate }}</span>
+                }
+                <button type="button" class="hr-btn hr-btn--ghost" (click)="showSection('form')">{{ 'builder.summary.edit' | translate }}</button>
+              </dd>
+            </div>
+            <div class="publish-summary__row">
+              <dt>2 · {{ 'builder.flow' | translate }}</dt>
+              <dd>
+                <span>{{ 'builder.summary.flowCount' | translate: { nodes: publishNodeCount, edges: publishEdgeCount } }}</span>
+                @if (publishGraphWarningCount > 0) {
+                  <span class="publish-summary__warn">&#9888; {{ 'builder.summary.flowHints' | translate: { count: publishGraphWarningCount } }}</span>
+                }
+                <button type="button" class="hr-btn hr-btn--ghost" (click)="showSection('flow')">{{ 'builder.summary.edit' | translate }}</button>
+              </dd>
+            </div>
+            <div class="publish-summary__row">
+              <dt>{{ 'builder.summary.state' | translate }}</dt>
+              <dd>
+                @if (!draftVersionId) {
+                  <span>{{ 'builder.summary.stateNew' | translate }}</span>
+                } @else if (publishDirty) {
+                  <span class="publish-summary__warn">{{ 'builder.summary.stateDirty' | translate }}</span>
+                } @else {
+                  <span>{{ 'builder.summary.stateSaved' | translate: { major: draftMajor } }}</span>
+                }
+              </dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="publish-actions">
+          <button type="button" class="hr-btn hr-btn--secondary" (click)="save()" [disabled]="saving || !canSave">{{ 'builder.saveDraft' | translate }}</button>
+          <button type="button" class="hr-btn hr-btn--primary" (click)="publish()" [disabled]="publishing || publishDone || !canPublish">{{ 'builder.publish' | translate }}</button>
+        </div>
         @if (!draftVersionId) { <p class="hint">{{ 'builder.publishNeedsDraft' | translate }}</p> }
         @if (publishGraphWarningCount > 0) { <p class="hint">{{ 'builder.publishGraphWarnings' | translate }}</p> }
         @if (savedMajor !== null) { <p class="ok">{{ 'builder.savedMajor' | translate }} {{ savedMajor }}</p> }

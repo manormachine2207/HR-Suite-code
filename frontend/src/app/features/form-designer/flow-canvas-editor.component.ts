@@ -1,7 +1,11 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, input, signal, viewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
-import { Vflow, createNodes, createEdges, Node, Edge, NodePositionChange, NodeSelectedChange } from 'ngx-vflow';
+import {
+  Vflow, VflowComponent, createNodes, createEdges, Node, Edge,
+  NodePositionChange, NodeSelectedChange, Background,
+} from 'ngx-vflow';
 
 import {
   GraphDefinition,
@@ -15,18 +19,26 @@ import {
   addNode,
   connect,
   emptyGraph,
+  nextFreePosition,
   removeEdge,
   removeNode,
   updateEdge,
   validateGraph,
   cloneGraph,
+  DEFAULT_NODE_SIZE,
 } from './flow-graph.logic';
 import { GraphEdge } from './flow-graph.model';
+
+/** Data carried into the vflow html-template node (SP3 custom node cards). */
+interface VflowNodeData {
+  type: NodeType;
+  key: string;
+}
 
 @Component({
   selector: 'app-flow-canvas-editor',
   standalone: true,
-  imports: [...Vflow, ReactiveFormsModule, TranslateModule],
+  imports: [...Vflow, NgTemplateOutlet, ReactiveFormsModule, TranslateModule],
   templateUrl: './flow-canvas-editor.component.html',
   styleUrl: './flow-canvas-editor.component.scss',
 })
@@ -35,10 +47,28 @@ export class FlowCanvasEditorComponent {
   readonly nodeTypes: readonly NodeType[] = NODE_TYPES;
   readonly assigneeRoles = ASSIGNEE_ROLES;
 
+  /** vflow instance — only touched from user-event handlers (zoom/fit controls). */
+  private readonly vflow = viewChild(VflowComponent);
+
   readonly graph = signal<GraphDefinition>(emptyGraph());
   readonly selectedNodeId = signal<string | null>(null);
   readonly selectedEdgeId = signal<string | null>(null);
   readonly warnings = computed<GraphWarning[]>(() => validateGraph(this.graph()));
+
+  readonly hasStart = computed<boolean>(() => this.graph().nodes.some(n => n.type === 'START'));
+
+  /**
+   * Dotted canvas background (n8n look). Literal colors: this is a component input
+   * rendered into SVG attributes by ngx-vflow, where CSS custom properties do not
+   * resolve — values mirror the --bs-border/--bs-tertiary-bg fallbacks used in SCSS.
+   */
+  readonly canvasBackground: Background = {
+    type: 'dots',
+    gap: 24,
+    size: 1.5,
+    color: '#c9d2dc',
+    backgroundColor: '#fafbfc',
+  };
 
   readonly selectedNode = computed<GraphNode | null>(() => {
     const id = this.selectedNodeId();
@@ -57,34 +87,60 @@ export class FlowCanvasEditorComponent {
     return this.graph().nodes.find(n => n.id === e.source)?.type === 'XOR';
   });
 
-  /** vflow-compatible node array, re-derived from domain graph signal. */
+  /**
+   * vflow-compatible node array, re-derived from domain graph signal.
+   * SP3: 'html-template' nodes render the custom card via <ng-template nodeHtml>
+   * (icon + title + type subtitle); handles live inside the template.
+   */
   readonly vflowNodes = computed<Node[]>(() =>
     createNodes(
       this.graph().nodes.map(domainNode => ({
         id: domainNode.id,
-        type: 'default' as const,
+        type: 'html-template' as const,
         point: { x: domainNode.position.x, y: domainNode.position.y },
-        text: `${domainNode.type}${domainNode.data.key ? ': ' + domainNode.data.key : ''}`,
+        width: DEFAULT_NODE_SIZE.width,
+        height: DEFAULT_NODE_SIZE.height,
+        data: { type: domainNode.type, key: domainNode.data.key ?? '' } satisfies VflowNodeData,
       }))
     )
   );
 
-  /** vflow-compatible edge array, re-derived from domain graph signal. */
+  /**
+   * vflow-compatible edge array, re-derived from domain graph signal.
+   * SP3: arrow markers + a default center edge label showing `label` and/or the
+   * ƒ marker for a set condition (the inspector edge list stays the editor).
+   */
   readonly vflowEdges = computed<Edge[]>(() =>
     createEdges(
-      this.graph().edges.map(domainEdge => ({
-        id: domainEdge.id,
-        source: domainEdge.source,
-        target: domainEdge.target,
-        ...(domainEdge.sourceHandle ? { sourceHandle: domainEdge.sourceHandle } : {}),
-      }))
+      this.graph().edges.map(domainEdge => {
+        const labelText = this.edgeLabelText(domainEdge);
+        return {
+          id: domainEdge.id,
+          source: domainEdge.source,
+          target: domainEdge.target,
+          ...(domainEdge.sourceHandle ? { sourceHandle: domainEdge.sourceHandle } : {}),
+          markers: { end: { type: 'arrow-closed' as const, width: 22, height: 22 } },
+          ...(labelText
+            ? { edgeLabels: { center: { type: 'default' as const, text: labelText } } }
+            : {}),
+        };
+      })
     )
   );
 
+  /** Canvas caption of one edge: its label and/or the ƒ condition marker. */
+  private edgeLabelText(e: GraphEdge): string {
+    const label = e.label?.trim() ?? '';
+    const hasCondition = !!e.condition?.trim();
+    if (label && hasCondition) return `${label} · ƒ`;
+    if (hasCondition) return 'ƒ';
+    return label;
+  }
+
   addNode(type: NodeType): void {
-    if (type === 'START' && this.graph().nodes.some(n => n.type === 'START')) return;
-    const offset = this.graph().nodes.length * 40;
-    this.graph.set(addNode(this.graph(), type, { x: 80 + offset, y: 80 + offset }));
+    if (type === 'START' && this.hasStart()) return;
+    const position = nextFreePosition(this.graph().nodes, DEFAULT_NODE_SIZE);
+    this.graph.set(addNode(this.graph(), type, position));
   }
 
   removeNode(id: string): void {
@@ -106,6 +162,22 @@ export class FlowCanvasEditorComponent {
     const selected = changes.find(c => c.selected);
     this.selectedNodeId.set(selected ? selected.id : null);
     if (selected) this.selectedEdgeId.set(null);
+  }
+
+  // ---- canvas viewport controls (SP3) --------------------------------------
+
+  zoomIn(): void {
+    const v = this.vflow();
+    if (v) v.zoomTo(v.viewport().zoom * 1.2);
+  }
+
+  zoomOut(): void {
+    const v = this.vflow();
+    if (v) v.zoomTo(v.viewport().zoom / 1.2);
+  }
+
+  fitView(): void {
+    this.vflow()?.fitView({ padding: 0.15, duration: 250 });
   }
 
   // ---- edge editing (SP1) -------------------------------------------------

@@ -73,7 +73,26 @@
     "savedMajor": "Entwurf gespeichert, Major",
     "published": "Veröffentlicht, Prozess-Key:",
     "publishNeedsDraft": "Bitte zuerst als Entwurf speichern.",
-    "publishGraphWarnings": "Der Flow-Graph hat noch Hinweise — der Server prüft beim Veröffentlichen vollständig."
+    "publishGraphWarnings": "Der Flow-Graph hat noch Hinweise — der Server prüft beim Veröffentlichen vollständig.",
+    "stepsAria": "Builder-Schritte",
+    "stepVisited": "besucht",
+    "stepDesc": {
+      "form": "Felder definieren, die Antragsteller ausfüllen",
+      "flow": "Ablauf als Graph modellieren",
+      "publish": "Prüfen und live schalten"
+    },
+    "summary": {
+      "title": "Zusammenfassung",
+      "fieldCount": "{{count}} Felder",
+      "formWarning": "Keine gültigen Felder — bitte im Schritt «Formular» prüfen.",
+      "flowCount": "{{nodes}} Knoten, {{edges}} Kanten",
+      "flowHints": "{{count}} Hinweise auf dem Canvas",
+      "state": "Stand",
+      "stateSaved": "Gespeichert (v{{major}})",
+      "stateDirty": "Ungespeicherte Änderungen",
+      "stateNew": "Noch nicht gespeichert",
+      "edit": "Bearbeiten"
+    }
   },
   "flow": {
     "canvas": {
@@ -97,7 +116,21 @@
       "edgeLabel": "Kanten-Beschriftung",
       "edgeCondition": "Bedingung (XOR-Ausgang)",
       "edgeConditionHint": "Form: variable == 'wert' (oder !=). Genau eine Kante ohne Bedingung ist der Default-Pfad.",
-      "deleteEdge": "Kante löschen"
+      "deleteEdge": "Kante löschen",
+      "type": {
+        "START": "Start",
+        "FORM": "Formular",
+        "APPROVAL": "Genehmigung",
+        "ACTION": "Aktion",
+        "XOR": "Verzweigung (XOR)",
+        "AND": "Parallel (AND)",
+        "END": "Ende"
+      },
+      "controls": {
+        "zoomIn": "Vergrössern",
+        "zoomOut": "Verkleinern",
+        "fit": "Ansicht einpassen"
+      }
     }
   },
   "antrag": {

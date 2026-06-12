@@ -158,6 +158,22 @@ describe('FormDesignerComponent — canvas seeding', () => {
     expect(cmp.isDirty).toBe(false);
   });
 
+  it('showSection(publish) snapshots field/node/edge counts and dirty state (SP3 summary card)', () => {
+    loadDraft();
+
+    cmp.showSection('publish');
+
+    // Snapshot pattern (NG0100/zoneless): the publish template reads these plain
+    // properties, never live flowCanvas calls.
+    expect(cmp.publishFieldCount).toBe(1);     // DRAFT_VERSION has one field
+    expect(cmp.publishNodeCount).toBe(2);      // START + ACTION
+    expect(cmp.publishEdgeCount).toBe(1);
+    expect(cmp.publishFieldsInvalid).toBe(false);
+    expect(cmp.publishDirty).toBe(false);      // freshly loaded draft is clean
+    expect(cmp.draftMajor).toBe(1);
+    expect(cmp.visited.has('publish')).toBe(true);
+  });
+
   it('publish() surfaces the 422 ProblemDetail.detail (i18n gate) as visible error', () => {
     loadDraft();
 
