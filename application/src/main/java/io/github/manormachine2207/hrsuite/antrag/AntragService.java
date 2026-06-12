@@ -111,6 +111,17 @@ public class AntragService {
         return antragRepository.findAllByOrderByCreatedAtDesc();
     }
 
+    /**
+     * Reviewer access WITHOUT the ownership check (ADR-013): reviewers are not the
+     * applicant. Tenant isolation stays enforced by RLS; the caller's role is guarded
+     * at the review API. Loaded in the caller's transaction so review-state
+     * transitions on the returned entity flush with it.
+     */
+    public Antrag getForReview(UUID antragId) {
+        return antragRepository.findById(antragId)
+                .orElseThrow(() -> new AntragExceptions.NotFound("antrag not found: " + antragId));
+    }
+
     private Antrag getOwned(UUID antragId, String subject) {
         Antrag antrag = antragRepository.findById(antragId)
                 .orElseThrow(() -> new AntragExceptions.NotFound("antrag not found: " + antragId));

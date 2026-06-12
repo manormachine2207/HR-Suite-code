@@ -51,6 +51,16 @@ public class ApiExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     }
 
+    @ExceptionHandler(io.github.manormachine2207.hrsuite.review.ReviewExceptions.NotFound.class)
+    ProblemDetail handleReviewNotFound(io.github.manormachine2207.hrsuite.review.ReviewExceptions.NotFound ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+    }
+
+    @ExceptionHandler(io.github.manormachine2207.hrsuite.review.ReviewExceptions.Invalid.class)
+    ProblemDetail handleReviewInvalid(io.github.manormachine2207.hrsuite.review.ReviewExceptions.Invalid ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
     @ExceptionHandler(AntragExceptions.NotFound.class)
     ProblemDetail handleAntragNotFound(AntragExceptions.NotFound ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
