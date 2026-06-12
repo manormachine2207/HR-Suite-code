@@ -105,7 +105,11 @@ public final class GraphBpmnCompiler {
         if (!m.matches()) {
             throw new IllegalArgumentException("uncompilable condition: " + condition);
         }
-        return "${execution.getVariable('%s') %s '%s'}".formatted(m.group(1), m.group(2), m.group(3));
+        // group 3 = quoted string literal, group 4 = numeric literal (validator guarantees
+        // ordering operators only ever pair with numbers). Numeric null-safety: a missing
+        // variable coerces to 0 in EL arithmetic comparison -> false -> default flow.
+        String literal = m.group(3) != null ? "'" + m.group(3) + "'" : m.group(4);
+        return "${execution.getVariable('%s') %s %s}".formatted(m.group(1), m.group(2), literal);
     }
 
     private static String actionTask(String id, GraphNodeData data) {

@@ -146,7 +146,10 @@ export function validateGraph(g: GraphDefinition): GraphWarning[] {
   }
   for (const e of g.edges) {
     const condition = e.condition?.trim();
-    if (condition && !EDGE_CONDITION_PATTERN.test(condition)) {
+    if (!condition) continue;
+    // mirror of the backend rule: closed syntax; ordering operators need a number
+    const orderingWithString = /^\s*[A-Za-z][A-Za-z0-9_]*\s*(>=|<=|>|<)\s*'/.test(condition);
+    if (!EDGE_CONDITION_PATTERN.test(condition) || orderingWithString) {
       w.push({
         code: 'XOR_BAD_CONDITION',
         messageKey: 'flow.canvas.warning.xorBadCondition',

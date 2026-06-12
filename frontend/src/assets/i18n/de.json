@@ -137,12 +137,12 @@
         "duplicateKey": "Doppelter Schlüssel \"{{key}}\".",
         "disconnected": "Knoten ist nicht verbunden.",
         "xorUnconditioned": "XOR: höchstens ein Ausgang ohne Bedingung (Default) erlaubt.",
-        "xorBadCondition": "Ungültige Bedingung \"{{condition}}\" — erlaubt ist: variable == 'wert' (oder !=)."
+        "xorBadCondition": "Ungültige Bedingung \"{{condition}}\" — erlaubt: variable == 'wert' oder variable > zahl (Ordnungsvergleiche nur mit Zahlen)."
       },
       "edges": "Kanten",
       "edgeLabel": "Kanten-Beschriftung",
       "edgeCondition": "Bedingung (XOR-Ausgang)",
-      "edgeConditionHint": "Form: variable == 'wert' (oder !=). Genau eine Kante ohne Bedingung ist der Default-Pfad.",
+      "edgeConditionHint": "Form: variable == 'wert' (oder !=) sowie numerisch: variable > 5000 (>, >=, <, <=). Genau eine Kante ohne Bedingung ist der Default-Pfad.",
       "deleteEdge": "Kante löschen",
       "type": {
         "START": "Start",

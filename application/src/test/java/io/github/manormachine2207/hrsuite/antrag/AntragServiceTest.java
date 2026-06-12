@@ -99,6 +99,32 @@ class AntragServiceTest {
         assertThat(a.getWorkflowProcessId()).isEqualTo("pi-1");   // process instance started (ADR-009 §5)
     }
 
+    /**
+     * Flow-Bedingungen (z. B. „kosten > 5000" ⇒ HAL, Prototyp-Anforderung) brauchen
+     * die Payload-Felder als Prozessvariablen — submit() reicht sie typerhaltend an
+     * den Instanz-Start durch (antragId bleibt zusätzlich gesetzt).
+     */
+    @Test
+    void submitPassesPayloadFieldsAsProcessVariables() {
+        UUID atId = UUID.randomUUID();
+        Antrag a = new Antrag(UUID.randomUUID(), TENANT, atId, SUBJECT,
+                Map.of("kosten", 7000, "grund", "IPMA Level C"));
+        when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
+        when(antragsTypService.findPublishedMajor(atId))
+                .thenReturn(Optional.of(new PublishedMajorRef(UUID.randomUUID(), 0, "proc-key")));
+        when(workflowEngine.startInstance(any(), eq("proc-key"), any(), any())).thenReturn("pi-1");
+
+        service.submit(a.getId(), SUBJECT);
+
+        @SuppressWarnings("unchecked")
+        var vars = org.mockito.ArgumentCaptor.forClass(Map.class);
+        org.mockito.Mockito.verify(workflowEngine)
+                .startInstance(any(), eq("proc-key"), any(), vars.capture());
+        assertThat(vars.getValue()).containsEntry("kosten", 7000);
+        assertThat(vars.getValue()).containsEntry("grund", "IPMA Level C");
+        assertThat(vars.getValue()).containsKey("antragId");
+    }
+
     /** Systemgrenze des Einreich-Pfads (Review 2026-06-12): ein 422 aus der Payload-Validierung verhindert Pin + Prozessstart. */
     @Test
     void submitRejectsPayloadThatDoesNotMatchPinnedFormDefinition() {

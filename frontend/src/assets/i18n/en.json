@@ -137,12 +137,12 @@
         "duplicateKey": "Duplicate key \"{{key}}\".",
         "disconnected": "Node is not connected.",
         "xorUnconditioned": "XOR: at most one branch without a condition (default) is allowed.",
-        "xorBadCondition": "Invalid condition \"{{condition}}\" — allowed form: variable == 'value' (or !=)."
+        "xorBadCondition": "Invalid condition \"{{condition}}\" — allowed: variable == 'value' or variable > number (ordering comparisons are numeric only)."
       },
       "edges": "Edges",
       "edgeLabel": "Edge label",
       "edgeCondition": "Condition (XOR branch)",
-      "edgeConditionHint": "Form: variable == 'value' (or !=). Exactly one edge without a condition acts as the default path.",
+      "edgeConditionHint": "Form: variable == 'value' (or !=) plus numeric: variable > 5000 (>, >=, <, <=). Exactly one edge without a condition acts as the default path.",
       "deleteEdge": "Delete edge",
       "type": {
         "START": "Start",
