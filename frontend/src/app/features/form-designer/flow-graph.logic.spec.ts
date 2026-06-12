@@ -21,6 +21,14 @@ describe('flow-graph.logic', () => {
     expect(g.nodes[1].position).toEqual({ x: 100, y: 0 });
   });
 
+  it('addNode seeds new APPROVAL nodes with the default approver group (ADR-016)', () => {
+    let g = emptyGraph();
+    g = addNode(g, 'APPROVAL', { x: 0, y: 0 });
+    g = addNode(g, 'FORM', { x: 300, y: 0 });
+    expect(g.nodes[0].data.assigneeRole).toBe('approver-vg');
+    expect(g.nodes[1].data.assigneeRole).toBeUndefined();   // only APPROVAL carries a role
+  });
+
   it('connect adds an edge between two existing nodes', () => {
     let g = emptyGraph();
     g = addNode(g, 'START', { x: 0, y: 0 });

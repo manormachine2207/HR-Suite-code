@@ -58,4 +58,46 @@ class WorkflowEngineIT {
         String processInstanceId = engine.startInstance(tenant, key, "antrag-1", Map.of("foo", "bar"));
         assertThat(processInstanceId).isNotBlank();
     }
+
+    /**
+     * ADR-016: Tasks MIT Candidate-Group sieht nur, wer Gruppenmitglied ist;
+     * gruppenlose Tasks bleiben den Basis-Review-Rollen vorbehalten.
+     */
+    @Test
+    void openTasksFiltersByCandidateGroupMembership() {
+        UUID tenant = UUID.fromString("00000000-0000-0000-0000-0000000000bb");
+        String key = "at_groups_v1";
+        String bpmn = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+                             xmlns:flowable="http://flowable.org/bpmn"
+                             targetNamespace="hr-suite">
+                  <process id="%s" name="Groups" isExecutable="true">
+                    <startEvent id="start"/>
+                    <userTask id="erfassung" name="Erfassung"/>
+                    <userTask id="hal_freigabe" name="Freigabe HAL" flowable:candidateGroups="approver-hal"/>
+                    <endEvent id="end"/>
+                    <sequenceFlow id="f1" sourceRef="start" targetRef="erfassung"/>
+                    <sequenceFlow id="f2" sourceRef="erfassung" targetRef="hal_freigabe"/>
+                    <sequenceFlow id="f3" sourceRef="hal_freigabe" targetRef="end"/>
+                  </process>
+                </definitions>
+                """.formatted(key);
+        engine.deploy(tenant, key, "Groups", bpmn);
+        engine.startInstance(tenant, key, "antrag-g1", Map.of());
+
+        // Offen ist zunaechst nur die gruppenlose Erfassung
+        assertThat(engine.openTasks(tenant, java.util.Set.of("hr-reviewer")))
+                .extracting(WorkflowTask::taskDefinitionKey).containsExactly("erfassung");
+        assertThat(engine.openTasks(tenant, java.util.Set.of("approver-hal"))).isEmpty();
+
+        // Erfassung abschliessen -> HAL-Task offen, nur fuer approver-hal sichtbar
+        engine.completeTask(engine.openTasks(tenant, java.util.Set.of("hr-reviewer"))
+                .get(0).id(), Map.of());
+        assertThat(engine.openTasks(tenant, java.util.Set.of("hr-reviewer"))).isEmpty();
+        var halTasks = engine.openTasks(tenant, java.util.Set.of("approver-hal"));
+        assertThat(halTasks).extracting(WorkflowTask::taskDefinitionKey)
+                .containsExactly("hal_freigabe");
+        assertThat(halTasks.get(0).candidateGroups()).containsExactly("approver-hal");
+    }
 }

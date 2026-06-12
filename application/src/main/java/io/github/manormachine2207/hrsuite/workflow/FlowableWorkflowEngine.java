@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -66,15 +67,15 @@ public class FlowableWorkflowEngine implements WorkflowEngine {
 
     // ---- review path (ADR-013) --------------------------------------------
 
+    /** Gruppenlose Tasks (FORM/Erfassung) sieht, wer eine Basis-Review-Rolle hat (ADR-016). */
+    private static final Set<String> BASE_REVIEW_GROUPS = Set.of("hr-reviewer", "tenant-admin");
+
     @Override
     public List<WorkflowTask> openTasks(UUID tenantId, Collection<String> callerGroups) {
-        // Flowable 7.1 has no "without candidate groups" predicate, so a clean
-        // "group-less OR in caller's groups" query is not expressible. Today every
-        // compiler-emitted candidate group IS a review role (hr-reviewer/tenant-admin)
-        // and the endpoint is role-guarded — the tenant's unassigned active set IS the
-        // caller's inbox. Revisit with an identity-link post-filter once candidate
-        // groups outside the review roles exist (callerGroups stays in the signature
-        // for exactly that refinement).
+        // Flowable 7.1 has no "group-less OR in caller's groups" predicate, so the
+        // tenant's unassigned active set is post-filtered via identity links
+        // (ADR-016): tasks WITH candidate groups need a group intersection with the
+        // caller; group-less tasks stay visible to the base review roles.
         List<Task> tasks = taskService.createTaskQuery()
                 .taskTenantId(tenantId.toString())
                 .taskUnassigned()
@@ -82,7 +83,24 @@ public class FlowableWorkflowEngine implements WorkflowEngine {
                 .orderByTaskCreateTime().asc().list();
         Map<String, String> businessKeys = businessKeysFor(
                 tasks.stream().map(Task::getProcessInstanceId).distinct().toList());
-        return tasks.stream().map(t -> toWorkflowTask(t, businessKeys)).toList();
+        return tasks.stream()
+                .map(t -> toWorkflowTask(t, businessKeys, candidateGroupsOf(t.getId())))
+                .filter(t -> callerMayWork(t, callerGroups))
+                .toList();
+    }
+
+    private static boolean callerMayWork(WorkflowTask task, Collection<String> callerGroups) {
+        if (task.candidateGroups().isEmpty()) {
+            return callerGroups.stream().anyMatch(BASE_REVIEW_GROUPS::contains);
+        }
+        return callerGroups.stream().anyMatch(task.candidateGroups()::contains);
+    }
+
+    private Set<String> candidateGroupsOf(String taskId) {
+        return taskService.getIdentityLinksForTask(taskId).stream()
+                .filter(l -> l.getGroupId() != null)
+                .map(org.flowable.identitylink.api.IdentityLink::getGroupId)
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -95,7 +113,9 @@ public class FlowableWorkflowEngine implements WorkflowEngine {
         if (task == null) {
             return Optional.empty();
         }
-        return Optional.of(toWorkflowTask(task, businessKeysFor(List.of(task.getProcessInstanceId()))));
+        return Optional.of(toWorkflowTask(task,
+                businessKeysFor(List.of(task.getProcessInstanceId())),
+                candidateGroupsOf(task.getId())));
     }
 
     @Override
@@ -144,9 +164,11 @@ public class FlowableWorkflowEngine implements WorkflowEngine {
                 .collect(Collectors.toMap(ProcessInstance::getId, ProcessInstance::getBusinessKey));
     }
 
-    private static WorkflowTask toWorkflowTask(Task task, Map<String, String> businessKeys) {
+    private static WorkflowTask toWorkflowTask(Task task, Map<String, String> businessKeys,
+                                               Set<String> candidateGroups) {
         return new WorkflowTask(task.getId(), task.getName(), task.getTaskDefinitionKey(),
                 task.getProcessInstanceId(), businessKeys.get(task.getProcessInstanceId()),
-                task.getCreateTime() == null ? null : task.getCreateTime().toInstant());
+                task.getCreateTime() == null ? null : task.getCreateTime().toInstant(),
+                candidateGroups);
     }
 }

@@ -60,7 +60,7 @@ class ReviewServiceTest {
         antrag = new Antrag(UUID.randomUUID(), TENANT, antragstypId, "dev-applicant~x", Map.of("grund", "x"));
         antrag.submit(versionId, 0);
         task = new WorkflowTask("t-1", "Freigabe", "freigabe", "pi-1",
-                antrag.getId().toString(), Instant.now());
+                antrag.getId().toString(), Instant.now(), Set.of("hr-reviewer"));
 
         lenient().when(workflowEngine.findOpenTask(TENANT, "t-1")).thenReturn(Optional.of(task));
         lenient().when(antragService.getForReview(antrag.getId())).thenReturn(antrag);
@@ -80,7 +80,7 @@ class ReviewServiceTest {
     void completeWithApproveEndsProcessAndApprovesAntrag() {
         when(workflowEngine.isInstanceRunning(TENANT, "pi-1")).thenReturn(false);
 
-        service.complete("t-1", "approve", null);
+        service.complete("t-1", "approve", null, Set.of("hr-reviewer"));
 
         verify(workflowEngine).completeTask("t-1", Map.of("freigabe_outcome", "approve"));
         assertThat(antrag.getStatus()).isEqualTo(AntragStatus.APPROVED);
@@ -90,7 +90,7 @@ class ReviewServiceTest {
     void completeWithRejectRejectsAntrag() {
         when(workflowEngine.isInstanceRunning(TENANT, "pi-1")).thenReturn(false);
 
-        service.complete("t-1", "reject", "zu kurzfristig");
+        service.complete("t-1", "reject", "zu kurzfristig", Set.of("hr-reviewer"));
 
         assertThat(antrag.getStatus()).isEqualTo(AntragStatus.REJECTED);
     }
@@ -99,7 +99,7 @@ class ReviewServiceTest {
     void completeWhileProcessKeepsRunningMovesAntragToInReview() {
         when(workflowEngine.isInstanceRunning(TENANT, "pi-1")).thenReturn(true);
 
-        service.complete("t-1", "approve", null);
+        service.complete("t-1", "approve", null, Set.of("hr-reviewer"));
 
         assertThat(antrag.getStatus()).isEqualTo(AntragStatus.IN_REVIEW);
     }
@@ -110,7 +110,7 @@ class ReviewServiceTest {
         // ohne Outcome wird die Whitelist bewusst nicht abgefragt
         when(workflowEngine.isInstanceRunning(TENANT, "pi-1")).thenReturn(false);
 
-        service.complete("t-1", null, null);
+        service.complete("t-1", null, null, Set.of("hr-reviewer"));
 
         verify(workflowEngine).completeTask("t-1", Map.of());
         assertThat(antrag.getStatus()).isEqualTo(AntragStatus.COMPLETED);
@@ -118,7 +118,7 @@ class ReviewServiceTest {
 
     @Test
     void outcomeOutsideDeclaredWhitelistIs422() {
-        assertThatThrownBy(() -> service.complete("t-1", "escalate", null))
+        assertThatThrownBy(() -> service.complete("t-1", "escalate", null, Set.of("hr-reviewer")))
                 .isInstanceOf(ReviewExceptions.Invalid.class)
                 .hasMessageContaining("escalate");
         verify(workflowEngine, never()).completeTask(anyString(), any());
@@ -128,7 +128,7 @@ class ReviewServiceTest {
     /** Outcome wird Prozessvariable — gleiche Injection-Disziplin wie Compiler-Keys. */
     @Test
     void outcomeViolatingPatternIs422() {
-        assertThatThrownBy(() -> service.complete("t-1", "x' || hack", null))
+        assertThatThrownBy(() -> service.complete("t-1", "x' || hack", null, Set.of("hr-reviewer")))
                 .isInstanceOf(ReviewExceptions.Invalid.class);
         verify(workflowEngine, never()).completeTask(anyString(), any());
     }
@@ -136,7 +136,7 @@ class ReviewServiceTest {
     @Test
     void unknownTaskIs404() {
         when(workflowEngine.findOpenTask(TENANT, "missing")).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> service.complete("missing", "approve", null))
+        assertThatThrownBy(() -> service.complete("missing", "approve", null, Set.of("hr-reviewer")))
                 .isInstanceOf(ReviewExceptions.NotFound.class);
     }
 
@@ -155,12 +155,52 @@ class ReviewServiceTest {
     /** Tasks ohne Business-Key (Alt-Instanzen/Fremdprozesse) bleiben sichtbar — ohne Antrag-Kontext. */
     @Test
     void taskWithoutBusinessKeyStaysListable() {
-        var orphan = new WorkflowTask("t-2", "Review", "review", "pi-2", null, Instant.now());
+        var orphan = new WorkflowTask("t-2", "Review", "review", "pi-2", null, Instant.now(), Set.of());
         when(workflowEngine.openTasks(eq(TENANT), any())).thenReturn(List.of(orphan));
 
         var tasks = service.listOpenTasks(Set.of("hr-reviewer"));
 
         assertThat(tasks).hasSize(1);
         assertThat(tasks.get(0).antragId()).isNull();
+    }
+
+    // ---- ADR-016: Gruppen-Guard auf get/complete ---------------------------
+
+    /** Ein Nicht-Mitglied der Task-Gruppe bekommt 404 (kein Existenz-Leak). */
+    @Test
+    void completeByNonGroupMemberIs404() {
+        var halTask = new WorkflowTask("t-3", "Freigabe HAL", "hal_freigabe", "pi-1",
+                antrag.getId().toString(), Instant.now(), Set.of("approver-hal"));
+        when(workflowEngine.findOpenTask(TENANT, "t-3")).thenReturn(Optional.of(halTask));
+
+        assertThatThrownBy(() -> service.complete("t-3", "approve", null, Set.of("hr-reviewer")))
+                .isInstanceOf(ReviewExceptions.NotFound.class);
+        verify(workflowEngine, never()).completeTask(anyString(), any());
+    }
+
+    @Test
+    void completeByGroupMemberSucceeds() {
+        var halTask = new WorkflowTask("t-3", "Freigabe HAL", "hal_freigabe", "pi-1",
+                antrag.getId().toString(), Instant.now(), Set.of("approver-hal"));
+        when(workflowEngine.findOpenTask(TENANT, "t-3")).thenReturn(Optional.of(halTask));
+        when(antragsTypService.findDeclaredOutcomes(versionId, "hal_freigabe"))
+                .thenReturn(List.of("approve", "reject"));
+        when(workflowEngine.isInstanceRunning(TENANT, "pi-1")).thenReturn(false);
+
+        service.complete("t-3", "approve", null, Set.of("approver-hal"));
+
+        verify(workflowEngine).completeTask("t-3", Map.of("hal_freigabe_outcome", "approve"));
+    }
+
+    /** Gruppenlose Tasks (FORM/Erfassung) brauchen eine Basis-Review-Rolle. */
+    @Test
+    void grouplessTaskRequiresBaseReviewRole() {
+        var formTask = new WorkflowTask("t-4", "Erfassung", "erfassung", "pi-1",
+                antrag.getId().toString(), Instant.now(), Set.of());
+        when(workflowEngine.findOpenTask(TENANT, "t-4")).thenReturn(Optional.of(formTask));
+
+        assertThatThrownBy(() -> service.getTask("t-4", Set.of("approver-vg")))
+                .isInstanceOf(ReviewExceptions.NotFound.class);
+        assertThat(service.getTask("t-4", Set.of("hr-reviewer")).stepKey()).isEqualTo("erfassung");
     }
 }

@@ -150,6 +150,14 @@
       "palette": "Knoten",
       "key": "Schlüssel",
       "assigneeRole": "Zuständige Rolle",
+      "role": {
+        "approver-vg": "Vorgesetzte:r (VG)",
+        "approver-hr-bp": "HR-Businesspartner",
+        "approver-hal": "Hauptabteilungsleitung (HAL)",
+        "hr-reviewer": "HR-Review (Basis)",
+        "tenant-admin": "Mandanten-Admin"
+      },
+      "roleLegacy": "(aktuell: {{value}})",
       "ref": "Aktion (n8n-ref)",
       "delete": "Knoten löschen",
       "selectHint": "Knoten auswählen, um ihn zu bearbeiten.",
@@ -469,6 +477,15 @@
         "title": "Zusammenfassung und Veröffentlichung",
         "desc": "Prüfen Sie Felder, Knoten und Speicherstand — «Veröffentlichen» schaltet den Antragstyp LIVE."
       }
+    }
+  },
+  "dev": {
+    "roleSwitcher": {
+      "chip": "DEV: {{role}}",
+      "default": "Standard (runtime.json)",
+      "toggleAria": "Dev-Identität wechseln",
+      "menuAria": "Dev-Identitäten",
+      "hint": "Nur Entwicklung: wechselt den Dev-Bearer-Token und lädt die App neu."
     }
   }
 }

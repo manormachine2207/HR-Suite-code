@@ -1,6 +1,6 @@
 import {
   GraphDefinition, GraphEdge, GraphNode, GraphWarning, NodeType,
-  NODE_KEY_PATTERN, EDGE_CONDITION_PATTERN,
+  NODE_KEY_PATTERN, EDGE_CONDITION_PATTERN, DEFAULT_ASSIGNEE_ROLE,
 } from './flow-graph.model';
 
 let _seq = 0;
@@ -18,7 +18,9 @@ export function cloneGraph(g: GraphDefinition): GraphDefinition {
 }
 
 export function addNode(g: GraphDefinition, type: NodeType, position: { x: number; y: number }): GraphDefinition {
-  const node: GraphNode = { id: uid('n'), type, position, data: {} };
+  // ADR-016: new APPROVAL nodes start on the supervisor group instead of an empty role.
+  const data = type === 'APPROVAL' ? { assigneeRole: DEFAULT_ASSIGNEE_ROLE } : {};
+  const node: GraphNode = { id: uid('n'), type, position, data };
   return { ...g, nodes: [...g.nodes, node] };
 }
 

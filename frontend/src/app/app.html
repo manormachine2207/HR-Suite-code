@@ -6,6 +6,14 @@
     {{ 'app.title' | translate }}
     <span class="hr-version-badge">{{ version }}</span>
   </span>
+  <!-- ADR-016: dev role switcher as Oblique header control, next to the language
+       switcher. The template must stay unconditional (ob-master-layout queries
+       #obHeaderControl with descendants:false — wrapping it in @if would hide it
+       from the content query); the component itself renders NOTHING unless
+       runtime.json carries an enabled devAuth block, so prod gets an empty slot. -->
+  <ng-template #obHeaderControl>
+    <app-dev-role-switcher />
+  </ng-template>
   <!-- ADR-015: help entry as Oblique header control. #obHeaderControl templates are
        projected by ob-master-layout into the service-navigation list, i.e. next to
        the language switcher. data-tour anchors the final dashboard-tour step. -->
