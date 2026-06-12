@@ -17,6 +17,33 @@
     "imprint": "Imprint",
     "accessibility": "Accessibility"
   },
+  "home": {
+    "title": "Welcome to HR-Suite",
+    "subtitle": "Your modules at a glance.",
+    "searchLabel": "Search modules",
+    "searchPlaceholder": "Enter a search term …",
+    "onlyFavorites": "Show favorite modules only",
+    "empty": "No modules found.",
+    "open": "Open",
+    "tag": "HR-Suite",
+    "favoriteAdd": "Mark as favorite:",
+    "favoriteRemove": "Remove favorite:",
+    "rolesLabel": "Required roles:",
+    "modules": {
+      "antragstypen": {
+        "title": "Request Types",
+        "description": "Model request types: form, flow canvas and publication."
+      },
+      "antraege": {
+        "title": "My Requests",
+        "description": "Submit your own requests and track their status."
+      },
+      "aufgaben": {
+        "title": "Tasks",
+        "description": "Review open tasks and decide on requests."
+      }
+    }
+  },
   "antragstyp": {
     "listTitle": "Request Types",
     "lead": "Overview of all available request types.",

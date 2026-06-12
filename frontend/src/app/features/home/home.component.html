@@ -1,6 +1,61 @@
 <section class="hr-home" aria-labelledby="home-title">
-  <h1 id="home-title">{{ 'app.title' | translate }}</h1>
-  <p>{{ 'app.subtitle' | translate }}</p>
-  <p><a routerLink="/antragstypen">{{ 'nav.antragstypen' | translate }}</a></p>
-  <p><a routerLink="/antraege">{{ 'nav.antraege' | translate }}</a></p>
+  <header class="hr-head">
+    <h1 id="home-title">{{ 'home.title' | translate }}</h1>
+    <p class="hr-lead">{{ 'home.subtitle' | translate }}</p>
+  </header>
+
+  <div class="hr-toolbar">
+    <div class="hr-search">
+      <label for="module-search">{{ 'home.searchLabel' | translate }}</label>
+      <input id="module-search" type="search" class="hr-input"
+             [value]="search()" (input)="search.set($any($event.target).value)"
+             [placeholder]="'home.searchPlaceholder' | translate" />
+    </div>
+    <label class="hr-fav-toggle">
+      <input type="checkbox"
+             [checked]="onlyFavorites()" (change)="onlyFavorites.set($any($event.target).checked)" />
+      {{ 'home.onlyFavorites' | translate }}
+    </label>
+  </div>
+
+  @if (modules().length === 0) {
+    <div class="hr-state" role="status">{{ 'home.empty' | translate }}</div>
+  } @else {
+    <ul class="hr-module-grid">
+      @for (m of modules(); track m.id) {
+        <li class="hr-module-card">
+          <button type="button" class="hr-fav-btn"
+                  [class.is-active]="isFavorite(m.id)"
+                  [attr.aria-pressed]="isFavorite(m.id)"
+                  [attr.aria-label]="favoriteLabel(m)"
+                  (click)="toggleFavorite(m.id)">
+            <mat-icon [svgIcon]="isFavorite(m.id) ? 'star_filled' : 'star'" aria-hidden="true" />
+          </button>
+
+          <mat-icon class="hr-module-icon" [svgIcon]="m.icon" aria-hidden="true" />
+
+          <h2 class="hr-module-title">
+            <!-- Stretched link: its ::after covers the card, so the whole card is ONE
+                 real, keyboard-focusable link without nesting the star button in it. -->
+            <a [routerLink]="m.route" class="hr-module-link">{{ m.titleKey | translate }}</a>
+          </h2>
+          <p class="hr-module-desc">{{ m.descriptionKey | translate }}</p>
+
+          @if (m.roles.length > 0) {
+            <p class="hr-module-roles">
+              <span class="hr-sr-only">{{ 'home.rolesLabel' | translate }}</span>
+              @for (role of m.roles; track role) {
+                <span class="hr-role-chip">{{ role }}</span>
+              }
+            </p>
+          }
+
+          <div class="hr-module-foot">
+            <span class="hr-tag">{{ 'home.tag' | translate }}</span>
+            <span class="hr-open">{{ 'home.open' | translate }} <span aria-hidden="true">→</span></span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
 </section>

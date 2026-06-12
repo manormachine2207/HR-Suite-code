@@ -17,6 +17,33 @@
     "imprint": "Mentions légales",
     "accessibility": "Accessibilité"
   },
+  "home": {
+    "title": "Bienvenue dans HR-Suite",
+    "subtitle": "Vos modules en un coup d'œil.",
+    "searchLabel": "Rechercher des modules",
+    "searchPlaceholder": "Saisir un terme de recherche …",
+    "onlyFavorites": "Afficher uniquement les modules favoris",
+    "empty": "Aucun module trouvé.",
+    "open": "Ouvrir",
+    "tag": "HR-Suite",
+    "favoriteAdd": "Marquer comme favori :",
+    "favoriteRemove": "Retirer des favoris :",
+    "rolesLabel": "Rôles requis :",
+    "modules": {
+      "antragstypen": {
+        "title": "Types de demande",
+        "description": "Modéliser les types de demande : formulaire, canevas de flux et publication."
+      },
+      "antraege": {
+        "title": "Mes demandes",
+        "description": "Déposer vos propres demandes et suivre leur statut."
+      },
+      "aufgaben": {
+        "title": "Tâches",
+        "description": "Examiner les tâches ouvertes et statuer sur les demandes."
+      }
+    }
+  },
   "antragstyp": {
     "listTitle": "Types de demande",
     "lead": "Aperçu de tous les types de demande disponibles.",

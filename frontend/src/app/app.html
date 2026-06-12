@@ -1,3 +1,10 @@
 <ob-master-layout [navigation]="navigation">
+  <!-- Official Oblique header-title slot: ob-master-layout projects [obHeaderTitle]
+       into the brand link next to the federal logo (ObMasterLayoutComponent ng-content
+       selector "[obHeaderTitle]"). Product name + release version from runtime.json. -->
+  <span obHeaderTitle class="hr-header-title">
+    {{ 'app.title' | translate }}
+    <span class="hr-version-badge">{{ version }}</span>
+  </span>
   <router-outlet />
 </ob-master-layout>

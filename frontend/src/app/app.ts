@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
 import { ObMasterLayoutModule, ObINavigationLink } from '@oblique/oblique';
 import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
@@ -11,7 +11,7 @@ import { RuntimeConfigService } from './core/runtime-config/runtime-config.servi
 // imports directly in the @Component imports array. Refs: BDR-008, ADR-007.
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ObMasterLayoutModule],
+  imports: [RouterOutlet, ObMasterLayoutModule, TranslateModule],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
@@ -26,6 +26,12 @@ export class App implements OnInit {
     { label: 'nav.antraege', url: 'antraege' },
     { label: 'nav.aufgaben', url: 'aufgaben' },
   ];
+
+  /**
+   * Release version for the header badge, from runtime.json (12-Factor; the
+   * APP_INITIALIZER guarantees the config is loaded before this component exists).
+   */
+  protected readonly version = this.config.get().release.version;
 
   ngOnInit(): void {
     const supported = this.config.get().i18n.supportedLocales;

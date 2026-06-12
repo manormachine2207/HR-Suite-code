@@ -1,0 +1,21 @@
+// Header brand: product name + version badge inside the Oblique [obHeaderTitle] slot.
+// The projected nodes keep this component's style scope (content projection).
+
+.hr-header-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.hr-version-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: var(--bs-secondary-bg-subtle, #eef1f4);
+  color: var(--bs-secondary-color, #5a6b7b);
+  border: 1px solid var(--bs-border-color, #dbe1e8);
+}
