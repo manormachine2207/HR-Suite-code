@@ -29,6 +29,12 @@
     "favoriteAdd": "Als Favorit markieren:",
     "favoriteRemove": "Favorit entfernen:",
     "rolesLabel": "Erforderliche Rollen:",
+    "kpi": {
+      "heading": "Meine Übersicht",
+      "openAntraege": "Meine offenen Anträge",
+      "tasks": "Zu entscheidende Aufgaben",
+      "decided": "Zuletzt entschieden"
+    },
     "modules": {
       "antragstypen": {
         "title": "Antragstypen",
