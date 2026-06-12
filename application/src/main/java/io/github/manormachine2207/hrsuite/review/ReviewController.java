@@ -24,10 +24,13 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/task")
 public class ReviewController {
 
-    private static final String REVIEW = "hasAnyRole('hr-reviewer','tenant-admin')";
+    /** ADR-016: Genehmiger-Gruppen duerfen die Inbox sehen — die Engine filtert auf Mitgliedschaft. */
+    private static final String REVIEW = "hasAnyRole('hr-reviewer','tenant-admin',"
+            + "'approver-vg','approver-hr-bp','approver-hal')";
 
-    /** Candidate-Group-Filter: nur fachliche Reviewer-Rollen werden an die Engine gereicht. */
-    private static final Set<String> REVIEW_GROUPS = Set.of("hr-reviewer", "tenant-admin");
+    /** Candidate-Group-Filter: Basis-Review-Rollen + fachliche Genehmiger-Gruppen (ADR-016). */
+    private static final Set<String> REVIEW_GROUPS = Set.of(
+            "hr-reviewer", "tenant-admin", "approver-vg", "approver-hr-bp", "approver-hal");
 
     private final ReviewService service;
 
@@ -43,17 +46,19 @@ public class ReviewController {
 
     @GetMapping("/{id}")
     @PreAuthorize(REVIEW)
-    public TaskResponse get(@PathVariable("id") String id) {
-        return service.getTask(id);
+    public TaskResponse get(@PathVariable("id") String id, Authentication auth) {
+        return service.getTask(id, callerGroups(auth));
     }
 
     @PostMapping("/{id}/complete")
     @PreAuthorize(REVIEW)
     public TaskResponse complete(@PathVariable("id") String id,
-                                 @RequestBody(required = false) CompleteTaskRequest req) {
+                                 @RequestBody(required = false) CompleteTaskRequest req,
+                                 Authentication auth) {
         return service.complete(id,
                 req == null ? null : req.outcome(),
-                req == null ? null : req.comment());
+                req == null ? null : req.comment(),
+                callerGroups(auth));
     }
 
     private static Set<String> callerGroups(Authentication auth) {

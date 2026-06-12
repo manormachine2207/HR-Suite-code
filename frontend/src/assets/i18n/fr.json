@@ -29,6 +29,12 @@
     "favoriteAdd": "Marquer comme favori :",
     "favoriteRemove": "Retirer des favoris :",
     "rolesLabel": "Rôles requis :",
+    "kpi": {
+      "heading": "Mon aperçu",
+      "openAntraege": "Mes demandes ouvertes",
+      "tasks": "Tâches à décider",
+      "decided": "Décidées récemment"
+    },
     "modules": {
       "antragstypen": {
         "title": "Types de demande",
@@ -155,6 +161,14 @@
       "palette": "Nœuds",
       "key": "Clé",
       "assigneeRole": "Rôle responsable",
+      "role": {
+        "approver-vg": "Supérieur·e (VG)",
+        "approver-hr-bp": "Partenaire d'affaires RH (HR-BP)",
+        "approver-hal": "Chef·fe de division (HAL)",
+        "hr-reviewer": "Révision RH (base)",
+        "tenant-admin": "Admin du tenant"
+      },
+      "roleLegacy": "(actuel : {{value}})",
       "ref": "Action (référence n8n)",
       "delete": "Supprimer le nœud",
       "selectHint": "Sélectionner un nœud pour le modifier.",
@@ -519,6 +533,15 @@
         "title": "Récapitulatif et publication",
         "desc": "Vérifiez les champs, les nœuds et l'état d'enregistrement — « Publier » met le type de demande en ligne."
       }
+    }
+  },
+  "dev": {
+    "roleSwitcher": {
+      "chip": "DEV: {{role}}",
+      "default": "Standard (runtime.json)",
+      "toggleAria": "Changer l'identité de développement",
+      "menuAria": "Identités de développement",
+      "hint": "Développement uniquement : change le jeton bearer de développement et recharge l'application."
     }
   }
 }

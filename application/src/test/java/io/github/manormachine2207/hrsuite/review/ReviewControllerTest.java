@@ -62,7 +62,7 @@ class ReviewControllerTest {
 
     @Test
     void completeMapsInvalidOutcomeTo422() throws Exception {
-        when(service.complete(anyString(), any(), any()))
+        when(service.complete(anyString(), any(), any(), any()))
                 .thenThrow(new ReviewExceptions.Invalid("outcome 'x' is not declared"));
         mvc.perform(post("/api/v1/task/t-1/complete").with(jwt().authorities(role("tenant-admin")))
                         .contentType(MediaType.APPLICATION_JSON).content("{\"outcome\":\"x\"}"))
@@ -71,10 +71,21 @@ class ReviewControllerTest {
 
     @Test
     void completeMapsUnknownTaskTo404() throws Exception {
-        when(service.complete(anyString(), any(), any()))
+        when(service.complete(anyString(), any(), any(), any()))
                 .thenThrow(new ReviewExceptions.NotFound("task not found"));
         mvc.perform(post("/api/v1/task/missing/complete").with(jwt().authorities(role("hr-reviewer")))
                         .contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isNotFound());
+    }
+
+    // ---- ADR-016: Genehmiger-Gruppen passieren den Guard -------------------
+
+    @Test
+    void listReturns200ForApproverGroups() throws Exception {
+        when(service.listOpenTasks(any())).thenReturn(List.of());
+        mvc.perform(get("/api/v1/task").with(jwt().authorities(role("approver-vg"))))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/v1/task").with(jwt().authorities(role("approver-hal"))))
+                .andExpect(status().isOk());
     }
 }

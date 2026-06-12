@@ -53,12 +53,31 @@ public class ReviewService {
                 .toList();
     }
 
+    /** Gruppenlose Tasks bearbeitet die Basis-Review-Rolle; Gruppen-Tasks nur Mitglieder (ADR-016). */
+    private static final java.util.Set<String> BASE_REVIEW_GROUPS =
+            java.util.Set.of("hr-reviewer", "tenant-admin");
+
     @Transactional(readOnly = true)
-    public TaskResponse getTask(String taskId) {
+    public TaskResponse getTask(String taskId, Collection<String> callerGroups) {
         UUID tenantId = TenantContext.require();
         WorkflowTask task = workflowEngine.findOpenTask(tenantId, taskId)
                 .orElseThrow(() -> new ReviewExceptions.NotFound("task not found: " + taskId));
+        assertCallerMayWork(task, callerGroups);
         return toResponse(task, true);
+    }
+
+    /**
+     * ADR-016: Sichtbarkeit in der Inbox UND Bearbeitung am Task-Endpoint folgen
+     * derselben Regel — ein Nicht-Mitglied bekommt 404 (kein Existenz-Leak,
+     * gleiches Muster wie die Applicant-Ownership-Grenze im Antrag-Modul).
+     */
+    private static void assertCallerMayWork(WorkflowTask task, Collection<String> callerGroups) {
+        boolean allowed = task.candidateGroups().isEmpty()
+                ? callerGroups.stream().anyMatch(BASE_REVIEW_GROUPS::contains)
+                : callerGroups.stream().anyMatch(task.candidateGroups()::contains);
+        if (!allowed) {
+            throw new ReviewExceptions.NotFound("task not found: " + task.id());
+        }
     }
 
     /**
@@ -66,10 +85,12 @@ public class ReviewService {
      * process still running → IN_REVIEW; ended → APPROVED/REJECTED by outcome,
      * COMPLETED without one (ADR-013).
      */
-    public TaskResponse complete(String taskId, String outcome, String comment) {
+    public TaskResponse complete(String taskId, String outcome, String comment,
+                                 Collection<String> callerGroups) {
         UUID tenantId = TenantContext.require();
         WorkflowTask task = workflowEngine.findOpenTask(tenantId, taskId)
                 .orElseThrow(() -> new ReviewExceptions.NotFound("task not found: " + taskId));
+        assertCallerMayWork(task, callerGroups);
         Antrag antrag = antragOf(task);
 
         String normalized = (outcome == null || outcome.isBlank()) ? null : outcome.trim();

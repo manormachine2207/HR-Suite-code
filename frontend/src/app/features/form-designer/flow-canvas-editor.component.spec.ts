@@ -69,6 +69,54 @@ describe('FlowCanvasEditorComponent', () => {
     }
   });
 
+  // ---- ADR-016: APPROVAL role dropdown ------------------------------------
+
+  it('renders the five ADR-016 approver groups as role dropdown options', async () => {
+    const fixture = TestBed.createComponent(FlowCanvasEditorComponent);
+    fixture.componentRef.setInput('availableRefs', []);
+    const c = fixture.componentInstance;
+    c.addNode('APPROVAL');
+    c.select(c.graph().nodes[0].id);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const options = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLOptionElement>('.inspector select option')
+    );
+    expect(options.map(o => o.value)).toEqual([
+      'approver-vg', 'approver-hr-bp', 'approver-hal', 'hr-reviewer', 'tenant-admin',
+    ]);
+  });
+
+  it('new APPROVAL nodes default to approver-vg (ADR-016)', () => {
+    cmp.addNode('APPROVAL');
+    expect(cmp.graph().nodes[0].data.assigneeRole).toBe('approver-vg');
+  });
+
+  it('a legacy role outside the vocabulary appears as an extra "(current: …)" option', async () => {
+    const fixture = TestBed.createComponent(FlowCanvasEditorComponent);
+    fixture.componentRef.setInput('availableRefs', []);
+    const c = fixture.componentInstance;
+    c.loadGraph({
+      nodes: [{ id: 'n1', type: 'APPROVAL', position: { x: 0, y: 0 }, data: { key: 'genehmigung', assigneeRole: 'legacy-role' } }],
+      edges: [],
+    });
+    c.select('n1');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(c.selectedNodeLegacyRole()).toBe('legacy-role');
+    const select = (fixture.nativeElement as HTMLElement).querySelector<HTMLSelectElement>('.inspector select')!;
+    const options = Array.from(select.options);
+    expect(options).toHaveLength(6);                  // legacy + the 5 known groups
+    expect(options[0].value).toBe('legacy-role');     // listed first, stays selectable
+    expect(select.value).toBe('legacy-role');         // nothing is silently rewritten
+  });
+
+  it('selectedNodeLegacyRole is null for known roles', () => {
+    cmp.addNode('APPROVAL');
+    cmp.select(cmp.graph().nodes[0].id);
+    expect(cmp.selectedNodeLegacyRole()).toBeNull();
+  });
+
   it('onSelectionChange wires canvas selection to the inspector', () => {
     cmp.addNode('START');
     const nodeId = cmp.graph().nodes[0].id;

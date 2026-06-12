@@ -29,6 +29,12 @@
     "favoriteAdd": "Mark as favorite:",
     "favoriteRemove": "Remove favorite:",
     "rolesLabel": "Required roles:",
+    "kpi": {
+      "heading": "My overview",
+      "openAntraege": "My open requests",
+      "tasks": "Tasks to decide",
+      "decided": "Recently decided"
+    },
     "modules": {
       "antragstypen": {
         "title": "Request Types",
@@ -155,6 +161,14 @@
       "palette": "Nodes",
       "key": "Key",
       "assigneeRole": "Assignee role",
+      "role": {
+        "approver-vg": "Supervisor (VG)",
+        "approver-hr-bp": "HR business partner",
+        "approver-hal": "Head of division (HAL)",
+        "hr-reviewer": "HR review (basic)",
+        "tenant-admin": "Tenant admin"
+      },
+      "roleLegacy": "(current: {{value}})",
       "ref": "Action (n8n ref)",
       "delete": "Delete node",
       "selectHint": "Select a node to edit it.",
@@ -519,6 +533,15 @@
         "title": "Summary and publishing",
         "desc": "Check fields, nodes and save state — “Publish” puts the request type LIVE."
       }
+    }
+  },
+  "dev": {
+    "roleSwitcher": {
+      "chip": "DEV: {{role}}",
+      "default": "Default (runtime.json)",
+      "toggleAria": "Switch development identity",
+      "menuAria": "Development identities",
+      "hint": "Development only: switches the dev bearer token and reloads the app."
     }
   }
 }

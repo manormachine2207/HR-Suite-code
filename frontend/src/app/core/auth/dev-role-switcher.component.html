@@ -1,0 +1,35 @@
+<!-- ADR-016 dev role switcher: invisible without an enabled devAuth block (prod). -->
+@if (devAuthActive) {
+  <div class="hr-dev-switcher" (keydown.escape)="closeMenu()">
+    <button type="button"
+            class="hr-dev-switcher__chip"
+            data-tour="dev-role-switcher"
+            (click)="toggleMenu()"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="menuOpen()"
+            [attr.aria-label]="'dev.roleSwitcher.toggleAria' | translate">
+      {{ 'dev.roleSwitcher.chip' | translate: { role: activeRole() ?? ('dev.roleSwitcher.default' | translate) } }}
+    </button>
+    @if (menuOpen()) {
+      <div class="hr-dev-switcher__menu" role="menu"
+           [attr.aria-label]="'dev.roleSwitcher.menuAria' | translate">
+        <p class="hr-dev-switcher__hint">{{ 'dev.roleSwitcher.hint' | translate }}</p>
+        @for (r of roles; track r) {
+          <button type="button" role="menuitem" class="hr-dev-switcher__item"
+                  [class.hr-dev-switcher__item--active]="r === activeRole()"
+                  (click)="selectRole(r)">
+            <span class="hr-dev-switcher__role">{{ r }}</span>
+            @if (r === activeRole()) { <span class="hr-dev-switcher__check" aria-hidden="true">&#10003;</span> }
+          </button>
+        }
+        <button type="button" role="menuitem"
+                class="hr-dev-switcher__item hr-dev-switcher__item--default"
+                [class.hr-dev-switcher__item--active]="activeRole() === null"
+                (click)="selectRole(null)">
+          <span class="hr-dev-switcher__role">{{ 'dev.roleSwitcher.default' | translate }}</span>
+          @if (activeRole() === null) { <span class="hr-dev-switcher__check" aria-hidden="true">&#10003;</span> }
+        </button>
+      </div>
+    }
+  </div>
+}

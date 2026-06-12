@@ -5,6 +5,7 @@ import { DOCUMENT } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { ObMasterLayoutModule, ObINavigationLink } from '@oblique/oblique';
 import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
+import { DevRoleSwitcherComponent } from './core/auth/dev-role-switcher.component';
 
 // ObMasterLayoutModule is imported here because ob-master-layout has standalone:false
 // (Oblique 15.3 master-layout is not yet standalone-API-friendly — same root cause
@@ -12,7 +13,7 @@ import { RuntimeConfigService } from './core/runtime-config/runtime-config.servi
 // imports directly in the @Component imports array. Refs: BDR-008, ADR-007.
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, MatIconModule, ObMasterLayoutModule, TranslateModule],
+  imports: [RouterOutlet, RouterLink, MatIconModule, ObMasterLayoutModule, TranslateModule, DevRoleSwitcherComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

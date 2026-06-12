@@ -134,10 +134,19 @@
         </label>
       }
       @if (n.type === 'APPROVAL') {
+        <!-- ADR-016: approver-group dropdown (i18n labels). Legacy roles from old
+             graphs surface as an extra "(current: …)" option — selectable, never
+             silently rewritten. Fallback 'hr-reviewer' mirrors the pre-ADR-016
+             behaviour for APPROVAL nodes that carry no role at all. -->
         <label>{{ 'flow.canvas.assigneeRole' | translate }}
           <select [value]="n.data.assigneeRole ?? 'hr-reviewer'"
                   (change)="patchSelected({ assigneeRole: $any($event.target).value })">
-            @for (r of assigneeRoles; track r) { <option [value]="r">{{ r }}</option> }
+            @if (selectedNodeLegacyRole(); as legacy) {
+              <option [value]="legacy">{{ 'flow.canvas.roleLegacy' | translate: { value: legacy } }}</option>
+            }
+            @for (r of assigneeRoles; track r) {
+              <option [value]="r">{{ ('flow.canvas.role.' + r) | translate }}</option>
+            }
           </select>
         </label>
       }

@@ -4,6 +4,68 @@
     <p class="hr-lead">{{ 'home.subtitle' | translate }}</p>
   </header>
 
+  <!-- „Meine Übersicht" KPI row (ADR-017 Stufe 1): read-only counts from the
+       existing list APIs. The task card hides itself on ANY /task error (403 for
+       applicant/hr-designer = role-dependent visibility by error). -->
+  <section class="hr-kpis" aria-labelledby="home-kpi-title">
+    <h2 id="home-kpi-title" class="hr-kpi-heading">{{ 'home.kpi.heading' | translate }}</h2>
+    <div class="hr-kpi-grid">
+      @if (antragKpiState() === 'loading') {
+        <div class="hr-kpi-card is-skeleton" aria-hidden="true">
+          <span class="hr-kpi-icon"></span>
+          <span class="hr-kpi-text"><span class="hr-kpi-bar is-value"></span><span class="hr-kpi-bar is-label"></span></span>
+        </div>
+      } @else {
+        <a class="hr-kpi-card" routerLink="/antraege"
+           [attr.aria-label]="kpiAria('home.kpi.openAntraege', antragKpiValue(openAntraegeCount()))">
+          <span class="hr-kpi-icon is-open" aria-hidden="true">
+            <mat-icon svgIcon="file_text" />
+          </span>
+          <span class="hr-kpi-text">
+            <span class="hr-kpi-value">{{ antragKpiValue(openAntraegeCount()) }}</span>
+            <span class="hr-kpi-label">{{ 'home.kpi.openAntraege' | translate }}</span>
+          </span>
+        </a>
+      }
+
+      @if (taskKpiState() === 'loading') {
+        <div class="hr-kpi-card is-skeleton" aria-hidden="true">
+          <span class="hr-kpi-icon"></span>
+          <span class="hr-kpi-text"><span class="hr-kpi-bar is-value"></span><span class="hr-kpi-bar is-label"></span></span>
+        </div>
+      } @else if (taskKpiState() === 'loaded') {
+        <a class="hr-kpi-card" routerLink="/aufgaben"
+           [attr.aria-label]="kpiAria('home.kpi.tasks', openTaskCount())">
+          <span class="hr-kpi-icon is-tasks" aria-hidden="true">
+            <mat-icon svgIcon="inbox" />
+          </span>
+          <span class="hr-kpi-text">
+            <span class="hr-kpi-value">{{ openTaskCount() }}</span>
+            <span class="hr-kpi-label">{{ 'home.kpi.tasks' | translate }}</span>
+          </span>
+        </a>
+      }
+
+      @if (antragKpiState() === 'loading') {
+        <div class="hr-kpi-card is-skeleton" aria-hidden="true">
+          <span class="hr-kpi-icon"></span>
+          <span class="hr-kpi-text"><span class="hr-kpi-bar is-value"></span><span class="hr-kpi-bar is-label"></span></span>
+        </div>
+      } @else {
+        <a class="hr-kpi-card" routerLink="/antraege"
+           [attr.aria-label]="kpiAria('home.kpi.decided', antragKpiValue(decidedAntraegeCount()))">
+          <span class="hr-kpi-icon is-decided" aria-hidden="true">
+            <mat-icon svgIcon="checkmark_circle" />
+          </span>
+          <span class="hr-kpi-text">
+            <span class="hr-kpi-value">{{ antragKpiValue(decidedAntraegeCount()) }}</span>
+            <span class="hr-kpi-label">{{ 'home.kpi.decided' | translate }}</span>
+          </span>
+        </a>
+      }
+    </div>
+  </section>
+
   <!-- data-tour attributes anchor the guided tour (ADR-015, tour-definitions.ts):
        keep them when refactoring markup/classes. -->
   <div class="hr-toolbar">

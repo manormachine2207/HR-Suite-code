@@ -3,13 +3,22 @@ import { provideRouter } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ObIconService } from '@oblique/oblique';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of, throwError } from 'rxjs';
 
 import { HomeComponent, FAVORITES_STORAGE_KEY } from './home.component';
 import { TourService } from '../../core/tour/tour.service';
+import { AntragService } from '../antrag/antrag.service';
+import { ReviewService } from '../review/review.service';
 
 /** Minimal DE texts so the live search runs over real translated card content. */
 const DE = {
   home: {
+    kpi: {
+      heading: 'Meine Übersicht',
+      openAntraege: 'Meine offenen Anträge',
+      tasks: 'Zu entscheidende Aufgaben',
+      decided: 'Zuletzt entschieden',
+    },
     modules: {
       antragstypen: { title: 'Antragstypen', description: 'Antragstypen modellieren.' },
       antraege: { title: 'Meine Anträge', description: 'Eigene Anträge stellen.' },
@@ -27,19 +36,73 @@ const DE = {
 /** TourService stub: driver.js must never mount its overlay inside jsdom tests. */
 const tourStub = { maybeAutoStartDashboardTour: vi.fn(() => false) };
 
+/** KPI source stubs (ADR-017): defaults = empty lists; tests override per case. */
+const antragStub = { listOwn: vi.fn() };
+const reviewStub = { list: vi.fn() };
+
 describe('HomeComponent', () => {
   beforeEach(async () => {
     localStorage.clear();
     tourStub.maybeAutoStartDashboardTour.mockClear();
+    antragStub.listOwn.mockReset().mockReturnValue(of([]));
+    reviewStub.list.mockReset().mockReturnValue(of([]));
     await TestBed.configureTestingModule({
       imports: [HomeComponent, TranslateModule.forRoot()],
-      providers: [provideRouter([]), { provide: TourService, useValue: tourStub }],
+      providers: [
+        provideRouter([]),
+        { provide: TourService, useValue: tourStub },
+        { provide: AntragService, useValue: antragStub },
+        { provide: ReviewService, useValue: reviewStub },
+      ],
     }).compileComponents();
     // Register the bundled Oblique icon set so <mat-icon svgIcon> resolves in jsdom.
     TestBed.inject(ObIconService).registerOnAppInit();
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('de', DE);
     translate.use('de');
+  });
+
+  it('renders the KPI row with counted values as real links (ADR-017 Stufe 1)', async () => {
+    antragStub.listOwn.mockReturnValue(of([
+      { status: 'DRAFT' }, { status: 'SUBMITTED' }, { status: 'IN_REVIEW' },
+      { status: 'APPROVED' }, { status: 'REJECTED' }, { status: 'CANCELLED' },
+    ]));
+    reviewStub.list.mockReturnValue(of([{ taskId: 't1' }, { taskId: 't2' }]));
+    const fixture = TestBed.createComponent(HomeComponent);
+    await fixture.whenStable();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const cards = [...el.querySelectorAll<HTMLAnchorElement>('a.hr-kpi-card')];
+    expect(cards).toHaveLength(3);
+    expect(cards.map(c => c.getAttribute('href'))).toEqual(['/antraege', '/aufgaben', '/antraege']);
+    expect(cards.map(c => c.querySelector('.hr-kpi-value')?.textContent?.trim()))
+      .toEqual(['3', '2', '2']); // 3 offen, 2 Tasks, 2 entschieden
+    // a11y (SDR-003): aria-label carries label + count.
+    expect(cards[0].getAttribute('aria-label')).toBe('Meine offenen Anträge: 3');
+    expect(el.querySelectorAll('.hr-kpi-card.is-skeleton')).toHaveLength(0);
+  });
+
+  it('hides the task KPI card entirely when /task answers 403 (ADR-017)', async () => {
+    reviewStub.list.mockReturnValue(throwError(() => ({ status: 403 })));
+    const fixture = TestBed.createComponent(HomeComponent);
+    await fixture.whenStable();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const hrefs = [...el.querySelectorAll<HTMLAnchorElement>('a.hr-kpi-card')]
+      .map(c => c.getAttribute('href'));
+    expect(hrefs).toEqual(['/antraege', '/antraege']); // no /aufgaben card, no error text
+    expect(el.textContent).not.toContain('Zu entscheidende Aufgaben');
+  });
+
+  it('renders the Antrag KPI cards with an em-dash when /antrag fails', async () => {
+    antragStub.listOwn.mockReturnValue(throwError(() => ({ status: 500 })));
+    const fixture = TestBed.createComponent(HomeComponent);
+    await fixture.whenStable();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const values = [...el.querySelectorAll('a.hr-kpi-card .hr-kpi-value')]
+      .map(v => v.textContent?.trim());
+    expect(values).toEqual(['–', '0', '–']); // tasks loaded fine (empty list)
   });
 
   it('renders the five module cards as real links', async () => {
