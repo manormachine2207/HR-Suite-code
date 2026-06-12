@@ -22,6 +22,58 @@ export function addNode(g: GraphDefinition, type: NodeType, position: { x: numbe
   return { ...g, nodes: [...g.nodes, node] };
 }
 
+// ---- SP3: collision-free spawn position ------------------------------------
+
+/** Uniform card size of a canvas node (kept in sync with `.flow-node` in the editor SCSS). */
+export const DEFAULT_NODE_SIZE = { width: 190, height: 64 } as const;
+
+export interface NodeSize { width: number; height: number; }
+export interface ViewportHint { maxRowWidth?: number; }
+
+const SPAWN_ORIGIN = { x: 80, y: 80 };
+const SPAWN_GAP_X = 80;   // horizontal gap right of the rightmost node
+const SPAWN_GAP_Y = 40;   // vertical gap when staggering into a new row
+
+/**
+ * Pure: computes a spawn position that never overlaps an existing node's bounding
+ * box (all nodes assumed `nodeSize`). Strategy: right of the rightmost node +80px;
+ * empty canvas starts at the origin; when the row would exceed `maxRowWidth`,
+ * stagger vertically into a new row and skip occupied slots.
+ */
+export function nextFreePosition(
+  existingNodes: readonly GraphNode[],
+  nodeSize: NodeSize = DEFAULT_NODE_SIZE,
+  viewportHint?: ViewportHint,
+): { x: number; y: number } {
+  if (existingNodes.length === 0) {
+    return { ...SPAWN_ORIGIN };
+  }
+  // Clamp so a fresh row always fits at least one node (no infinite wrap).
+  const maxRowWidth = Math.max(viewportHint?.maxRowWidth ?? 1100, SPAWN_ORIGIN.x + nodeSize.width);
+
+  const collides = (x: number, y: number): boolean =>
+    existingNodes.some(n =>
+      x < n.position.x + nodeSize.width && n.position.x < x + nodeSize.width &&
+      y < n.position.y + nodeSize.height && n.position.y < y + nodeSize.height);
+
+  const rightmost = existingNodes.reduce((a, b) => (b.position.x > a.position.x ? b : a));
+  let x = rightmost.position.x + nodeSize.width + SPAWN_GAP_X;
+  let y = rightmost.position.y;
+
+  // Every iteration either moves right or wraps strictly downwards, so y grows
+  // past all finite nodes — the guard is a pure safety net.
+  let guard = 0;
+  while ((x + nodeSize.width > maxRowWidth || collides(x, y)) && guard++ < 1000) {
+    if (x + nodeSize.width > maxRowWidth) {
+      x = SPAWN_ORIGIN.x;
+      y = y + nodeSize.height + SPAWN_GAP_Y;
+    } else {
+      x += nodeSize.width + SPAWN_GAP_X;
+    }
+  }
+  return { x, y };
+}
+
 export function removeNode(g: GraphDefinition, nodeId: string): GraphDefinition {
   return {
     nodes: g.nodes.filter(n => n.id !== nodeId),

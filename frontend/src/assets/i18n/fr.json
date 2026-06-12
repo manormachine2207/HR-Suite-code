@@ -73,7 +73,26 @@
     "savedMajor": "Brouillon enregistré, version majeure",
     "published": "Publié, clé du processus :",
     "publishNeedsDraft": "Veuillez d'abord enregistrer comme brouillon.",
-    "publishGraphWarnings": "Le graphe de flux contient encore des avertissements — le serveur valide entièrement à la publication."
+    "publishGraphWarnings": "Le graphe de flux contient encore des avertissements — le serveur valide entièrement à la publication.",
+    "stepsAria": "Étapes du concepteur",
+    "stepVisited": "visité",
+    "stepDesc": {
+      "form": "Définir les champs que les requérants remplissent",
+      "flow": "Modéliser le déroulement sous forme de graphe",
+      "publish": "Vérifier et mettre en ligne"
+    },
+    "summary": {
+      "title": "Résumé",
+      "fieldCount": "{{count}} champs",
+      "formWarning": "Aucun champ valide — veuillez vérifier l’étape «Formulaire».",
+      "flowCount": "{{nodes}} nœuds, {{edges}} arêtes",
+      "flowHints": "{{count}} indications sur le canevas",
+      "state": "État",
+      "stateSaved": "Enregistré (v{{major}})",
+      "stateDirty": "Modifications non enregistrées",
+      "stateNew": "Pas encore enregistré",
+      "edit": "Modifier"
+    }
   },
   "flow": {
     "canvas": {
@@ -97,7 +116,21 @@
       "edgeLabel": "Libellé de l'arête",
       "edgeCondition": "Condition (sortie XOR)",
       "edgeConditionHint": "Forme : variable == 'valeur' (ou !=). Exactement une arête sans condition sert de chemin par défaut.",
-      "deleteEdge": "Supprimer l'arête"
+      "deleteEdge": "Supprimer l'arête",
+      "type": {
+        "START": "Début",
+        "FORM": "Formulaire",
+        "APPROVAL": "Approbation",
+        "ACTION": "Action",
+        "XOR": "Branchement (XOR)",
+        "AND": "Parallèle (AND)",
+        "END": "Fin"
+      },
+      "controls": {
+        "zoomIn": "Agrandir",
+        "zoomOut": "Réduire",
+        "fit": "Ajuster la vue"
+      }
     }
   },
   "antrag": {

@@ -73,7 +73,26 @@
     "savedMajor": "Draft saved, major version",
     "published": "Published, process key:",
     "publishNeedsDraft": "Please save as draft first.",
-    "publishGraphWarnings": "The flow graph still has hints — the server validates fully on publish."
+    "publishGraphWarnings": "The flow graph still has hints — the server validates fully on publish.",
+    "stepsAria": "Builder steps",
+    "stepVisited": "visited",
+    "stepDesc": {
+      "form": "Define the fields applicants fill in",
+      "flow": "Model the workflow as a graph",
+      "publish": "Review and go live"
+    },
+    "summary": {
+      "title": "Summary",
+      "fieldCount": "{{count}} fields",
+      "formWarning": "No valid fields — please review the “Form” step.",
+      "flowCount": "{{nodes}} nodes, {{edges}} edges",
+      "flowHints": "{{count}} hints on the canvas",
+      "state": "Status",
+      "stateSaved": "Saved (v{{major}})",
+      "stateDirty": "Unsaved changes",
+      "stateNew": "Not saved yet",
+      "edit": "Edit"
+    }
   },
   "flow": {
     "canvas": {
@@ -97,7 +116,21 @@
       "edgeLabel": "Edge label",
       "edgeCondition": "Condition (XOR branch)",
       "edgeConditionHint": "Form: variable == 'value' (or !=). Exactly one edge without a condition acts as the default path.",
-      "deleteEdge": "Delete edge"
+      "deleteEdge": "Delete edge",
+      "type": {
+        "START": "Start",
+        "FORM": "Form",
+        "APPROVAL": "Approval",
+        "ACTION": "Action",
+        "XOR": "Branch (XOR)",
+        "AND": "Parallel (AND)",
+        "END": "End"
+      },
+      "controls": {
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "fit": "Fit view"
+      }
     }
   },
   "antrag": {

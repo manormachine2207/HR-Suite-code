@@ -53,6 +53,22 @@ describe('FlowCanvasEditorComponent', () => {
     expect(cmp.warnings().map(w => w.code)).toContain('NO_START');
   });
 
+  it('addNode spawns nodes collision-free (SP3 — no overlapping bounding boxes)', () => {
+    cmp.addNode('START');
+    cmp.addNode('FORM');
+    cmp.addNode('END');
+    const size = { width: 190, height: 64 };   // DEFAULT_NODE_SIZE
+    const ps = cmp.graph().nodes.map(n => n.position);
+    for (let i = 0; i < ps.length; i++) {
+      for (let j = i + 1; j < ps.length; j++) {
+        const a = ps[i], b = ps[j];
+        const overlap = a.x < b.x + size.width && b.x < a.x + size.width
+                     && a.y < b.y + size.height && b.y < a.y + size.height;
+        expect(overlap).toBe(false);
+      }
+    }
+  });
+
   it('onSelectionChange wires canvas selection to the inspector', () => {
     cmp.addNode('START');
     const nodeId = cmp.graph().nodes[0].id;

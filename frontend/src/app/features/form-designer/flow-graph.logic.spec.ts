@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { GraphDefinition } from './flow-graph.model';
-import { emptyGraph, addNode, connect, validateGraph, cloneGraph, removeNode, updateEdge, removeEdge } from './flow-graph.logic';
+import { GraphDefinition, GraphNode } from './flow-graph.model';
+import {
+  emptyGraph, addNode, connect, validateGraph, cloneGraph, removeNode, updateEdge, removeEdge,
+  nextFreePosition, DEFAULT_NODE_SIZE,
+} from './flow-graph.logic';
 
 describe('flow-graph.logic', () => {
   it('emptyGraph has no nodes/edges', () => {
@@ -189,5 +192,77 @@ describe('flow-graph.logic', () => {
     const g1 = addNode(g0, 'ACTION', { x: 0, y: 0 });
     expect(g0.nodes).toHaveLength(0);   // original untouched
     expect(g1.nodes).toHaveLength(1);
+  });
+});
+
+// ---- SP3: collision-free spawn position ------------------------------------
+
+describe('nextFreePosition', () => {
+  const size = DEFAULT_NODE_SIZE;
+
+  /** AABB overlap with all nodes assumed `size` (uniform node cards on the canvas). */
+  function overlaps(a: { x: number; y: number }, b: { x: number; y: number }): boolean {
+    return a.x < b.x + size.width && b.x < a.x + size.width
+        && a.y < b.y + size.height && b.y < a.y + size.height;
+  }
+
+  it('returns the start position on an empty canvas', () => {
+    expect(nextFreePosition([], size)).toEqual({ x: 80, y: 80 });
+  });
+
+  it('places the new node 80px right of the rightmost bounding box, same row', () => {
+    const g = addNode(emptyGraph(), 'START', { x: 80, y: 80 });
+    expect(nextFreePosition(g.nodes, size)).toEqual({ x: 80 + size.width + 80, y: 80 });
+  });
+
+  it('NEVER overlaps an existing bounding box, even on a dense canvas', () => {
+    let g = emptyGraph();
+    for (let i = 0; i < 12; i++) {
+      const p = nextFreePosition(g.nodes, size);
+      for (const n of g.nodes) {
+        expect(overlaps(p, n.position)).toBe(false);
+      }
+      g = addNode(g, 'ACTION', p);
+    }
+  });
+
+  it('staggers vertically into a new row when the row is full (viewportHint)', () => {
+    const hint = { maxRowWidth: 600 };
+    let g = emptyGraph();
+    const placed: { x: number; y: number }[] = [];
+    for (let i = 0; i < 4; i++) {
+      const p = nextFreePosition(g.nodes, size, hint);
+      expect(p.x + size.width).toBeLessThanOrEqual(hint.maxRowWidth);  // row constraint holds
+      placed.push(p);
+      g = addNode(g, 'FORM', p);
+    }
+    expect(new Set(placed.map(p => p.y)).size).toBeGreaterThan(1);     // wrapped to a 2nd row
+    for (let i = 0; i < placed.length; i++) {
+      for (let j = i + 1; j < placed.length; j++) {
+        expect(overlaps(placed[i], placed[j])).toBe(false);
+      }
+    }
+  });
+
+  it('skips an occupied slot in the wrapped row (manually dragged node in the way)', () => {
+    // Row is full (maxRowWidth 600) AND the first slot of the new row is already taken.
+    const nodes: GraphNode[] = [
+      { id: 'a', type: 'START', position: { x: 80, y: 80 }, data: {} },
+      { id: 'b', type: 'FORM', position: { x: 350, y: 80 }, data: { key: 'f' } },
+      { id: 'c', type: 'END', position: { x: 80, y: 184 }, data: {} },   // squats on the wrap target
+    ];
+    const p = nextFreePosition(nodes, size, { maxRowWidth: 600 });
+    expect(p.y).toBeGreaterThan(80);                                   // new row, not row 1
+    expect(p.x + size.width).toBeLessThanOrEqual(600);
+    for (const n of nodes) {
+      expect(overlaps(p, n.position)).toBe(false);
+    }
+  });
+
+  it('is pure — does not mutate the input nodes', () => {
+    const g = addNode(addNode(emptyGraph(), 'START', { x: 80, y: 80 }), 'END', { x: 400, y: 80 });
+    const snapshot = JSON.stringify(g.nodes);
+    nextFreePosition(g.nodes, size);
+    expect(JSON.stringify(g.nodes)).toBe(snapshot);
   });
 });
