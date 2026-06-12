@@ -48,6 +48,11 @@
         "title": "Compiti",
         "description": "Esaminare i compiti aperti e decidere sulle richieste."
       },
+      "lohnrechner": {
+        "title": "Calcolatore salariale",
+        "description": "Simulazione lordo-netto con i valori indicativi 2025 — solo nel browser, senza salvataggio.",
+        "badge": "Simulazione"
+      },
       "hilfe": {
         "title": "Aiuto",
         "description": "Guide e tour guidati."
@@ -359,6 +364,51 @@
     "outcome": {
       "approve": "Approvare",
       "reject": "Respingere"
+    }
+  },
+  "lohnrechner": {
+    "title": "Calcolatore salariale",
+    "lead": "Simuli lordo → netto con le deduzioni sociali svizzere — il calcolo avviene interamente nel suo browser.",
+    "banner": "Simulazione non vincolante con valori indicativi 2025 — nessuna validità giuridica, nessun salvataggio dei dati inseriti.",
+    "form": {
+      "legend": "I suoi dati",
+      "alter": "Età",
+      "kanton": "Cantone",
+      "brutto": "Salario annuo lordo (CHF, al 100 %)",
+      "bruttoHint": "Salario lordo annuo riferito a un grado di occupazione completo.",
+      "pensum": "Grado di occupazione (%)",
+      "pensumHint": "Il grado di occupazione scala linearmente il salario lordo.",
+      "qst": "Includere l'imposta alla fonte",
+      "qstHint": "Stima approssimativa per cantone sul netto dopo le deduzioni sociali."
+    },
+    "kanton": {
+      "BE": "Berna",
+      "ZH": "Zurigo",
+      "GE": "Ginevra",
+      "VD": "Vaud",
+      "BS": "Basilea Città"
+    },
+    "result": {
+      "title": "Il suo risultato",
+      "nettoMonat": "Netto al mese",
+      "nettoJahr": "Netto all'anno",
+      "bruttoEffektiv": "Salario annuo lordo effettivo",
+      "position": "Deduzione",
+      "satz": "Aliquota",
+      "jahr": "CHF/anno",
+      "monat": "CHF/mese",
+      "total": "Totale deduzioni",
+      "koordLohn": "Salario coordinato (LPP)",
+      "qstBasis": "Base dell'imposta alla fonte (netto dopo le deduzioni sociali)",
+      "bvgU25": "Prima dei 25 anni non è dovuto alcun accredito di vecchiaia LPP."
+    },
+    "position": {
+      "ahvIvEo": "AVS/AI/IPG",
+      "alv": "AD (assicurazione disoccupazione)",
+      "nbu": "AINP (infortuni non professionali)",
+      "ktg": "IGM (indennità giornaliera di malattia)",
+      "bvg": "LPP (quota dipendente)",
+      "qst": "Imposta alla fonte"
     }
   },
   "status": {

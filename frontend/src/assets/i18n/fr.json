@@ -48,6 +48,11 @@
         "title": "Tâches",
         "description": "Examiner les tâches ouvertes et statuer sur les demandes."
       },
+      "lohnrechner": {
+        "title": "Calculateur de salaire",
+        "description": "Simulation brut-net avec les valeurs indicatives 2025 — uniquement dans le navigateur, sans sauvegarde.",
+        "badge": "Simulation"
+      },
       "hilfe": {
         "title": "Aide",
         "description": "Guides et visites guidées."
@@ -359,6 +364,51 @@
     "outcome": {
       "approve": "Approuver",
       "reject": "Rejeter"
+    }
+  },
+  "lohnrechner": {
+    "title": "Calculateur de salaire",
+    "lead": "Simulez brut → net avec les déductions sociales suisses — le calcul s'effectue entièrement dans votre navigateur.",
+    "banner": "Simulation sans engagement avec les valeurs indicatives 2025 — aucune valeur juridique, aucune sauvegarde des saisies.",
+    "form": {
+      "legend": "Vos données",
+      "alter": "Âge",
+      "kanton": "Canton",
+      "brutto": "Salaire annuel brut (CHF, à 100 %)",
+      "bruttoHint": "Salaire brut annuel pour un taux d'occupation complet.",
+      "pensum": "Taux d'occupation (%)",
+      "pensumHint": "Le taux d'occupation met le salaire brut à l'échelle de manière linéaire.",
+      "qst": "Inclure l'impôt à la source",
+      "qstHint": "Estimation approximative par canton sur le net après déductions sociales."
+    },
+    "kanton": {
+      "BE": "Berne",
+      "ZH": "Zurich",
+      "GE": "Genève",
+      "VD": "Vaud",
+      "BS": "Bâle-Ville"
+    },
+    "result": {
+      "title": "Votre résultat",
+      "nettoMonat": "Net par mois",
+      "nettoJahr": "Net par an",
+      "bruttoEffektiv": "Salaire annuel brut effectif",
+      "position": "Déduction",
+      "satz": "Taux",
+      "jahr": "CHF/an",
+      "monat": "CHF/mois",
+      "total": "Total des déductions",
+      "koordLohn": "Salaire coordonné (LPP)",
+      "qstBasis": "Base de l'impôt à la source (net après déductions sociales)",
+      "bvgU25": "Aucune bonification de vieillesse LPP n'est due avant 25 ans."
+    },
+    "position": {
+      "ahvIvEo": "AVS/AI/APG",
+      "alv": "AC (assurance-chômage)",
+      "nbu": "AANP (accidents non professionnels)",
+      "ktg": "IJM (indemnités journalières maladie)",
+      "bvg": "LPP (part salarié)",
+      "qst": "Impôt à la source"
     }
   },
   "status": {

@@ -116,7 +116,10 @@
           }
 
           <div class="hr-module-foot">
-            <span class="hr-tag">{{ 'home.tag' | translate }}</span>
+            <!-- badgeKey (e.g. "Simulation", ADR-018) replaces the default product tag. -->
+            <span class="hr-tag" [class.hr-tag--badge]="!!m.badgeKey">
+              {{ (m.badgeKey ?? 'home.tag') | translate }}
+            </span>
             <span class="hr-open">{{ 'home.open' | translate }} <span aria-hidden="true">→</span></span>
           </div>
         </li>

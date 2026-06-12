@@ -23,6 +23,11 @@ const DE = {
       antragstypen: { title: 'Antragstypen', description: 'Antragstypen modellieren.' },
       antraege: { title: 'Meine Anträge', description: 'Eigene Anträge stellen.' },
       aufgaben: { title: 'Aufgaben', description: 'Offene Aufgaben prüfen.' },
+      lohnrechner: {
+        title: 'Lohnrechner',
+        description: 'Brutto-Netto-Simulation mit Richtwerten 2025.',
+        badge: 'Simulation',
+      },
       hilfe: { title: 'Hilfe', description: 'Anleitungen und geführte Touren.' },
     },
   },
@@ -100,16 +105,27 @@ describe('HomeComponent', () => {
     expect(values).toEqual(['–', '0', '–']); // tasks loaded fine (empty list)
   });
 
-  it('renders the four module cards as real links', async () => {
+  it('renders the five module cards as real links', async () => {
     const fixture = TestBed.createComponent(HomeComponent);
     await fixture.whenStable();
 
     const el: HTMLElement = fixture.nativeElement;
     const cards = el.querySelectorAll('.hr-module-card');
-    expect(cards).toHaveLength(4);
+    expect(cards).toHaveLength(5);
     const hrefs = [...el.querySelectorAll<HTMLAnchorElement>('a.hr-module-link')]
       .map(a => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/antragstypen', '/antraege', '/aufgaben', '/hilfe']);
+    expect(hrefs).toEqual(['/antragstypen', '/antraege', '/aufgaben', '/lohnrechner', '/hilfe']);
+  });
+
+  it('Lohnrechner card carries the "Simulation" maturity badge, the others the product tag (ADR-018)', async () => {
+    const fixture = TestBed.createComponent(HomeComponent);
+    await fixture.whenStable();
+
+    const el: HTMLElement = fixture.nativeElement;
+    const tags = [...el.querySelectorAll('.hr-tag')].map(t => t.textContent?.trim());
+    // 'home.tag' is untranslated in this spec → the raw key identifies the default tag.
+    expect(tags).toEqual(['home.tag', 'home.tag', 'home.tag', 'Simulation', 'home.tag']);
+    expect(el.querySelectorAll('.hr-tag--badge')).toHaveLength(1);
   });
 
   it('offers the dashboard tour auto-start exactly once after the first render (ADR-015)', async () => {

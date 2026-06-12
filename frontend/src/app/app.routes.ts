@@ -57,6 +57,13 @@ export const routes: Routes = [
       import('./features/help/help.component').then(m => m.HelpComponent),
   },
   {
+    // Lohnrechner (ADR-018): purely client-side gross→net simulation — no backend
+    // calls, no persistence, no personal data; rates 2025 live in SAETZE_2025.
+    path: 'lohnrechner',
+    loadComponent: () =>
+      import('./features/lohnrechner/lohnrechner.component').then(m => m.LohnrechnerComponent),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then(m => m.NotFoundComponent),

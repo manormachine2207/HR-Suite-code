@@ -18,6 +18,9 @@ const T: Record<string, string> = {
   'home.modules.aufgaben.description': 'Offene Aufgaben prüfen und Anträge entscheiden.',
   'home.modules.hilfe.title': 'Hilfe',
   'home.modules.hilfe.description': 'Anleitungen und geführte Touren.',
+  'home.modules.lohnrechner.title': 'Lohnrechner',
+  'home.modules.lohnrechner.description':
+    'Brutto-Netto-Simulation mit Richtwerten 2025 — rein im Browser, ohne Speicherung.',
 };
 
 const translateFn = (key: string): string => T[key] ?? key;
@@ -25,8 +28,10 @@ const translateFn = (key: string): string => T[key] ?? key;
 const ids = (defs: readonly ModuleCardDef[]): string[] => defs.map(d => d.id);
 
 describe('MODULE_CATALOG', () => {
-  it('declares the four dashboard modules with route + roles', () => {
-    expect(ids(MODULE_CATALOG)).toEqual(['antragstypen', 'antraege', 'aufgaben', 'hilfe']);
+  it('declares the five dashboard modules with route + roles', () => {
+    expect(ids(MODULE_CATALOG)).toEqual([
+      'antragstypen', 'antraege', 'aufgaben', 'lohnrechner', 'hilfe',
+    ]);
     const byId = new Map(MODULE_CATALOG.map(d => [d.id, d]));
     expect(byId.get('antragstypen')!.route).toBe('/antragstypen');
     expect(byId.get('antragstypen')!.roles).toEqual(['hr-designer', 'tenant-admin']);
@@ -40,6 +45,18 @@ describe('MODULE_CATALOG', () => {
     expect(byId.get('hilfe')!.icon).toBe('question_circle');
   });
 
+  it('Lohnrechner card (ADR-018): for everyone, calculator icon, "Simulation" maturity badge', () => {
+    const lohnrechner = MODULE_CATALOG.find(d => d.id === 'lohnrechner')!;
+    expect(lohnrechner.route).toBe('/lohnrechner');
+    expect(lohnrechner.roles).toEqual([]);
+    expect(lohnrechner.icon).toBe('calculator');
+    expect(lohnrechner.badgeKey).toBe('home.modules.lohnrechner.badge');
+    // All other cards keep the default product tag (no badge).
+    for (const def of MODULE_CATALOG.filter(d => d.id !== 'lohnrechner')) {
+      expect(def.badgeKey, def.id).toBeUndefined();
+    }
+  });
+
   it('every module carries icon + i18n keys in the home.modules.* block', () => {
     for (const def of MODULE_CATALOG) {
       expect(def.icon.length).toBeGreaterThan(0);
@@ -51,11 +68,11 @@ describe('MODULE_CATALOG', () => {
 
 describe('filterModules', () => {
   it('returns all modules for an empty search without favorites-only', () => {
-    expect(filterModules(MODULE_CATALOG, '', false, [], translateFn)).toHaveLength(4);
+    expect(filterModules(MODULE_CATALOG, '', false, [], translateFn)).toHaveLength(5);
   });
 
   it('treats whitespace-only search as empty', () => {
-    expect(filterModules(MODULE_CATALOG, '   ', false, [], translateFn)).toHaveLength(4);
+    expect(filterModules(MODULE_CATALOG, '   ', false, [], translateFn)).toHaveLength(5);
   });
 
   it('matches the translated title case-insensitively', () => {
