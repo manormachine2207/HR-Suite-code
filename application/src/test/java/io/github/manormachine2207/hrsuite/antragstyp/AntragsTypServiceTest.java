@@ -71,12 +71,15 @@ class AntragsTypServiceTest {
     }
 
     // ---- helpers ----------------------------------------------------------
+    private static final Map<String, String> LABELS =
+            Map.of("de", "L", "fr", "L", "it", "L", "en", "L");
+
     private static FormDefinition form(FormField... f) {
         return new FormDefinition(List.of(f));
     }
 
     private static FormField text(String key, boolean required, Integer maxLen) {
-        return new FormField(key, FieldType.TEXT, required, Map.of("de", "L"), Map.of(),
+        return new FormField(key, FieldType.TEXT, required, LABELS, Map.of(),
                 maxLen == null ? null : new Validation(maxLen, null, null), List.of(), null);
     }
 
@@ -111,10 +114,10 @@ class AntragsTypServiceTest {
     void createDraftMajorAssignsNextMajor() {
         UUID atId = UUID.randomUUID();
         when(antragsTypRepository.findById(atId))
-                .thenReturn(Optional.of(new AntragsTyp(atId, TENANT, "k", Map.of("de", "K"), Map.of())));
+                .thenReturn(Optional.of(new AntragsTyp(atId, TENANT, "k", LABELS, Map.of())));
         when(versionRepository.maxMajor(atId)).thenReturn(2);
 
-        AntragsTypVersion v = service.createDraftMajor(atId, form(text("a", true, 100)), "<bpmn/>", Map.of(), null, null);
+        AntragsTypVersion v = service.createDraftMajor(atId, form(text("a", true, 100)), Map.of(), null, null);
 
         assertThat(v.getMajor()).isEqualTo(3);
         assertThat(v.getMinor()).isZero();
@@ -127,7 +130,7 @@ class AntragsTypServiceTest {
         UUID missing = UUID.randomUUID();
         when(antragsTypRepository.findById(missing)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.createDraftMajor(missing, form(text("a", true, 100)), "<bpmn/>", Map.of(), null, null))
+        assertThatThrownBy(() -> service.createDraftMajor(missing, form(text("a", true, 100)), Map.of(), null, null))
                 .isInstanceOf(AntragsTypExceptions.NotFound.class);
     }
 
@@ -135,7 +138,7 @@ class AntragsTypServiceTest {
     @Test
     void publishFirstVersionMarksAntragsTypLive() {
         UUID atId = UUID.randomUUID();
-        var at = new AntragsTyp(atId, TENANT, "k", Map.of("de", "K"), Map.of());
+        var at = new AntragsTyp(atId, TENANT, "k", LABELS, Map.of());
         var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 1, form(text("a", true, 100)), "<bpmn/>", Map.of());
         when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(atId));
         when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
@@ -150,10 +153,40 @@ class AntragsTypServiceTest {
         assertThat(at.getCurrentVersionId()).isEqualTo(v.getId());
     }
 
+    /**
+     * Security (Review 2026-06-12): client-supplied BPMN must NEVER reach the engine.
+     * Flowable evaluates expressions/delegates in deployed XML against the full Spring
+     * context — deploying raw client XML is code execution and a tenant escape. publish()
+     * deploys exclusively compiler output or the default placeholder.
+     */
+    @Test
+    void publishNeverDeploysStoredRawBpmn() {
+        UUID atId = UUID.randomUUID();
+        var at = new AntragsTyp(atId, TENANT, "k", LABELS, Map.of());
+        var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 1, form(text("a", true, 100)),
+                "<process id=\"evil\"><serviceTask flowable:expression=\"${runtime.exec()}\"/></process>",
+                Map.of());
+        when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(atId));
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+        when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.empty());
+        when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
+
+        service.publish(v.getId(), USER);
+
+        var xml = org.mockito.ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(workflowEngine).deploy(any(), anyString(), any(), xml.capture());
+        assertThat(xml.getValue()).doesNotContain("evil");
+        assertThat(xml.getValue()).doesNotContain("runtime.exec");
+        // without a FlowDefinition the default placeholder is what gets deployed
+        assertThat(xml.getValue()).contains("<userTask id=\"review\"");
+        // and the version records what was actually deployed (traceability)
+        assertThat(v.getWorkflowBpmn()).doesNotContain("evil");
+    }
+
     @Test
     void publishDemotesPreviousPublishedMajor() {
         UUID atId = UUID.randomUUID();
-        var at = new AntragsTyp(atId, TENANT, "k", Map.of("de", "K"), Map.of());
+        var at = new AntragsTyp(atId, TENANT, "k", LABELS, Map.of());
         var prev = publishedVersion(atId, form(text("a", true, 100)));
         var next = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 2, form(text("a", true, 100)), "<bpmn/>", Map.of());
         when(versionRepository.findAntragstypIdById(next.getId())).thenReturn(Optional.of(atId));
@@ -175,6 +208,97 @@ class AntragsTypServiceTest {
 
         assertThatThrownBy(() -> service.publish(v.getId(), USER))
                 .isInstanceOf(AntragsTypExceptions.IllegalState.class);
+    }
+
+    /** BDR-005-Gate (Review 2026-06-12): unvollstaendige i18n blockiert den Publish, bevor irgendetwas demotet/deployt wird. */
+    @Test
+    void publishRejectsIncompleteI18nBeforeAnySideEffect() {
+        UUID atId = UUID.randomUUID();
+        var at = new AntragsTyp(atId, TENANT, "k", Map.of("de", "Nur Deutsch"), Map.of());
+        var next = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 2, form(text("a", true, 100)), null, Map.of());
+        when(versionRepository.findAntragstypIdById(next.getId())).thenReturn(Optional.of(atId));
+        when(versionRepository.findById(next.getId())).thenReturn(Optional.of(next));
+        when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
+
+        assertThatThrownBy(() -> service.publish(next.getId(), USER))
+                .isInstanceOf(AntragsTypExceptions.Invalid.class)
+                .hasMessageContaining("i18n");
+
+        assertThat(next.getStatus()).isEqualTo(VersionStatus.DRAFT);
+        org.mockito.Mockito.verify(workflowEngine, org.mockito.Mockito.never())
+                .deploy(any(), anyString(), any(), any());
+        // gate fires before the demote lookup — the previously published major is untouched
+        org.mockito.Mockito.verify(versionRepository, org.mockito.Mockito.never())
+                .findByAntragstypIdAndStatus(any(), any());
+    }
+
+    // ---- publish with graph (ADR-012 SP1) ----------------------------------
+    @Test
+    void publishCompilesGraphDefinitionAndDeploysIt() throws Exception {
+        UUID atId = UUID.randomUUID();
+        var at = new AntragsTyp(atId, TENANT, "k", LABELS, Map.of());
+        var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 1, form(text("a", true, 100)), null, Map.of());
+        v.setGraphDefinition(new com.fasterxml.jackson.databind.ObjectMapper().readTree("""
+                {"nodes":[
+                   {"id":"n1","type":"START","position":{"x":0,"y":0},"data":{}},
+                   {"id":"n2","type":"FORM","position":{"x":1,"y":0},"data":{"key":"erfassen","title":{"de":"E"}}},
+                   {"id":"n3","type":"END","position":{"x":2,"y":0},"data":{}}],
+                 "edges":[
+                   {"id":"e1","source":"n1","target":"n2"},
+                   {"id":"e2","source":"n2","target":"n3"}]}
+                """));
+        when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(atId));
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+        when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.empty());
+        when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
+
+        service.publish(v.getId(), USER);
+
+        var xml = org.mockito.ArgumentCaptor.forClass(String.class);
+        org.mockito.Mockito.verify(workflowEngine).deploy(any(), anyString(), any(), xml.capture());
+        assertThat(xml.getValue()).contains("<userTask id=\"erfassen\"");
+        assertThat(v.getWorkflowBpmn()).contains("<userTask id=\"erfassen\"");
+        assertThat(v.getStatus()).isEqualTo(VersionStatus.PUBLISHED);
+    }
+
+    @Test
+    void publishRejectsInvalidGraphWith422() throws Exception {
+        UUID atId = UUID.randomUUID();
+        var at = new AntragsTyp(atId, TENANT, "k", LABELS, Map.of());
+        var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, atId, 1, form(text("a", true, 100)), null, Map.of());
+        v.setGraphDefinition(new com.fasterxml.jackson.databind.ObjectMapper().readTree(
+                "{\"nodes\":[{\"id\":\"n1\",\"type\":\"FORM\",\"data\":{\"key\":\"solo\"}}],\"edges\":[]}"));
+        when(versionRepository.findAntragstypIdById(v.getId())).thenReturn(Optional.of(atId));
+        when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
+        when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.empty());
+        when(antragsTypRepository.findById(atId)).thenReturn(Optional.of(at));
+
+        assertThatThrownBy(() -> service.publish(v.getId(), USER))
+                .isInstanceOf(AntragsTypExceptions.Invalid.class)
+                .hasMessageContaining("START");
+        org.mockito.Mockito.verify(workflowEngine, org.mockito.Mockito.never())
+                .deploy(any(), anyString(), any(), any());
+    }
+
+    // ---- validatePayloadForPublishedMajor ----------------------------------
+    @Test
+    void validatePayloadRejectsMismatchWithInvalid() {
+        UUID atId = UUID.randomUUID();
+        var v = publishedVersion(atId, form(text("grund", true, 10)));
+        when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.of(v));
+
+        assertThatThrownBy(() -> service.validatePayloadForPublishedMajor(atId, Map.of("hack", "x")))
+                .isInstanceOf(AntragsTypExceptions.Invalid.class)
+                .hasMessageContaining("hack");
+    }
+
+    @Test
+    void validatePayloadAcceptsMatchingPayload() {
+        UUID atId = UUID.randomUUID();
+        var v = publishedVersion(atId, form(text("grund", true, 10)));
+        when(versionRepository.findByAntragstypIdAndStatus(atId, VersionStatus.PUBLISHED)).thenReturn(Optional.of(v));
+
+        service.validatePayloadForPublishedMajor(atId, Map.of("grund", "Umzug"));
     }
 
     // ---- editInPlaceMinor -------------------------------------------------
@@ -230,10 +354,11 @@ class AntragsTypServiceTest {
         var v = new AntragsTypVersion(UUID.randomUUID(), TENANT, UUID.randomUUID(), 1, form(text("a", true, 100)), "<bpmn/>", Map.of());
         when(versionRepository.findById(v.getId())).thenReturn(Optional.of(v));
 
-        var edited = service.editDraft(v.getId(), form(text("a", true, 100), text("b", false, 50)), "<bpmn>v2</bpmn>", Map.of(), null, null);
+        var edited = service.editDraft(v.getId(), form(text("a", true, 100), text("b", false, 50)), Map.of(), null, null);
 
         assertThat(edited.getFormDefinition().fields()).hasSize(2);
-        assertThat(edited.getWorkflowBpmn()).isEqualTo("<bpmn>v2</bpmn>");
+        // workflowBpmn is compiler output only and must not be client-editable (Review 2026-06-12)
+        assertThat(edited.getWorkflowBpmn()).isEqualTo("<bpmn/>");
         assertThat(edited.getMinor()).isZero();
         assertThat(edited.getStatus()).isEqualTo(VersionStatus.DRAFT);
     }

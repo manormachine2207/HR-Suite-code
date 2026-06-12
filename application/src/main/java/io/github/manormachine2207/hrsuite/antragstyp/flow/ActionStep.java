@@ -16,6 +16,7 @@ public record ActionStep(
 
     public ActionStep {
         key = Objects.requireNonNull(key, "key");
+        ref = Objects.requireNonNull(ref, "ref");
         title = title == null ? Map.of() : Map.copyOf(title);
         inputMapping = inputMapping == null ? Map.of() : Map.copyOf(inputMapping);
     }

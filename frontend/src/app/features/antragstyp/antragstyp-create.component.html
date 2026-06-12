@@ -1,22 +1,23 @@
 <section class="create">
-  <a routerLink="/antragstypen">&larr; {{ 'antragstyp.list.title' | translate }}</a>
+  <a routerLink="/antragstypen">&larr; {{ 'antragstyp.listTitle' | translate }}</a>
   <h1>{{ 'antragstyp.create.title' | translate }}</h1>
 
-  @if (errorMsg) { <p class="error" role="alert">{{ errorMsg }}</p> }
+  @if (errorKey) { <p class="error" role="alert">{{ errorKey | translate }}</p> }
 
   <form [formGroup]="form" (ngSubmit)="submit()">
-    <label>
-      {{ 'antragstyp.create.key' | translate }}
-      <input formControlName="key" autocomplete="off" />
-    </label>
+    <label for="at-key">{{ 'antragstyp.create.key' | translate }}</label>
+    <input id="at-key" formControlName="key" autocomplete="off" />
     @if (form.controls['key'].touched && form.controls['key'].invalid) {
       <p class="hint">{{ 'antragstyp.create.keyHint' | translate }}</p>
     }
 
     <fieldset formGroupName="title">
-      <legend>{{ 'antragstyp.create.title' | translate }}</legend>
+      <legend>{{ 'antragstyp.create.titleLabel' | translate }}</legend>
       @for (lang of langs; track lang) {
-        <label>{{ lang | uppercase }}<input [formControlName]="lang" /></label>
+        <div class="lang-field">
+          <label [for]="'at-title-' + lang">{{ lang | uppercase }}</label>
+          <input [id]="'at-title-' + lang" [formControlName]="lang" autocomplete="off" />
+        </div>
       }
     </fieldset>
 

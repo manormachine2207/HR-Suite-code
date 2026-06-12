@@ -62,7 +62,7 @@ class N8nActionConnectorTest {
     }
 
     private ActionRequest req(String ref) {
-        return new ActionRequest(TENANT, "pi-1", "ad", ref, Map.of("upn", "a@b.ch"));
+        return new ActionRequest(TENANT, "pi-1", "antrag-1", "ad", ref, Map.of("upn", "a@b.ch"));
     }
 
     @Test
@@ -74,6 +74,20 @@ class N8nActionConnectorTest {
                 .isEqualTo(HmacSigner.hexSha256("topsecret",
                         connector.canonical(req("provision-ad-account"))));
         assertThat(lastBody.get()).contains("provision-ad-account").contains("a@b.ch");
+    }
+
+    @Test
+    void idempotencyKeyAnchorsOnBusinessKeyWhenPresent() {
+        // stable across process instances: a resubmit (new pi) keeps the same key
+        assertThat(connector.canonical(req("provision-ad-account")))
+                .contains("\"idempotencyKey\":\"antrag-1:ad\"");
+    }
+
+    @Test
+    void idempotencyKeyFallsBackToProcessInstanceWithoutBusinessKey() {
+        var noBk = new ActionRequest(TENANT, "pi-1", null, "ad", "provision-ad-account", Map.of());
+        assertThat(connector.canonical(noBk))
+                .contains("\"idempotencyKey\":\"pi-1:ad\"");
     }
 
     @Test

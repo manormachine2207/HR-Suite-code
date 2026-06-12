@@ -47,6 +47,27 @@
     background: var(--bs-danger-bg-subtle, #fbe6e7);
     border-color: var(--bs-danger-border-subtle, #f3c0c3);
   }
+
+  &--ok {
+    color: var(--bs-success-text-emphasis, #1d6f3a);
+    background: var(--bs-success-bg-subtle, #e3f4e8);
+    border-color: var(--bs-success-border-subtle, #bfe6cb);
+  }
+}
+
+.hr-field-error {
+  color: var(--bs-danger-text-emphasis, #b3000c);
+  font-size: 0.82rem;
+}
+
+.hr-rowactions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.hr-btn--sm {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
 }
 
 .hr-card {

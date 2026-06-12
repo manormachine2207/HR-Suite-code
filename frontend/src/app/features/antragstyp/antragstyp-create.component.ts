@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -25,10 +25,14 @@ export class AntragstypCreateComponent {
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(AntragsTypService);
   private readonly router = inject(Router);
+  // Zoneless: async subscribe callbacks must notify change detection explicitly,
+  // otherwise the saving/error state never reaches the view (frozen submit button).
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly langs = LANGS;
   saving = false;
-  errorMsg = '';
+  /** i18n key of the current error (BDR-005 — translated in the template). */
+  errorKey = '';
 
   readonly form: CreateForm = this.fb.group({
     key: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[a-z0-9_-]+$/)] }),
@@ -47,15 +51,26 @@ export class AntragstypCreateComponent {
       return;
     }
     this.saving = true;
-    this.errorMsg = '';
+    this.errorKey = '';
     const key = this.form.controls.key.value;
     const rawTitle = this.form.controls.title.value as Record<string, string>;
     const title: LocaleMap = Object.fromEntries(
       Object.entries(rawTitle).filter(([, v]) => v && v.trim().length > 0));
 
     this.service.createAntragstyp(key, title).subscribe({
-      next: (created) => this.router.navigate(['/antragstypen', created.id, 'designer']),
-      error: (e) => { this.saving = false; this.errorMsg = (e as { error?: { message?: string } })?.error?.message ?? 'Fehler'; },
+      next: (created) => {
+        this.saving = false;
+        this.cdr.markForCheck();
+        this.router.navigate(['/antragstypen', created.id, 'designer']);
+      },
+      error: (e) => {
+        this.saving = false;
+        const status = (e as { status?: number })?.status;
+        this.errorKey = status === 409
+          ? 'antragstyp.create.error.conflict'
+          : 'antragstyp.create.error.generic';
+        this.cdr.markForCheck();
+      },
     });
   }
 }

@@ -38,22 +38,29 @@ public class ActionExecutionService {
         this.maxAttempts = maxAttempts;
     }
 
-    public ActionExecution run(String processInstanceId, String stepKey, String ref, Map<String, Object> input) {
+    public ActionExecution run(String processInstanceId, String businessKey, String stepKey,
+                               String ref, Map<String, Object> input) {
         UUID tenantId = TenantContext.require();
 
-        ActionExecution exec = repo.findByProcessInstanceIdAndStepKey(processInstanceId, stepKey)
-                .orElseGet(() -> repo.save(new ActionExecution(tenantId, processInstanceId, stepKey, ref)));
-        // Idempotency guard: only SUCCEEDED short-circuits. A row left RUNNING, FAILED, or
-        // DEAD (e.g. from a previous process-instance crash or a BPMN compensation re-entry)
-        // will re-attempt here, which is acceptable for Cut A's synchronous request/reply
-        // model — n8n receives an idempotency key in the canonical body and can deduplicate
-        // on its side. Stricter at-most-once semantics are a deferred follow-up.
-        if (exec.getStatus() == ActionStatus.SUCCEEDED) {
-            return exec; // idempotent: a retried BPMN step must not re-fire the side effect
+        // Lookup anchored on the business key (= antrag id) when present: a resubmit after a
+        // rollback starts a NEW process instance, so processInstanceId alone cannot dedupe
+        // side effects across submits (Review 2026-06-12). RLS scopes the query to the tenant.
+        ActionExecution exec = (businessKey != null
+                ? repo.findByBusinessKeyAndStepKey(businessKey, stepKey)
+                : repo.findByProcessInstanceIdAndStepKey(processInstanceId, stepKey))
+                .orElseGet(() -> repo.save(new ActionExecution(tenantId, processInstanceId, businessKey, stepKey, ref)));
+        // Idempotency guard: SUCCEEDED short-circuits (side effect already out), and
+        // FAILED/DEAD are terminal — a dead-lettered action must not revive itself on a
+        // BPMN re-entry; the delegate raises BpmnError from the returned status. Only
+        // PENDING/RUNNING (fresh row or crash recovery) proceed to attempt.
+        if (exec.getStatus() == ActionStatus.SUCCEEDED
+                || exec.getStatus() == ActionStatus.FAILED
+                || exec.getStatus() == ActionStatus.DEAD) {
+            return exec;
         }
         exec.markRunning();
 
-        ActionRequest request = new ActionRequest(tenantId, processInstanceId, stepKey, ref, input);
+        ActionRequest request = new ActionRequest(tenantId, processInstanceId, businessKey, stepKey, ref, input);
         ActionResult last = null;
         // Retries are immediate (no backoff) on purpose for Cut A: introducing Thread.sleep
         // here would hold the Flowable command thread and its DB connection for the full

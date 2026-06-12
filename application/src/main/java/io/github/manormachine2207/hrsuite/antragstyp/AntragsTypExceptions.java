@@ -37,4 +37,14 @@ public final class AntragsTypExceptions {
             super(message);
         }
     }
+
+    /**
+     * Fachlich ungueltiger Inhalt: unvollstaendige i18n beim Publish (BDR-005) oder
+     * Payload passt nicht zur gepinnten FormDefinition (ADR-009 §4). HTTP 422.
+     */
+    public static class Invalid extends RuntimeException {
+        public Invalid(String message) {
+            super(message);
+        }
+    }
 }

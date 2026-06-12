@@ -94,7 +94,10 @@ public class N8nActionConnector implements ActionConnector {
     /** Canonical signed body: stable field order so the signature is reproducible. */
     public String canonical(ActionRequest request) {
         Map<String, Object> ordered = new LinkedHashMap<>();
-        ordered.put("idempotencyKey", request.processInstanceId() + ":" + request.stepKey());
+        // Anchor the key on the business key (= antrag id) when present: stays stable when a
+        // resubmit starts a new process instance, so n8n can actually deduplicate.
+        String anchor = request.businessKey() != null ? request.businessKey() : request.processInstanceId();
+        ordered.put("idempotencyKey", anchor + ":" + request.stepKey());
         ordered.put("ref", request.ref());
         ordered.put("input", request.input());
         try {

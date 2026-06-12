@@ -99,6 +99,26 @@ class AntragServiceTest {
         assertThat(a.getWorkflowProcessId()).isEqualTo("pi-1");   // process instance started (ADR-009 §5)
     }
 
+    /** Systemgrenze des Einreich-Pfads (Review 2026-06-12): ein 422 aus der Payload-Validierung verhindert Pin + Prozessstart. */
+    @Test
+    void submitRejectsPayloadThatDoesNotMatchPinnedFormDefinition() {
+        UUID atId = UUID.randomUUID();
+        Antrag a = draft(atId, SUBJECT);
+        when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
+        when(antragsTypService.findPublishedMajor(atId))
+                .thenReturn(Optional.of(new PublishedMajorRef(UUID.randomUUID(), 0, "proc-key")));
+        org.mockito.Mockito.doThrow(new io.github.manormachine2207.hrsuite.antragstyp
+                        .AntragsTypExceptions.Invalid("payload does not match"))
+                .when(antragsTypService).validatePayloadForPublishedMajor(eq(atId), any());
+
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT))
+                .hasMessageContaining("payload does not match");
+
+        assertThat(a.getStatus()).isEqualTo(AntragStatus.DRAFT);
+        org.mockito.Mockito.verify(workflowEngine, org.mockito.Mockito.never())
+                .startInstance(any(), any(), any(), any());
+    }
+
     @Test
     void submitThrowsIllegalStateWhenNotDraft() {
         UUID atId = UUID.randomUUID();

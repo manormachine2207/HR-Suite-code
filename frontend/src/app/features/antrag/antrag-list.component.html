@@ -16,6 +16,15 @@
     }
   </div>
 
+  @if (successKey) {
+    <div class="hr-state hr-state--ok" role="status">{{ successKey | translate }}</div>
+  }
+  @if (!creating && (errorKey || errorDetail)) {
+    <div class="hr-state hr-state--error" role="alert">
+      {{ errorDetail || (errorKey | translate) }}
+    </div>
+  }
+
   @if (creating) {
     <div class="hr-card hr-form-card">
       <h2 class="hr-form-title">{{ 'antrag.newTitle' | translate }}</h2>
@@ -48,13 +57,16 @@
                   <input [id]="'f-' + f.key" type="checkbox" [formControlName]="f.key" />
                 }
                 @case ('NUMBER') {
-                  <input [id]="'f-' + f.key" type="number" class="hr-input" [formControlName]="f.key" />
+                  <input [id]="'f-' + f.key" type="number" class="hr-input" [formControlName]="f.key"
+                         [attr.aria-describedby]="fieldErrorKey(f) ? 'f-err-' + f.key : null" />
                 }
                 @case ('DATE') {
-                  <input [id]="'f-' + f.key" type="date" class="hr-input" [formControlName]="f.key" />
+                  <input [id]="'f-' + f.key" type="date" class="hr-input" [formControlName]="f.key"
+                         [attr.aria-describedby]="fieldErrorKey(f) ? 'f-err-' + f.key : null" />
                 }
                 @case ('SELECT') {
-                  <select [id]="'f-' + f.key" class="hr-input" [formControlName]="f.key">
+                  <select [id]="'f-' + f.key" class="hr-input" [formControlName]="f.key"
+                          [attr.aria-describedby]="fieldErrorKey(f) ? 'f-err-' + f.key : null">
                     <option value="">—</option>
                     @for (o of f.options ?? []; track o.value) {
                       <option [value]="o.value">{{ optionLabel(o) }}</option>
@@ -62,21 +74,30 @@
                   </select>
                 }
                 @case ('MULTI_SELECT') {
-                  <select [id]="'f-' + f.key" class="hr-input" multiple [formControlName]="f.key">
+                  <select [id]="'f-' + f.key" class="hr-input" multiple [formControlName]="f.key"
+                          [attr.aria-describedby]="fieldErrorKey(f) ? 'f-err-' + f.key : null">
                     @for (o of f.options ?? []; track o.value) {
                       <option [value]="o.value">{{ optionLabel(o) }}</option>
                     }
                   </select>
                 }
                 @default {
-                  <input [id]="'f-' + f.key" type="text" class="hr-input" [formControlName]="f.key" />
+                  <input [id]="'f-' + f.key" type="text" class="hr-input" [formControlName]="f.key"
+                         [attr.aria-describedby]="fieldErrorKey(f) ? 'f-err-' + f.key : null" />
                 }
+              }
+              @if (fieldErrorKey(f); as errKey) {
+                <small class="hr-field-error" [id]="'f-err-' + f.key">
+                  {{ errKey | translate: fieldErrorParams(f) }}
+                </small>
               }
             </div>
           }
 
-          @if (errorKey) {
-            <div class="hr-state hr-state--error" role="alert">{{ ('antrag.' + errorKey) | translate }}</div>
+          @if (errorKey || errorDetail) {
+            <div class="hr-state hr-state--error" role="alert">
+              {{ errorDetail || (errorKey | translate) }}
+            </div>
           }
 
           <div class="hr-form-actions">
@@ -107,13 +128,18 @@
             <th scope="col">{{ 'antrag.colStatus' | translate }}</th>
             <th scope="col">{{ 'antrag.colProcess' | translate }}</th>
             <th scope="col">{{ 'antrag.colCreated' | translate }}</th>
+            <th scope="col">{{ 'antrag.colActions' | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (a of antraege; track a.id) {
             <tr [class.hr-row--new]="a.id === lastSubmittedId">
               <td class="hr-title">{{ typTitle(a.antragstypId) }}</td>
-              <td><span class="hr-status" [class]="statusClass(a.status)">{{ a.status }}</span></td>
+              <td>
+                <span class="hr-status" [class]="statusClass(a.status)">
+                  {{ statusKey(a.status) ? (statusKey(a.status)! | translate) : a.status }}
+                </span>
+              </td>
               <td>
                 @if (a.workflowProcessId) {
                   <code class="hr-key">{{ a.workflowProcessId }}</code>
@@ -121,7 +147,21 @@
                   <span class="hr-muted">—</span>
                 }
               </td>
-              <td class="hr-muted">{{ a.createdAt | date: 'short' }}</td>
+              <td class="hr-muted">{{ a.createdAt | date: 'short' : undefined : dateLocale }}</td>
+              <td class="hr-rowactions">
+                @if (a.status === 'DRAFT') {
+                  <button type="button" class="hr-btn hr-btn--sm hr-btn--primary"
+                          (click)="submitDraft(a)" [disabled]="rowBusyId !== null">
+                    {{ 'antrag.submitDraft' | translate }}
+                  </button>
+                  <button type="button" class="hr-btn hr-btn--sm"
+                          (click)="cancelDraft(a)" [disabled]="rowBusyId !== null">
+                    {{ 'antrag.cancelDraft' | translate }}
+                  </button>
+                } @else {
+                  <span class="hr-muted">—</span>
+                }
+              </td>
             </tr>
           }
         </tbody>

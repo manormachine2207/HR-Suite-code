@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { GraphDefinition } from './flow-graph.model';
-import { emptyGraph, addNode, connect, validateGraph, cloneGraph, removeNode } from './flow-graph.logic';
+import { emptyGraph, addNode, connect, validateGraph, cloneGraph, removeNode, updateEdge, removeEdge } from './flow-graph.logic';
 
 describe('flow-graph.logic', () => {
   it('emptyGraph has no nodes/edges', () => {
@@ -46,16 +46,115 @@ describe('flow-graph.logic', () => {
       edges: [
         { id: 'e1', source: 'a', target: 'b' },
         { id: 'e2', source: 'b', target: 'x' },
-        { id: 'e3', source: 'x', target: 'a' },   // XOR outgoing WITHOUT condition
+        // TWO unconditioned XOR outgoing edges — at most one default branch is allowed
+        { id: 'e3', source: 'x', target: 'a' },
+        { id: 'e4', source: 'x', target: 'b' },
       ],
     };
-    const codes = validateGraph(g).map(w => w.code);
+    const warnings = validateGraph(g);
+    const codes = warnings.map(w => w.code);
     expect(codes).toContain('NO_START');
     expect(codes).toContain('NO_END');
     expect(codes).toContain('INVALID_KEY');
     expect(codes).toContain('DUPLICATE_KEY');
     expect(codes).toContain('DISCONNECTED');
     expect(codes).toContain('XOR_UNCONDITIONED');
+  });
+
+  it('validateGraph emits i18n message keys + params instead of hardcoded German (BDR-005)', () => {
+    const g: GraphDefinition = {
+      nodes: [
+        { id: 'a', type: 'FORM', position: { x: 0, y: 0 }, data: { key: 'bad-key' } },
+        { id: 'b', type: 'FORM', position: { x: 0, y: 0 }, data: { key: 'bad-key' } },
+        { id: 'x', type: 'XOR', position: { x: 0, y: 0 }, data: { key: 'gw' } },
+        { id: 'd', type: 'ACTION', position: { x: 0, y: 0 }, data: { key: 'd', ref: 'r' } },
+      ],
+      edges: [
+        { id: 'e1', source: 'a', target: 'b' },
+        { id: 'e2', source: 'b', target: 'x' },
+        { id: 'e3', source: 'x', target: 'a' },
+        { id: 'e4', source: 'x', target: 'b' },
+      ],
+    };
+    const byCode = (code: string) => validateGraph(g).find(w => w.code === code)!;
+
+    expect(byCode('NO_START').messageKey).toBe('flow.canvas.warning.noStart');
+    expect(byCode('NO_END').messageKey).toBe('flow.canvas.warning.noEnd');
+    expect(byCode('INVALID_KEY').messageKey).toBe('flow.canvas.warning.invalidKey');
+    expect(byCode('INVALID_KEY').params).toEqual({ key: 'bad-key' });
+    expect(byCode('DUPLICATE_KEY').messageKey).toBe('flow.canvas.warning.duplicateKey');
+    expect(byCode('DUPLICATE_KEY').params).toEqual({ key: 'bad-key' });
+    expect(byCode('DISCONNECTED').messageKey).toBe('flow.canvas.warning.disconnected');
+    expect(byCode('XOR_UNCONDITIONED').messageKey).toBe('flow.canvas.warning.xorUnconditioned');
+
+    // No warning carries a hardcoded (German) message anymore.
+    for (const w of validateGraph(g)) {
+      expect(w).not.toHaveProperty('message');
+    }
+  });
+
+  // ---- SP1: edge editing + backend-aligned XOR semantics -------------------
+
+  it('updateEdge patches label and condition immutably', () => {
+    let g = emptyGraph();
+    g = addNode(g, 'XOR', { x: 0, y: 0 });
+    g = addNode(g, 'END', { x: 100, y: 0 });
+    g = connect(g, g.nodes[0].id, g.nodes[1].id);
+    const edgeId = g.edges[0].id;
+
+    const patched = updateEdge(g, edgeId, { label: 'ja', condition: "gw_outcome == 'approve'" });
+
+    expect(patched.edges[0].label).toBe('ja');
+    expect(patched.edges[0].condition).toBe("gw_outcome == 'approve'");
+    expect(g.edges[0].label).toBeUndefined();   // input untouched
+  });
+
+  it('removeEdge drops exactly that edge', () => {
+    let g = emptyGraph();
+    g = addNode(g, 'FORM', { x: 0, y: 0 });
+    g = addNode(g, 'END', { x: 100, y: 0 });
+    g = connect(g, g.nodes[0].id, g.nodes[1].id);
+    g = connect(g, g.nodes[0].id, g.nodes[1].id);
+    const removed = removeEdge(g, g.edges[0].id);
+    expect(removed.edges).toHaveLength(1);
+    expect(g.edges).toHaveLength(2);   // input untouched
+  });
+
+  it('validateGraph accepts a single unconditioned XOR branch as the default (backend semantics)', () => {
+    const g: GraphDefinition = {
+      nodes: [
+        { id: 's', type: 'START', position: { x: 0, y: 0 }, data: {} },
+        { id: 'x', type: 'XOR', position: { x: 0, y: 0 }, data: { key: 'gw' } },
+        { id: 'e1n', type: 'END', position: { x: 0, y: 0 }, data: {} },
+        { id: 'e2n', type: 'END', position: { x: 0, y: 0 }, data: {} },
+      ],
+      edges: [
+        { id: 'a', source: 's', target: 'x' },
+        { id: 'b', source: 'x', target: 'e1n', condition: "gw_outcome == 'approve'" },
+        { id: 'c', source: 'x', target: 'e2n' },   // exactly one default branch -> ok
+      ],
+    };
+    expect(validateGraph(g)).toEqual([]);
+  });
+
+  it('validateGraph flags a condition outside the closed syntax (no free-form JUEL)', () => {
+    const g: GraphDefinition = {
+      nodes: [
+        { id: 's', type: 'START', position: { x: 0, y: 0 }, data: {} },
+        { id: 'x', type: 'XOR', position: { x: 0, y: 0 }, data: { key: 'gw' } },
+        { id: 'e1n', type: 'END', position: { x: 0, y: 0 }, data: {} },
+        { id: 'e2n', type: 'END', position: { x: 0, y: 0 }, data: {} },
+      ],
+      edges: [
+        { id: 'a', source: 's', target: 'x' },
+        { id: 'b', source: 'x', target: 'e1n', condition: 'evilBean.run()' },
+        { id: 'c', source: 'x', target: 'e2n' },
+      ],
+    };
+    const bad = validateGraph(g).find(w => w.code === 'XOR_BAD_CONDITION');
+    expect(bad).toBeDefined();
+    expect(bad!.messageKey).toBe('flow.canvas.warning.xorBadCondition');
+    expect(bad!.params).toEqual({ condition: 'evilBean.run()' });
   });
 
   it('validateGraph returns empty for a valid linear START->ACTION->END', () => {

@@ -97,7 +97,7 @@ describe('FormDesignerComponent — canvas seeding', () => {
     req.flush({ ...DRAFT_VERSION, minor: 1 });
   });
 
-  it('canPublish is false when canvas has a graph, true when empty', () => {
+  it('canPublish only requires a saved draft — graphs publish too (ADR-012 SP1)', () => {
     fixture.detectChanges();
 
     http.expectOne('/api/v1/antragstyp/at-1').flush({ id: 'at-1', key: 'urlaubsantrag' });
@@ -106,12 +106,70 @@ describe('FormDesignerComponent — canvas seeding', () => {
 
     fixture.detectChanges();
 
-    // draftVersionId is set from the loaded draft; canvas has 2 nodes → canPublish false
+    // SP2 locked publish whenever a graph existed; SP1 compiles graphs at publish,
+    // so a saved draft with a canvas graph is publishable now.
     expect(cmp.draftVersionId).toBe('v-1');
-    expect(cmp.canPublish).toBe(false);
+    expect(cmp.canPublish).toBe(true);
 
-    // Clear the canvas → toGraphDefinition() returns null; draftVersionId still set → canPublish true
     cmp.flowCanvas!.loadGraph(null);
     expect(cmp.canPublish).toBe(true);
+  });
+
+  function loadDraft(): void {
+    fixture.detectChanges();
+    http.expectOne('/api/v1/antragstyp/at-1').flush({ id: 'at-1', key: 'urlaubsantrag' });
+    http.expectOne('/api/v1/action/refs').flush(['provision-ad-account']);
+    http.expectOne('/api/v1/antragstyp/at-1/versions').flush([DRAFT_VERSION]);
+    fixture.detectChanges(); // seeds the canvas + captures the saved snapshot
+  }
+
+  it('publish() publishes directly when the editor is clean (no extra save)', () => {
+    loadDraft();
+    expect(cmp.isDirty).toBe(false);
+
+    cmp.publish();
+
+    http.expectNone(r => r.url.includes('/draft'));
+    const publishReq = http.expectOne('/api/v1/antragstyp/versions/v-1/publish');
+    publishReq.flush({ ...DRAFT_VERSION, status: 'PUBLISHED', processDefinitionKey: 'proc_1' });
+
+    expect(cmp.publishDone).toBe(true);
+    expect(cmp.publishedKey).toBe('proc_1');
+    expect(cmp.publishing).toBe(false);
+  });
+
+  it('publish() auto-saves a dirty editor first, then publishes the fresh draft', () => {
+    loadDraft();
+    cmp.fields.at(0).get('key')!.setValue('renamed');
+    expect(cmp.isDirty).toBe(true);
+
+    cmp.publish();
+
+    // 1) dirty state is persisted (PUT on the existing draft) …
+    const saveReq = http.expectOne('/api/v1/antragstyp/versions/v-1/draft');
+    expect(saveReq.request.method).toBe('PUT');
+    saveReq.flush({ ...DRAFT_VERSION, minor: 1 });
+
+    // 2) … then the publish goes out.
+    const publishReq = http.expectOne('/api/v1/antragstyp/versions/v-1/publish');
+    publishReq.flush({ ...DRAFT_VERSION, status: 'PUBLISHED', processDefinitionKey: 'proc_2' });
+
+    expect(cmp.publishDone).toBe(true);
+    expect(cmp.isDirty).toBe(false);
+  });
+
+  it('publish() surfaces the 422 ProblemDetail.detail (i18n gate) as visible error', () => {
+    loadDraft();
+
+    cmp.publish();
+    http.expectOne('/api/v1/antragstyp/versions/v-1/publish').flush(
+      { detail: 'i18n incomplete (BDR-005): label.fr missing' },
+      { status: 422, statusText: 'Unprocessable Entity' }
+    );
+
+    expect(cmp.errorKey).toBe('designer.error.publishRejected');
+    expect(cmp.errorDetail).toBe('i18n incomplete (BDR-005): label.fr missing');
+    expect(cmp.publishDone).toBe(false);
+    expect(cmp.publishing).toBe(false);
   });
 });

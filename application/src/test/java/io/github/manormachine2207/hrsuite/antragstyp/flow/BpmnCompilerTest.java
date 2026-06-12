@@ -10,6 +10,71 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class BpmnCompilerTest {
 
+    // ---- security: outcome values are interpolated into JUEL + XML ids ----
+
+    @Test
+    void approvalOutcomeWithJuelInjectionThrows() {
+        var def = new FlowDefinition(List.of(
+                new ApprovalStep("review", Map.of("de", "Review"), "hr-reviewer",
+                        List.of("approve", "x' || evilBean.run() || '"))));
+        assertThatThrownBy(() -> BpmnCompiler.compile("proc_inj", "Inj", def))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("outcome");
+    }
+
+    @Test
+    void approvalOutcomeWithXmlSpecialCharsThrows() {
+        var def = new FlowDefinition(List.of(
+                new ApprovalStep("review", Map.of("de", "Review"), "hr-reviewer",
+                        List.of("approve", "a<b"))));
+        assertThatThrownBy(() -> BpmnCompiler.compile("proc_xml", "Xml", def))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("outcome");
+    }
+
+    @Test
+    void actionStepRequiresRef() {
+        assertThatThrownBy(() -> new ActionStep("act", Map.of("de", "A"), null, Map.of()))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessageContaining("ref");
+    }
+
+    // ---- gateway default flow: unknown outcome must not approve or wedge ----
+
+    /**
+     * The LAST outcome's flow becomes the gateway's default flow (deny-by-default:
+     * an outcome value outside the declared list routes to the most conservative,
+     * terminal path instead of throwing "no outgoing sequence flow" at complete time
+     * or — worse — silently continuing like an approval).
+     */
+    @Test
+    void lastApprovalOutcomeBecomesGatewayDefaultFlow() {
+        var def = new FlowDefinition(List.of(
+                new ApprovalStep("review", Map.of("de", "Review"), "hr-reviewer",
+                        List.of("approve", "reject"))));
+        String bpmn = BpmnCompiler.compile("proc_def", "Default", def);
+
+        // gateway declares the reject flow as its default
+        assertThat(bpmn).contains("default=\"sf_gw_review_reject\"");
+        // the default flow itself is unconditional (self-closing element)
+        assertThat(bpmn).contains(
+                "<sequenceFlow id=\"sf_gw_review_reject\" sourceRef=\"gw_review\" targetRef=\"end_review_reject\"/>");
+        // the continue flow keeps its condition
+        assertThat(bpmn).contains("review_outcome == 'approve'");
+    }
+
+    @Test
+    void singleOutcomeApprovalMakesContinueFlowTheDefault() {
+        var def = new FlowDefinition(List.of(
+                new ApprovalStep("review", Map.of("de", "Review"), "hr-reviewer",
+                        List.of("done"))));
+        String bpmn = BpmnCompiler.compile("proc_single", "Single", def);
+
+        assertThat(bpmn).contains("default=\"sf_gw_review_continue\"");
+        assertThat(bpmn).contains(
+                "<sequenceFlow id=\"sf_gw_review_continue\" sourceRef=\"gw_review\" targetRef=\"end\"/>");
+    }
+
     @Test
     void singleFormStepProducesUserTaskWithStartAndEnd() {
         var def = new FlowDefinition(List.of(
@@ -120,8 +185,8 @@ class BpmnCompilerTest {
         assertThat(bpmn).contains("id=\"end_review_reject\"");
         // approve condition on the continue flow
         assertThat(bpmn).contains("review_outcome == 'approve'");
-        // reject condition on the terminal flow
-        assertThat(bpmn).contains("review_outcome == 'reject'");
+        // reject is the gateway's default flow (unconditional, deny-by-default)
+        assertThat(bpmn).contains("default=\"sf_gw_review_reject\"");
     }
 
     /**

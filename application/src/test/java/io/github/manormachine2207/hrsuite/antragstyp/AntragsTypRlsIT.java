@@ -73,7 +73,7 @@ class AntragsTypRlsIT {
     // ---- API helpers ------------------------------------------------------
     private String createTenant(String code, String subdomain) throws Exception {
         String body = """
-                {"code":"%s","subdomain":"%s","displayName":{"de":"%s"}}
+                {"code":"%1$s","subdomain":"%2$s","displayName":{"de":"%3$s","fr":"%3$s","it":"%3$s","en":"%3$s"}}
                 """.formatted(code, subdomain, code);
         ResponseEntity<String> r = rest.exchange("/api/v1/tenant", HttpMethod.POST,
                 new HttpEntity<>(body, admin()), String.class);
@@ -83,7 +83,7 @@ class AntragsTypRlsIT {
 
     private String createAntragsTyp(HttpHeaders h, String key) throws Exception {
         String body = """
-                {"key":"%s","title":{"de":"%s"}}
+                {"key":"%1$s","title":{"de":"%2$s","fr":"%2$s","it":"%2$s","en":"%2$s"}}
                 """.formatted(key, key);
         ResponseEntity<String> r = rest.exchange("/api/v1/antragstyp", HttpMethod.POST,
                 new HttpEntity<>(body, h), String.class);
@@ -94,9 +94,9 @@ class AntragsTypRlsIT {
     private String createTwoFieldMajor(HttpHeaders h, String antragstypId) throws Exception {
         String body = """
                 {"formDefinition":{"fields":[
-                  {"key":"a","type":"TEXT","required":true,"label":{"de":"A"}},
-                  {"key":"b","type":"TEXT","required":true,"label":{"de":"B"}}
-                ]},"workflowBpmn":"<bpmn/>","sfActionBindings":{}}
+                  {"key":"a","type":"TEXT","required":true,"label":{"de":"A","fr":"A","it":"A","en":"A"}},
+                  {"key":"b","type":"TEXT","required":true,"label":{"de":"B","fr":"B","it":"B","en":"B"}}
+                ]},"sfActionBindings":{}}
                 """;
         ResponseEntity<String> r = rest.exchange("/api/v1/antragstyp/" + antragstypId + "/versions",
                 HttpMethod.POST, new HttpEntity<>(body, h), String.class);
@@ -142,7 +142,7 @@ class AntragsTypRlsIT {
         // remove required field "b" in place -> breaking -> 422
         String breaking = """
                 {"formDefinition":{"fields":[
-                  {"key":"a","type":"TEXT","required":true,"label":{"de":"A"}}
+                  {"key":"a","type":"TEXT","required":true,"label":{"de":"A","fr":"A","it":"A","en":"A"}}
                 ]}}
                 """;
         ResponseEntity<String> r = rest.exchange("/api/v1/antragstyp/versions/" + vId + "/minor",
@@ -169,8 +169,8 @@ class AntragsTypRlsIT {
         // non-breaking in-place minor edit (label change) -> minor bumps to 1
         String minor = """
                 {"formDefinition":{"fields":[
-                  {"key":"a","type":"TEXT","required":true,"label":{"de":"A neu"}},
-                  {"key":"b","type":"TEXT","required":true,"label":{"de":"B"}}
+                  {"key":"a","type":"TEXT","required":true,"label":{"de":"A neu","fr":"A neu","it":"A neu","en":"A neu"}},
+                  {"key":"b","type":"TEXT","required":true,"label":{"de":"B","fr":"B","it":"B","en":"B"}}
                 ]}}
                 """;
         ResponseEntity<String> edit = rest.exchange("/api/v1/antragstyp/versions/" + vId + "/minor",
@@ -191,7 +191,7 @@ class AntragsTypRlsIT {
         HttpHeaders applicant = jsonHeaders();
         applicant.setBearerAuth("dev-applicant~" + tenant);
         String body = """
-                {"key":"verboten","title":{"de":"x"}}
+                {"key":"verboten","title":{"de":"x","fr":"x","it":"x","en":"x"}}
                 """;
         ResponseEntity<String> r = rest.exchange("/api/v1/antragstyp", HttpMethod.POST,
                 new HttpEntity<>(body, applicant), String.class);

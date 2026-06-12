@@ -137,11 +137,12 @@ public class AntragsTypVersion {
     /**
      * Replaces all content of a still-unpublished DRAFT major. No compatibility
      * constraints apply before first publish (nothing is pinned yet, ADR-009 §1).
+     * {@code workflowBpmn} is deliberately untouched: it holds compiler output only
+     * (set by publish), never client input.
      */
-    public void replaceDraftContent(FormDefinition newDefinition, String newWorkflowBpmn,
+    public void replaceDraftContent(FormDefinition newDefinition,
                                     Map<String, Object> newSfActionBindings) {
         this.formDefinition = newDefinition;
-        this.workflowBpmn = newWorkflowBpmn;
         this.sfActionBindings = newSfActionBindings == null ? null : new LinkedHashMap<>(newSfActionBindings);
     }
 

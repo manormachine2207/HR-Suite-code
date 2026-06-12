@@ -58,9 +58,40 @@
       <p class="hint">{{ 'flow.canvas.selectHint' | translate }}</p>
     }
 
+    @if (graph().edges.length) {
+      <div class="edges">
+        <h5>{{ 'flow.canvas.edges' | translate }}</h5>
+        <ul class="edge-list">
+          @for (e of graph().edges; track e.id) {
+            <li>
+              <button type="button" [class.active]="selectedEdgeId() === e.id" (click)="selectEdge(e.id)">
+                {{ edgeDisplay(e) }}@if (e.condition) {<span class="cond-chip" aria-hidden="true">ƒ</span>}
+              </button>
+            </li>
+          }
+        </ul>
+        @if (selectedEdge(); as e) {
+          <label>{{ 'flow.canvas.edgeLabel' | translate }}
+            <input [value]="e.label ?? ''"
+                   (input)="patchSelectedEdge({ label: $any($event.target).value })" />
+          </label>
+          @if (selectedEdgeSourceIsXor()) {
+            <label>{{ 'flow.canvas.edgeCondition' | translate }}
+              <input [value]="e.condition ?? ''" placeholder="variable == 'wert'"
+                     (input)="patchSelectedEdge({ condition: $any($event.target).value })" />
+            </label>
+            <p class="hint">{{ 'flow.canvas.edgeConditionHint' | translate }}</p>
+          }
+          <button type="button" (click)="removeSelectedEdge()">{{ 'flow.canvas.deleteEdge' | translate }}</button>
+        }
+      </div>
+    }
+
     @if (warnings().length) {
       <ul class="warnings">
-        @for (w of warnings(); track w.message) { <li>&#9888; {{ w.message }}</li> }
+        @for (w of warnings(); track w.code + (w.nodeId ?? '') + (w.params?.['key'] ?? '')) {
+          <li>&#9888; {{ w.messageKey | translate: w.params }}</li>
+        }
       </ul>
     }
   </aside>

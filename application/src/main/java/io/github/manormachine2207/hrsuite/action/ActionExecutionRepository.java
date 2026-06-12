@@ -7,4 +7,7 @@ import java.util.UUID;
 
 public interface ActionExecutionRepository extends JpaRepository<ActionExecution, UUID> {
     Optional<ActionExecution> findByProcessInstanceIdAndStepKey(String processInstanceId, String stepKey);
+
+    /** Idempotency lookup stable across process instances (business key = antrag id); RLS scopes the tenant. */
+    Optional<ActionExecution> findByBusinessKeyAndStepKey(String businessKey, String stepKey);
 }

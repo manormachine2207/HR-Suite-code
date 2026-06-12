@@ -56,6 +56,18 @@ describe('AntragsTypService', () => {
     req.flush({ id: 'v1' });
   });
 
+  it('never sends workflowBpmn (removed from CreateVersionRequest, ADR-010)', () => {
+    service.createDraftVersion('at1', { fields: [] }, null).subscribe();
+    const create = http.expectOne('/api/v1/antragstyp/at1/versions');
+    expect('workflowBpmn' in create.request.body).toBe(false);
+    create.flush({ id: 'v1' });
+
+    service.editDraft('v1', { fields: [] }, null).subscribe();
+    const edit = http.expectOne('/api/v1/antragstyp/versions/v1/draft');
+    expect('workflowBpmn' in edit.request.body).toBe(false);
+    edit.flush({ id: 'v1' });
+  });
+
   it('createDraftVersion includes graphDefinition when provided', () => {
     const graph = { nodes: [{ id: 'n1', type: 'START', position: { x: 0, y: 0 }, data: {} }], edges: [] };
     service.createDraftVersion('at1', { fields: [] }, null, graph).subscribe();

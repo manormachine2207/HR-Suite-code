@@ -94,12 +94,24 @@ class AntragsTypControllerTest {
                 .andExpect(status().isForbidden());
     }
 
-    // ---- read (any role) --------------------------------------------------
+    // ---- read (any role; non-authoring roles see LIVE only) ---------------
     @Test
-    void listReturns200ForApplicant() throws Exception {
-        when(service.listDefinitions()).thenReturn(List.of());
+    void listForApplicantReturnsOnlyLiveTypes() throws Exception {
+        // HR work-in-progress (DRAFT majors) is not applicant business (Review 2026-06-12)
+        when(service.listLiveDefinitions()).thenReturn(List.of());
         mvc.perform(get("/api/v1/antragstyp").with(jwt().authorities(role("applicant"))))
                 .andExpect(status().isOk());
+        org.mockito.Mockito.verify(service).listLiveDefinitions();
+        org.mockito.Mockito.verify(service, org.mockito.Mockito.never()).listDefinitions();
+    }
+
+    @Test
+    void listForHrDesignerReturnsAllTypes() throws Exception {
+        when(service.listDefinitions()).thenReturn(List.of());
+        mvc.perform(get("/api/v1/antragstyp").with(jwt().authorities(role("hr-designer"))))
+                .andExpect(status().isOk());
+        org.mockito.Mockito.verify(service).listDefinitions();
+        org.mockito.Mockito.verify(service, org.mockito.Mockito.never()).listLiveDefinitions();
     }
 
     @Test

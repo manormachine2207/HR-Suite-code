@@ -8,6 +8,8 @@ import io.github.manormachine2207.hrsuite.antragstyp.dto.MinorEditRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,8 +55,14 @@ public class AntragsTypController {
 
     @GetMapping
     @PreAuthorize(READ)
-    public List<AntragsTypResponse> list() {
-        return service.listDefinitions().stream().map(AntragsTypResponse::from).toList();
+    public List<AntragsTypResponse> list(Authentication auth) {
+        // Authoring roles see everything incl. DRAFTs; applicant/hr-reviewer only what is
+        // live for submissions — HR work-in-progress is not their business (Review 2026-06-12).
+        boolean authoring = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .anyMatch(a -> a.equals("ROLE_hr-designer") || a.equals("ROLE_tenant-admin"));
+        List<AntragsTyp> types = authoring ? service.listDefinitions() : service.listLiveDefinitions();
+        return types.stream().map(AntragsTypResponse::from).toList();
     }
 
     @GetMapping("/{id}")
@@ -69,7 +77,7 @@ public class AntragsTypController {
     public ResponseEntity<AntragsTypVersionResponse> createVersion(@PathVariable("id") UUID id,
                                                                    @Valid @RequestBody CreateVersionRequest req,
                                                                    UriComponentsBuilder uri) {
-        AntragsTypVersion v = service.createDraftMajor(id, req.formDefinition(), req.workflowBpmn(), req.sfActionBindings(),
+        AntragsTypVersion v = service.createDraftMajor(id, req.formDefinition(), req.sfActionBindings(),
                 req.flowDefinition(), req.graphDefinition());
         URI location = uri.path("/api/v1/antragstyp/versions/{vid}").buildAndExpand(v.getId()).toUri();
         return ResponseEntity.created(location).body(AntragsTypVersionResponse.from(v));
@@ -85,7 +93,7 @@ public class AntragsTypController {
     @PreAuthorize(WRITE_DRAFT)
     public AntragsTypVersionResponse editDraft(@PathVariable("vid") UUID vid, @Valid @RequestBody CreateVersionRequest req) {
         return AntragsTypVersionResponse.from(
-                service.editDraft(vid, req.formDefinition(), req.workflowBpmn(), req.sfActionBindings(),
+                service.editDraft(vid, req.formDefinition(), req.sfActionBindings(),
                         req.flowDefinition(), req.graphDefinition()));
     }
 

@@ -33,6 +33,22 @@ export interface GraphDefinition {
 
 /** Mirrors backend BpmnCompiler key constraint (becomes BPMN id + JUEL var in SP1). */
 export const NODE_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
+
+/**
+ * Mirrors the backend GraphValidator CONDITION_PATTERN (SP1): XOR edge conditions are a
+ * closed language — `variable == 'value'` or `!=` — never free-form JUEL (injection channel).
+ */
+export const EDGE_CONDITION_PATTERN =
+  /^\s*[A-Za-z][A-Za-z0-9_]*\s*(==|!=)\s*'[A-Za-z0-9_ .\-äöüÄÖÜéèêàçÉÈÀ]*'\s*$/;
 export const ASSIGNEE_ROLES: readonly string[] = ['hr-reviewer', 'tenant-admin'];
 
-export interface GraphWarning { code: string; nodeId?: string; message: string; }
+/**
+ * Canvas validation warning. `messageKey` is an i18n key (BDR-005 — no hardcoded UI
+ * language in logic); `params` feeds ngx-translate interpolation (e.g. the offending key).
+ */
+export interface GraphWarning {
+  code: string;
+  nodeId?: string;
+  messageKey: string;
+  params?: Record<string, string>;
+}

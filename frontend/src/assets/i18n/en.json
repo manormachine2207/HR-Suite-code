@@ -29,7 +29,12 @@
       "title": "New Request Type",
       "key": "Key",
       "keyHint": "Lowercase letters, digits, _ and - only",
-      "submit": "Create"
+      "submit": "Create",
+      "titleLabel": "Title (multilingual)",
+      "error": {
+        "conflict": "A request type with this key already exists.",
+        "generic": "Creation failed. Please try again."
+      }
     }
   },
   "builder": {
@@ -39,7 +44,8 @@
     "saveDraft": "Save draft",
     "savedMajor": "Draft saved, major version",
     "published": "Published, process key:",
-    "publishDeferred": "Publishing graph flows is coming (compiler = SP1)."
+    "publishNeedsDraft": "Please save as draft first.",
+    "publishGraphWarnings": "The flow graph still has hints — the server validates fully on publish."
   },
   "flow": {
     "canvas": {
@@ -49,7 +55,21 @@
       "ref": "Action (n8n ref)",
       "delete": "Delete node",
       "selectHint": "Select a node to edit it.",
-      "noRefs": "No n8n refs for this tenant — ACTION nodes have no ref."
+      "noRefs": "No n8n refs for this tenant — ACTION nodes have no ref.",
+      "warning": {
+        "noStart": "No START node.",
+        "noEnd": "No END node.",
+        "invalidKey": "Invalid key \"{{key}}\".",
+        "duplicateKey": "Duplicate key \"{{key}}\".",
+        "disconnected": "Node is not connected.",
+        "xorUnconditioned": "XOR: at most one branch without a condition (default) is allowed.",
+        "xorBadCondition": "Invalid condition \"{{condition}}\" — allowed form: variable == 'value' (or !=)."
+      },
+      "edges": "Edges",
+      "edgeLabel": "Edge label",
+      "edgeCondition": "Condition (XOR branch)",
+      "edgeConditionHint": "Form: variable == 'value' (or !=). Exactly one edge without a condition acts as the default path.",
+      "deleteEdge": "Delete edge"
     }
   },
   "antrag": {
@@ -73,7 +93,19 @@
     "colType": "Request type",
     "colStatus": "Status",
     "colProcess": "Workflow process ID",
-    "colCreated": "Created"
+    "colCreated": "Created",
+    "colActions": "Actions",
+    "submitDraft": "Submit",
+    "cancelDraft": "Cancel request",
+    "submitSuccess": "The request has been submitted.",
+    "cancelSuccess": "The request has been cancelled.",
+    "fieldError": {
+      "required": "This field is required.",
+      "maxLength": "At most {{limit}} characters.",
+      "min": "Minimum: {{min}}.",
+      "max": "Maximum: {{max}}.",
+      "invalid": "Invalid value."
+    }
   },
   "designer": {
     "back": "Back to list",
@@ -111,7 +143,25 @@
       "BOOLEAN": "Yes/No",
       "SELECT": "Select",
       "MULTI_SELECT": "Multi-select"
+    },
+    "error": {
+      "incompatible": "Incompatible change — a new major version is required.",
+      "conflict": "Just published — please try again.",
+      "generic": "Action failed.",
+      "publishRejected": "Publish rejected:",
+      "saveBeforePublish": "Unsaved changes are invalid and cannot be saved automatically — please save a valid state first."
     }
+  },
+  "status": {
+    "DRAFT": "Draft",
+    "LIVE": "Live",
+    "DEPRECATED": "Deprecated",
+    "ARCHIVED": "Archived",
+    "SUBMITTED": "Submitted",
+    "IN_REVIEW": "In review",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected",
+    "CANCELLED": "Cancelled"
   },
   "errors": {
     "notFound": "Page not found",

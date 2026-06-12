@@ -75,7 +75,7 @@ class AntragRlsIT {
     // ---- API helpers ------------------------------------------------------
     private String createTenant(String code, String subdomain) throws Exception {
         String body = """
-                {"code":"%s","subdomain":"%s","displayName":{"de":"%s"}}
+                {"code":"%1$s","subdomain":"%2$s","displayName":{"de":"%3$s","fr":"%3$s","it":"%3$s","en":"%3$s"}}
                 """.formatted(code, subdomain, code);
         ResponseEntity<String> r = rest.exchange("/api/v1/tenant", HttpMethod.POST,
                 new HttpEntity<>(body, admin()), String.class);
@@ -87,13 +87,13 @@ class AntragRlsIT {
     private String[] publishedAntragstyp(String tenant, String key) throws Exception {
         HttpHeaders designer = token("hr-designer", tenant);
         ResponseEntity<String> at = rest.exchange("/api/v1/antragstyp", HttpMethod.POST,
-                new HttpEntity<>("{\"key\":\"%s\",\"title\":{\"de\":\"%s\"}}".formatted(key, key), designer), String.class);
+                new HttpEntity<>("{\"key\":\"%1$s\",\"title\":{\"de\":\"%1$s\",\"fr\":\"%1$s\",\"it\":\"%1$s\",\"en\":\"%1$s\"}}".formatted(key), designer), String.class);
         assertThat(at.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         String atId = mapper.readTree(at.getBody()).get("id").asText();
 
         String versionBody = """
-                {"formDefinition":{"fields":[{"key":"grund","type":"TEXT","required":true,"label":{"de":"Grund"}}]},
-                 "workflowBpmn":"<bpmn/>","sfActionBindings":{}}
+                {"formDefinition":{"fields":[{"key":"grund","type":"TEXT","required":true,"label":{"de":"Grund","fr":"Grund","it":"Grund","en":"Grund"}}]},
+                 "sfActionBindings":{}}
                 """;
         ResponseEntity<String> v = rest.exchange("/api/v1/antragstyp/" + atId + "/versions", HttpMethod.POST,
                 new HttpEntity<>(versionBody, designer), String.class);

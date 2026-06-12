@@ -1,10 +1,11 @@
 import { Component, OnInit, AfterViewInit, AfterViewChecked, ViewChild, inject, ChangeDetectorRef } from '@angular/core';
 import { UpperCasePipe } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { forkJoin, of, Observable } from 'rxjs';
+import { catchError, switchMap, tap } from 'rxjs/operators';
 
 import { AntragsTypService } from '../antragstyp/antragstyp.service';
 import { AntragsTypSummary } from '../antragstyp/antragstyp.model';
@@ -15,6 +16,7 @@ import {
 } from './form-definition.model';
 import { FlowCanvasEditorComponent } from './flow-canvas-editor.component';
 import { GraphDefinition } from './flow-graph.model';
+import { resolveLocaleText } from '../../core/i18n/locale-text';
 
 @Component({
   selector: 'app-form-designer',
@@ -27,6 +29,7 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   private readonly route = inject(ActivatedRoute);
   private readonly service = inject(AntragsTypService);
   private readonly fb = inject(FormBuilder);
+  private readonly translate = inject(TranslateService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   @ViewChild(FlowCanvasEditorComponent) flowCanvas?: FlowCanvasEditorComponent;
@@ -43,16 +46,45 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   loading = true;
   saving = false;
   savedMajor: number | null = null;
-  errorMsg = '';
+  /** i18n key of the current error (BDR-005); `errorDetail` carries ProblemDetail.detail verbatim. */
+  errorKey = '';
+  errorDetail = '';
 
   section: 'form' | 'flow' | 'publish' = 'form';
+  /**
+   * Snapshot of the canvas warning count, taken on tab switch. The publish tab must
+   * NOT call flowCanvas.warnings() from its template: the ViewChild is seeded via
+   * ngAfterViewChecked, so a live call flips mid-CD-cycle and throws NG0100 (zoneless).
+   */
+  publishGraphWarningCount = 0;
   availableRefs: string[] = [];
   draftVersionId: string | null = null;
   publishedKey: string | null = null;
   publishing = false;
+  /** True after a successful publish — blocks a second (409) publish of the same draft. */
+  publishDone = false;
+
+  showSection(section: 'form' | 'flow' | 'publish'): void {
+    if (section === 'publish') {
+      this.publishGraphWarningCount = this.flowCanvas?.warnings().length ?? 0;
+    }
+    this.section = section;
+  }
 
   private pendingGraph: GraphDefinition | null = null;
   private canvasSeeded = false;
+  /** Serialized editor state at the last successful save (or at load of an existing draft). */
+  private lastSavedSnapshot: string | null = null;
+
+  constructor() {
+    // Language switch: re-resolve the Antragstyp title shown in the header (BDR-005).
+    this.translate.onLangChange
+      .pipe(takeUntilDestroyed())
+      .subscribe(() => {
+        this.antragsTypLabel = this.resolveLabel(this.antragsTyp);
+        this.cdr.markForCheck();
+      });
+  }
 
   ngOnInit(): void {
     this.antragstypId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -93,6 +125,10 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
     if (!this.canvasSeeded && this.flowCanvas && !this.loading) {
       this.flowCanvas.loadGraph(this.pendingGraph);
       this.canvasSeeded = true;
+      // The loaded draft IS the server state — publish without a prior save is fine.
+      if (this.draftVersionId) {
+        this.lastSavedSnapshot = this.currentSnapshot();
+      }
       this.cdr.markForCheck();
     }
   }
@@ -127,13 +163,29 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
     return !this.saving && this.fields.length > 0 && this.fields.controls.every(c => this.keyError(c as FormGroup) === null);
   }
 
-  /** Publish is disabled whenever a graph exists (compiler is SP1). */
+  /**
+   * SP1 (ADR-012): graphs compile at publish now — the SP2 lock is gone. A saved
+   * draft is the only precondition; the server's GraphValidator answers 422 with
+   * the full issue list for an uncompilable graph (surfaced via errorDetail).
+   */
   get canPublish(): boolean {
-    return !!this.draftVersionId && !this.flowCanvas?.toGraphDefinition();
+    return !!this.draftVersionId;
+  }
+
+  /** True when the editor state differs from the last saved server state. */
+  get isDirty(): boolean {
+    return this.lastSavedSnapshot === null || this.lastSavedSnapshot !== this.currentSnapshot();
   }
 
   get previewJson(): string {
     return JSON.stringify(this.collectFormDefinition(), null, 2);
+  }
+
+  private currentSnapshot(): string {
+    return JSON.stringify({
+      form: this.collectFormDefinition(),
+      graph: this.flowCanvas?.toGraphDefinition() ?? null
+    });
   }
 
   // ---- mutators ---------------------------------------------------------
@@ -170,14 +222,8 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
   }
 
   // ---- save + publish ---------------------------------------------------
-  save(): void {
-    if (!this.canSave) {
-      return;
-    }
-    this.saving = true;
-    this.errorMsg = '';
-    this.savedMajor = null;
-
+  /** Persists the current editor state as DRAFT and refreshes the save bookkeeping. */
+  private persistDraft$(): Observable<AntragsTypVersion> {
     const formDefinition = this.collectFormDefinition();
     const graph = this.flowCanvas?.toGraphDefinition() ?? null;
 
@@ -185,16 +231,31 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
       ? this.service.editDraft(this.draftVersionId, formDefinition, null, graph)
       : this.service.createDraftVersion(this.antragstypId, formDefinition, null, graph);
 
-    save$.subscribe({
-      next: (v) => {
+    return save$.pipe(tap(v => {
+      this.savedMajor = v.major;
+      this.draftVersionId = v.id;
+      this.lastSavedSnapshot = this.currentSnapshot();
+      this.publishDone = false;
+    }));
+  }
+
+  save(): void {
+    if (!this.canSave) {
+      return;
+    }
+    this.saving = true;
+    this.errorKey = '';
+    this.errorDetail = '';
+    this.savedMajor = null;
+
+    this.persistDraft$().subscribe({
+      next: () => {
         this.saving = false;
-        this.savedMajor = v.major;
-        this.draftVersionId = v.id;
         this.cdr.markForCheck();
       },
       error: (e) => {
         this.saving = false;
-        this.errorMsg = this.httpMessage(e);
+        this.applyHttpError(e, { 422: 'designer.error.incompatible', 409: 'designer.error.conflict' });
         this.cdr.markForCheck();
       }
     });
@@ -202,30 +263,44 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
 
   publish(): void {
     if (!this.draftVersionId) {
-      this.errorMsg = 'Bitte zuerst als Entwurf speichern.';
+      return; // button is disabled; the template shows a translated hint instead
+    }
+    this.errorKey = '';
+    this.errorDetail = '';
+    if (this.isDirty && !this.canSave) {
+      // Unsaved changes that cannot be auto-saved (invalid editor state).
+      this.errorKey = 'designer.error.saveBeforePublish';
       return;
     }
     this.publishing = true;
-    this.errorMsg = '';
-    this.service.publish(this.draftVersionId).subscribe({
+    // Publish always targets the last saved server state — auto-save dirty edits first
+    // so the user never publishes an older draft than what the editor shows.
+    const ensureSaved$: Observable<unknown> = this.isDirty ? this.persistDraft$() : of(null);
+    ensureSaved$.pipe(
+      switchMap(() => this.service.publish(this.draftVersionId!))
+    ).subscribe({
       next: (v) => {
         this.publishing = false;
+        this.publishDone = true;
         this.publishedKey = v.processDefinitionKey ?? null;
         this.cdr.markForCheck();
       },
       error: (e) => {
         this.publishing = false;
-        this.errorMsg = this.httpMessage(e);
+        // 422 here is the publish gate (e.g. "i18n incomplete (BDR-005…)") — the
+        // ProblemDetail.detail is passed through verbatim by applyHttpError.
+        this.applyHttpError(e, { 422: 'designer.error.publishRejected', 409: 'designer.error.conflict' });
         this.cdr.markForCheck();
       }
     });
   }
 
-  private httpMessage(e: unknown): string {
-    const err = e as { status?: number; error?: { message?: string } };
-    if (err?.status === 422) return 'Inkompatible Änderung — eine neue Major-Version ist nötig.';
-    if (err?.status === 409) return 'Gerade veröffentlicht — bitte erneut versuchen.';
-    return err?.error?.message ?? 'Aktion fehlgeschlagen.';
+  /** Maps an HTTP error to an i18n key and passes a ProblemDetail.detail through verbatim. */
+  private applyHttpError(e: unknown, byStatus: Record<number, string>): void {
+    const err = e as { status?: number; error?: { detail?: unknown; message?: unknown } };
+    this.errorKey = (err?.status != null && byStatus[err.status]) || 'designer.error.generic';
+    const detail = err?.error?.detail ?? err?.error?.message;
+    this.errorDetail = typeof detail === 'string' ? detail : '';
   }
 
   // ---- (de)serialization ------------------------------------------------
@@ -317,7 +392,6 @@ export class FormDesignerComponent implements OnInit, AfterViewInit, AfterViewCh
     if (!a) {
       return '';
     }
-    const lang = (document.documentElement.lang || 'de') as Lang;
-    return a.title?.[lang] ?? a.title?.['de'] ?? a.key;
+    return resolveLocaleText(a.title, this.translate.getCurrentLang() || 'de', a.key);
   }
 }

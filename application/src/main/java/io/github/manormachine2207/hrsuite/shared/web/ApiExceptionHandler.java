@@ -46,6 +46,11 @@ public class ApiExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     }
 
+    @ExceptionHandler(AntragsTypExceptions.Invalid.class)
+    ProblemDetail handleAntragsTypInvalid(AntragsTypExceptions.Invalid ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
     @ExceptionHandler(AntragExceptions.NotFound.class)
     ProblemDetail handleAntragNotFound(AntragExceptions.NotFound ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
