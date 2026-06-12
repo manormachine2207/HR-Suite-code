@@ -79,10 +79,41 @@ public class AntragService {
         if (major.processDefinitionKey() != null) {
             String processInstanceId = workflowEngine.startInstance(
                     currentTenant(), major.processDefinitionKey(), antrag.getId().toString(),
-                    Map.of("antragId", antrag.getId().toString()));
+                    processVariables(antrag));
             antrag.attachWorkflowProcess(processInstanceId);
         }
         return antrag;
+    }
+
+    /** Reserved EL identifiers / system variables that payload fields may never shadow. */
+    private static final java.util.Set<String> RESERVED_VARIABLES =
+            java.util.Set.of("antragId", "execution", "task", "authenticatedUserId");
+
+    private static final java.util.regex.Pattern VARIABLE_KEY_PATTERN =
+            java.util.regex.Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
+
+    /**
+     * Payload fields become process variables so flow conditions can route on them
+     * (e.g. {@code kosten > 5000} ⇒ HAL-Stufe, Prototyp-Anforderung 2026-06-12).
+     * Only scalar values with well-formed, non-reserved keys pass — the payload was
+     * already validated against the pinned FormDefinition before this point.
+     */
+    private static Map<String, Object> processVariables(Antrag antrag) {
+        Map<String, Object> variables = new java.util.LinkedHashMap<>();
+        Map<String, Object> payload = antrag.getPayload();
+        if (payload != null) {
+            for (var entry : payload.entrySet()) {
+                String key = entry.getKey();
+                Object value = entry.getValue();
+                boolean scalar = value instanceof String || value instanceof Number || value instanceof Boolean;
+                if (scalar && VARIABLE_KEY_PATTERN.matcher(key).matches()
+                        && !RESERVED_VARIABLES.contains(key)) {
+                    variables.put(key, value);
+                }
+            }
+        }
+        variables.put("antragId", antrag.getId().toString());
+        return variables;
     }
 
     /** Withdraws a DRAFT or SUBMITTED (pre-decision) request. */

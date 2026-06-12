@@ -160,6 +160,26 @@ describe('flow-graph.logic', () => {
     expect(bad!.params).toEqual({ condition: 'evilBean.run()' });
   });
 
+  it('numeric edge conditions are valid; ordering with a string literal warns (mirror of backend rule)', () => {
+    let g = emptyGraph();
+    g = addNode(g, 'START', { x: 0, y: 0 });
+    g = addNode(g, 'XOR', { x: 100, y: 0 });
+    g = addNode(g, 'END', { x: 200, y: -40 });
+    g = addNode(g, 'END', { x: 200, y: 40 });
+    const [s, x, e1, e2] = g.nodes;
+    x.data = { key: 'kostenpruefung' };
+    g = connect(g, s.id, x.id);
+    g = connect(g, x.id, e1.id);
+    g = connect(g, x.id, e2.id);
+    const [, conditioned] = [g.edges[0], g.edges[1]];
+
+    const ok = updateEdge(g, conditioned.id, { condition: "kosten > 5000" });
+    expect(validateGraph(ok).filter(w => w.code === 'XOR_BAD_CONDITION')).toEqual([]);
+
+    const bad = updateEdge(g, conditioned.id, { condition: "kosten > 'fuenftausend'" });
+    expect(validateGraph(bad).some(w => w.code === 'XOR_BAD_CONDITION')).toBe(true);
+  });
+
   it('validateGraph returns empty for a valid linear START->ACTION->END', () => {
     let g = emptyGraph();
     g = addNode(g, 'START', { x: 0, y: 0 });

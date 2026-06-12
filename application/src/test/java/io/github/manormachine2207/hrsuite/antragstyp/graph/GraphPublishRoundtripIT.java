@@ -132,6 +132,82 @@ class GraphPublishRoundtripIT {
         }
     }
 
+    /**
+     * Prototyp-Anforderung „Kosten > CHF 5'000 ⇒ zusätzliche HAL-Stufe": Payload-
+     * Felder werden Prozessvariablen, der XOR routet numerisch. 7000 → HAL-Zweig,
+     * 100 → Default-Zweig.
+     */
+    @Test
+    void numericConditionRoutesByPayloadValue() throws Exception {
+        String tenantId = JSON.readTree(rest.exchange("/api/v1/tenant", HttpMethod.POST,
+                new HttpEntity<>("{\"code\":\"NUMIT\",\"subdomain\":\"numit\","
+                        + "\"displayName\":{\"de\":\"Numeric IT\"}}", token("dev-platform-admin")), String.class)
+                .getBody()).get("id").asText();
+        HttpHeaders designer = token("dev-hr-designer~" + tenantId);
+        HttpHeaders applicant = token("dev-applicant~" + tenantId);
+
+        String atId = JSON.readTree(rest.exchange("/api/v1/antragstyp", HttpMethod.POST,
+                new HttpEntity<>("{\"key\":\"kostenflow\",\"title\":" + I18N + "}", designer), String.class)
+                .getBody()).get("id").asText();
+
+        String versionBody = """
+                {
+                  "formDefinition": {"fields": [{"key":"kosten","type":"NUMBER","required":true,"label":%s}]},
+                  "sfActionBindings": {},
+                  "graphDefinition": {
+                    "nodes": [
+                      {"id":"n1","type":"START","position":{"x":0,"y":0},"data":{}},
+                      {"id":"n2","type":"XOR","position":{"x":100,"y":0},
+                       "data":{"key":"kostenpruefung","title":{"de":"Kosten"}}},
+                      {"id":"n3","type":"FORM","position":{"x":200,"y":-50},
+                       "data":{"key":"hal_pruefung","title":{"de":"HAL"}}},
+                      {"id":"n4","type":"FORM","position":{"x":200,"y":50},
+                       "data":{"key":"normal_weg","title":{"de":"Normal"}}},
+                      {"id":"n5","type":"END","position":{"x":300,"y":-50},"data":{}},
+                      {"id":"n6","type":"END","position":{"x":300,"y":50},"data":{}}
+                    ],
+                    "edges": [
+                      {"id":"e1","source":"n1","target":"n2"},
+                      {"id":"e2","source":"n2","target":"n3","label":"HAL","condition":"kosten > 5000"},
+                      {"id":"e3","source":"n2","target":"n4","label":"normal"},
+                      {"id":"e4","source":"n3","target":"n5"},
+                      {"id":"e5","source":"n4","target":"n6"}
+                    ]
+                  }
+                }
+                """.formatted(I18N);
+        String versionId = JSON.readTree(rest.exchange("/api/v1/antragstyp/" + atId + "/versions",
+                HttpMethod.POST, new HttpEntity<>(versionBody, designer), String.class).getBody())
+                .get("id").asText();
+        assertThat(rest.exchange("/api/v1/antragstyp/versions/" + versionId + "/publish",
+                HttpMethod.POST, new HttpEntity<>(designer), String.class).getStatusCode())
+                .isEqualTo(HttpStatus.OK);
+
+        String expensivePi = submitAntrag(applicant, atId, 7000);
+        String cheapPi = submitAntrag(applicant, atId, 100);
+
+        TenantContext.set(UUID.fromString(tenantId));
+        try {
+            assertThat(taskService.createTaskQuery().processInstanceId(expensivePi)
+                    .singleResult().getTaskDefinitionKey())
+                    .as("Kosten 7000 -> HAL-Zweig").isEqualTo("hal_pruefung");
+            assertThat(taskService.createTaskQuery().processInstanceId(cheapPi)
+                    .singleResult().getTaskDefinitionKey())
+                    .as("Kosten 100 -> Default-Zweig").isEqualTo("normal_weg");
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    private String submitAntrag(HttpHeaders applicant, String atId, int kosten) throws Exception {
+        String antragId = JSON.readTree(rest.exchange("/api/v1/antrag", HttpMethod.POST,
+                new HttpEntity<>("{\"antragstypId\":\"" + atId + "\",\"payload\":{\"kosten\":" + kosten + "}}",
+                        applicant), String.class).getBody()).get("id").asText();
+        return JSON.readTree(rest.exchange("/api/v1/antrag/" + antragId + "/submit",
+                HttpMethod.POST, new HttpEntity<>(applicant), String.class).getBody())
+                .get("workflowProcessId").asText();
+    }
+
     @Test
     void invalidGraphIsRejectedWith422AndNothingDeploys() throws Exception {
         String tenantId = JSON.readTree(rest.exchange("/api/v1/tenant", HttpMethod.POST,

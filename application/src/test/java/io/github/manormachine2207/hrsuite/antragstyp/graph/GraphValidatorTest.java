@@ -143,6 +143,48 @@ class GraphValidatorTest {
         assertThat(GraphValidator.validate(twoDefaults)).anyMatch(e -> e.contains("entscheid"));
     }
 
+    /**
+     * Prototyp-Anforderung „Kosten > CHF 5'000 ⇒ HAL-Stufe": numerische Vergleiche
+     * mit Zahlen-Literal sind erlaubt; Ordnungsoperatoren mit String-Literal nicht
+     * (lexikografische Falle).
+     */
+    @Test
+    void numericComparisonConditionsAreAccepted() {
+        var g = new GraphDefinition(
+                List.of(start(), xor("nx", "kostenpruefung"), end("n_e1"), end("n_e2")),
+                List.of(edge("e1", "n_start", "nx"),
+                        cond("e2", "nx", "n_e1", "kosten > 5000"),
+                        edge("e3", "nx", "n_e2")));
+        assertThat(GraphValidator.validate(g)).isEmpty();
+
+        var decimals = new GraphDefinition(
+                List.of(start(), xor("nx", "kostenpruefung"), end("n_e1"), end("n_e2")),
+                List.of(edge("e1", "n_start", "nx"),
+                        cond("e2", "nx", "n_e1", "pensum >= 80.5"),
+                        edge("e3", "nx", "n_e2")));
+        assertThat(GraphValidator.validate(decimals)).isEmpty();
+    }
+
+    @Test
+    void orderingOperatorWithStringLiteralIsRejected() {
+        var g = new GraphDefinition(
+                List.of(start(), xor("nx", "kostenpruefung"), end("n_e1"), end("n_e2")),
+                List.of(edge("e1", "n_start", "nx"),
+                        cond("e2", "nx", "n_e1", "kosten > 'fuenftausend'"),
+                        edge("e3", "nx", "n_e2")));
+        assertThat(GraphValidator.validate(g)).anyMatch(e -> e.contains("condition"));
+    }
+
+    @Test
+    void equalityWithNumericLiteralIsAccepted() {
+        var g = new GraphDefinition(
+                List.of(start(), xor("nx", "stufenwahl"), end("n_e1"), end("n_e2")),
+                List.of(edge("e1", "n_start", "nx"),
+                        cond("e2", "nx", "n_e1", "stufe == 2"),
+                        edge("e3", "nx", "n_e2")));
+        assertThat(GraphValidator.validate(g)).isEmpty();
+    }
+
     /** Bedingungen sind eine eng begrenzte Sprache (var == 'wert'), KEIN freies JUEL — Injection-Kanal. */
     @Test
     void freeFormJuelConditionIsRejected() {

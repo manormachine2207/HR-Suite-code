@@ -161,12 +161,12 @@
         "duplicateKey": "Clé « {{key}} » en double.",
         "disconnected": "Le nœud n'est pas connecté.",
         "xorUnconditioned": "XOR : au plus une sortie sans condition (défaut) est autorisée.",
-        "xorBadCondition": "Condition non valable \"{{condition}}\" — forme admise : variable == 'valeur' (ou !=)."
+        "xorBadCondition": "Condition non valable \"{{condition}}\" — admis : variable == 'valeur' ou variable > nombre (comparaisons d'ordre uniquement numériques)."
       },
       "edges": "Arêtes",
       "edgeLabel": "Libellé de l'arête",
       "edgeCondition": "Condition (sortie XOR)",
-      "edgeConditionHint": "Forme : variable == 'valeur' (ou !=). Exactement une arête sans condition sert de chemin par défaut.",
+      "edgeConditionHint": "Forme : variable == 'valeur' (ou !=) et numérique : variable > 5000 (>, >=, <, <=). Exactement une arête sans condition sert de chemin par défaut.",
       "deleteEdge": "Supprimer l'arête",
       "type": {
         "START": "Début",
