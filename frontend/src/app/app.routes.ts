@@ -35,6 +35,11 @@ export const routes: Routes = [
       import('./features/antrag/antrag-list.component').then(m => m.AntragListComponent),
   },
   {
+    path: 'aufgaben',
+    loadComponent: () =>
+      import('./features/review/task-list.component').then(m => m.TaskListComponent),
+  },
+  {
     path: 'conformite',
     loadComponent: () =>
       import('./features/accessibility/conformite.component').then(m => m.ConformiteComponent),

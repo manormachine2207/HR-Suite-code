@@ -24,6 +24,7 @@ export class App implements OnInit {
   readonly navigation: ObINavigationLink[] = [
     { label: 'nav.antragstypen', url: 'antragstypen' },
     { label: 'nav.antraege', url: 'antraege' },
+    { label: 'nav.aufgaben', url: 'aufgaben' },
   ];
 
   ngOnInit(): void {

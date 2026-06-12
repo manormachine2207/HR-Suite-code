@@ -106,6 +106,44 @@ public class AntragsTypService {
     }
 
     /**
+     * Declared outcomes of a user-task step in the given (pinned) version (ADR-013):
+     * from the legacy FlowDefinition's {@code ApprovalStep.outcomes}, or derived from
+     * the graph's XOR edge conditions on the variable {@code <stepKey>_outcome}.
+     * Empty when nothing is declared (placeholder/FORM tasks) — the review API then
+     * only enforces the safe outcome pattern.
+     */
+    @Transactional(readOnly = true)
+    public List<String> findDeclaredOutcomes(UUID versionId, String stepKey) {
+        AntragsTypVersion v = getVersion(versionId);
+        if (v.getFlowDefinition() != null) {
+            return v.getFlowDefinition().steps().stream()
+                    .filter(s -> s instanceof io.github.manormachine2207.hrsuite.antragstyp.flow.ApprovalStep a
+                            && a.key().equals(stepKey))
+                    .findFirst()
+                    .map(s -> ((io.github.manormachine2207.hrsuite.antragstyp.flow.ApprovalStep) s).outcomes())
+                    .orElse(List.of());
+        }
+        if (v.getGraphDefinition() != null) {
+            try {
+                GraphDefinition graph = GraphDefinition.from(v.getGraphDefinition());
+                String variable = stepKey + "_outcome";
+                return graph.edges().stream()
+                        .map(e -> e.condition())
+                        .filter(c -> c != null && !c.isBlank())
+                        .map(c -> io.github.manormachine2207.hrsuite.antragstyp.graph.GraphValidator
+                                .CONDITION_PATTERN.matcher(c))
+                        .filter(m -> m.matches() && m.group(1).equals(variable))
+                        .map(m -> m.group(3))
+                        .distinct()
+                        .toList();
+            } catch (IllegalArgumentException e) {
+                return List.of(); // unparseable stored graph: fall back to pattern-only validation
+            }
+        }
+        return List.of();
+    }
+
+    /**
      * Validates an antrag payload against the published major's FormDefinition — the
      * submission system boundary (ADR-009 §4, Review 2026-06-12). Lives here so the
      * FormDefinition never crosses the module boundary; the antrag module calls this

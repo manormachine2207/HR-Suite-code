@@ -134,6 +134,29 @@ public class Antrag {
         this.status = AntragStatus.CANCELLED;
     }
 
+    /**
+     * Review progress (ADR-013): a task was completed but the process keeps running.
+     * Idempotent for repeated task completions of the same in-flight request.
+     */
+    public void beginReview() {
+        if (status != AntragStatus.SUBMITTED && status != AntragStatus.IN_REVIEW) {
+            throw new IllegalStateException("only SUBMITTED/IN_REVIEW requests can move to review: " + id);
+        }
+        this.status = AntragStatus.IN_REVIEW;
+    }
+
+    /** Terminal review result (ADR-013): APPROVED, REJECTED or COMPLETED. */
+    public void finishReview(AntragStatus terminal) {
+        if (terminal != AntragStatus.APPROVED && terminal != AntragStatus.REJECTED
+                && terminal != AntragStatus.COMPLETED) {
+            throw new IllegalArgumentException("not a terminal review status: " + terminal);
+        }
+        if (status != AntragStatus.SUBMITTED && status != AntragStatus.IN_REVIEW) {
+            throw new IllegalStateException("only SUBMITTED/IN_REVIEW requests can be decided: " + id);
+        }
+        this.status = terminal;
+    }
+
     public UUID getId() { return id; }
     public UUID getTenantId() { return tenantId; }
     public UUID getAntragstypId() { return antragstypId; }

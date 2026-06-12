@@ -1,6 +1,9 @@
 package io.github.manormachine2207.hrsuite.workflow;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -25,4 +28,22 @@ public interface WorkflowEngine {
      */
     String startInstance(UUID tenantId, String processDefinitionKey, String businessKey,
                          Map<String, Object> variables);
+
+    // ---- review path (ADR-013) --------------------------------------------
+
+    /**
+     * Open, unassigned user tasks of the tenant the caller may work on: tasks without
+     * any candidate group (placeholder/FORM tasks) plus tasks whose candidate group
+     * intersects {@code callerGroups}.
+     */
+    List<WorkflowTask> openTasks(UUID tenantId, Collection<String> callerGroups);
+
+    /** Looks up one open task, tenant-scoped (empty for other tenants' tasks). */
+    Optional<WorkflowTask> findOpenTask(UUID tenantId, String taskId);
+
+    /** Completes a task, optionally setting process variables (e.g. the outcome) first. */
+    void completeTask(String taskId, Map<String, Object> variables);
+
+    /** True while the process instance still runs (false once it reached an end event). */
+    boolean isInstanceRunning(UUID tenantId, String processInstanceId);
 }

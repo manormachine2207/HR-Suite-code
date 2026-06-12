@@ -1,0 +1,139 @@
+<section class="hr-task-list" aria-labelledby="task-title">
+  <header class="hr-head">
+    <h1 id="task-title">{{ 'review.listTitle' | translate }}</h1>
+    <p class="hr-lead">{{ 'review.lead' | translate }}</p>
+  </header>
+
+  @if (successKey) {
+    <div class="hr-state hr-state--ok" role="status">
+      {{ successKey | translate }}
+      @if (successStatus) {
+        <span class="hr-status" [class]="statusClass(successStatus)">
+          {{ statusKey(successStatus) ? (statusKey(successStatus)! | translate) : successStatus }}
+        </span>
+      }
+    </div>
+  }
+  @if (errorKey || errorDetail) {
+    <div class="hr-state hr-state--error" role="alert">
+      {{ errorDetail || (errorKey | translate) }}
+    </div>
+  }
+
+  @if (loading) {
+    <div class="hr-state" role="status">{{ 'review.loading' | translate }}</div>
+  } @else if (forbidden) {
+    <div class="hr-state hr-state--error" role="alert">{{ 'review.forbidden' | translate }}</div>
+  } @else if (failed) {
+    <div class="hr-state hr-state--error" role="alert">{{ 'review.loadError' | translate }}</div>
+  } @else if (tasks.length === 0) {
+    <div class="hr-state">{{ 'review.empty' | translate }}</div>
+  } @else {
+    <div class="hr-card">
+      <table class="hr-table" [attr.aria-label]="'review.listTitle' | translate">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'review.colType' | translate }}</th>
+            <th scope="col">{{ 'review.colStep' | translate }}</th>
+            <th scope="col">{{ 'review.colApplicant' | translate }}</th>
+            <th scope="col">{{ 'review.colStatus' | translate }}</th>
+            <th scope="col">{{ 'review.colReceived' | translate }}</th>
+            <th scope="col">{{ 'review.colActions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of tasks; track t.taskId) {
+            <tr [class.hr-row--selected]="t.taskId === selectedId">
+              <td class="hr-title">{{ titleOf(t.taskId) }}</td>
+              <td>{{ t.name }}</td>
+              <td>
+                @if (t.antragstellerSubject) {
+                  <code class="hr-key">{{ t.antragstellerSubject }}</code>
+                } @else {
+                  <span class="hr-muted">—</span>
+                }
+              </td>
+              <td>
+                @if (t.antragStatus) {
+                  <span class="hr-status" [class]="statusClass(t.antragStatus)">
+                    {{ statusKey(t.antragStatus) ? (statusKey(t.antragStatus)! | translate) : t.antragStatus }}
+                  </span>
+                } @else {
+                  <span class="hr-muted">—</span>
+                }
+              </td>
+              <td class="hr-muted">{{ t.createdAt | date: 'short' : undefined : dateLocale }}</td>
+              <td class="hr-rowactions">
+                <button type="button" class="hr-btn hr-btn--sm" (click)="toggleDetail(t)"
+                        [disabled]="completing"
+                        [attr.aria-expanded]="t.taskId === selectedId" aria-controls="task-detail">
+                  {{ (t.taskId === selectedId ? 'review.hideDetail' : 'review.showDetail') | translate }}
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (selectedId) {
+    <div class="hr-card hr-detail-card" id="task-detail">
+      @if (detailLoading) {
+        <div class="hr-state" role="status">{{ 'review.loading' | translate }}</div>
+      } @else if (detail) {
+        <h2 class="hr-detail-title">
+          {{ 'review.detailTitle' | translate }}: {{ titleOf(detail.taskId) }} — {{ detail.name }}
+        </h2>
+
+        <h3 class="hr-detail-sub">{{ 'review.payload' | translate }}</h3>
+        @if (detailRows.length === 0) {
+          <p class="hr-hint">{{ 'review.payloadEmpty' | translate }}</p>
+        } @else {
+          <table class="hr-table hr-table--payload" [attr.aria-label]="'review.payload' | translate">
+            <thead>
+              <tr>
+                <th scope="col">{{ 'review.colKey' | translate }}</th>
+                <th scope="col">{{ 'review.colValue' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of detailRows; track row.key) {
+                <tr>
+                  <td><code class="hr-key">{{ row.key }}</code></td>
+                  <td>{{ row.value }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        <div class="hr-field">
+          <label for="task-comment">{{ 'review.comment' | translate }}</label>
+          <textarea id="task-comment" class="hr-input" rows="3"
+                    [value]="comment" (input)="comment = $any($event.target).value"
+                    [disabled]="completing"></textarea>
+        </div>
+
+        <div class="hr-form-actions">
+          @if (detail.allowedOutcomes.length > 0) {
+            @for (o of detail.allowedOutcomes; track o) {
+              <button type="button" class="hr-btn hr-btn--primary"
+                      (click)="completeTask(o)" [disabled]="completing">
+                {{ outcomeKey(o) ? (outcomeKey(o)! | translate) : o }}
+              </button>
+            }
+          } @else {
+            <button type="button" class="hr-btn hr-btn--primary"
+                    (click)="completeTask(null)" [disabled]="completing">
+              {{ (completing ? 'review.completing' : 'review.completeAction') | translate }}
+            </button>
+          }
+          <button type="button" class="hr-btn" (click)="closeDetail()" [disabled]="completing">
+            {{ 'review.close' | translate }}
+          </button>
+        </div>
+      }
+    </div>
+  }
+</section>

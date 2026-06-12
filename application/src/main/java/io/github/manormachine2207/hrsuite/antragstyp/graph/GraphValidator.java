@@ -19,14 +19,14 @@ import java.util.regex.Pattern;
 public final class GraphValidator {
 
     /** Mirrors the BpmnCompiler key constraint (BPMN element id + JUEL variable name). */
-    static final Pattern KEY_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
+    public static final Pattern KEY_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
 
     /**
      * Eng begrenzte Bedingungssprache fuer XOR-Ausgaenge: {@code var == 'wert'} bzw.
      * {@code var != 'wert'}. Bewusst KEIN freies JUEL: die Bedingung landet in einer
      * Flowable-Expression, freier Text waere ein Injection-Kanal (Review 2026-06-12).
      */
-    static final Pattern CONDITION_PATTERN = Pattern.compile(
+    public static final Pattern CONDITION_PATTERN = Pattern.compile(
             "^\\s*([A-Za-z][A-Za-z0-9_]*)\\s*(==|!=)\\s*'([A-Za-z0-9_ .\\-äöüÄÖÜéèêàçÉÈÀ]*)'\\s*$");
 
     private GraphValidator() {
