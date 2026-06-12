@@ -22,12 +22,20 @@ public final class GraphValidator {
     public static final Pattern KEY_PATTERN = Pattern.compile("^[A-Za-z][A-Za-z0-9_]*$");
 
     /**
-     * Eng begrenzte Bedingungssprache fuer XOR-Ausgaenge: {@code var == 'wert'} bzw.
-     * {@code var != 'wert'}. Bewusst KEIN freies JUEL: die Bedingung landet in einer
-     * Flowable-Expression, freier Text waere ein Injection-Kanal (Review 2026-06-12).
+     * Eng begrenzte Bedingungssprache fuer XOR-Ausgaenge: {@code var == 'wert'} /
+     * {@code var != 'wert'} fuer Strings, plus numerische Vergleiche
+     * {@code var > 5000} (==, !=, >, >=, <, <= mit Zahlen-Literal — Prototyp-
+     * Anforderung „Kosten > CHF 5'000 ⇒ HAL-Stufe", 2026-06-12). Bewusst KEIN
+     * freies JUEL: die Bedingung landet in einer Flowable-Expression, freier Text
+     * waere ein Injection-Kanal. Gruppen: 1=Variable, 2=Operator, 3=String-Literal
+     * (oder null), 4=Zahlen-Literal (oder null). Ordnungsoperatoren verlangen ein
+     * Zahlen-Literal (sonst lexikografische Falle) — erzwungen in {@link #validate}.
      */
     public static final Pattern CONDITION_PATTERN = Pattern.compile(
-            "^\\s*([A-Za-z][A-Za-z0-9_]*)\\s*(==|!=)\\s*'([A-Za-z0-9_ .\\-äöüÄÖÜéèêàçÉÈÀ]*)'\\s*$");
+            "^\\s*([A-Za-z][A-Za-z0-9_]*)\\s*(==|!=|>=|<=|>|<)\\s*"
+            + "(?:'([A-Za-z0-9_ .\\-äöüÄÖÜéèêàçÉÈÀ]*)'|(\\d+(?:\\.\\d+)?))\\s*$");
+
+    private static final Set<String> ORDERING_OPERATORS = Set.of(">", ">=", "<", "<=");
 
     private GraphValidator() {
     }
@@ -144,9 +152,15 @@ public final class GraphValidator {
             GraphNode source = byId.get(e.source());
             if (source != null && source.type() != GraphNodeType.XOR) {
                 errors.add("edge '" + e.id() + "': condition is only allowed on XOR outgoing edges");
-            } else if (!CONDITION_PATTERN.matcher(e.condition()).matches()) {
-                errors.add("edge '" + e.id() + "': condition '" + e.condition()
-                        + "' must have the form: variable == 'value' (or !=)");
+            } else {
+                var m = CONDITION_PATTERN.matcher(e.condition());
+                if (!m.matches()) {
+                    errors.add("edge '" + e.id() + "': condition '" + e.condition()
+                            + "' must have the form: variable == 'value' or variable > number");
+                } else if (m.group(3) != null && ORDERING_OPERATORS.contains(m.group(2))) {
+                    errors.add("edge '" + e.id() + "': condition '" + e.condition()
+                            + "' — ordering comparisons (>, >=, <, <=) require a numeric literal");
+                }
             }
         }
 

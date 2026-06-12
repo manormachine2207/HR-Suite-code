@@ -91,6 +91,26 @@ class GraphBpmnCompilerTest {
         assertThat(bpmn).containsPattern("default=\"sf_entscheid_end_[01]\"");
     }
 
+    /**
+     * Prototyp: „Kosten > 5'000 ⇒ HAL". Numerische Bedingungen kompilieren null-sicher
+     * (getVariable: fehlende Variable → null → EL-Coercion 0 → false → Default-Flow).
+     */
+    @Test
+    void numericConditionCompilesNullSafe() {
+        var g = new GraphDefinition(
+                List.of(node("a", GraphNodeType.START, null),
+                        node("x", GraphNodeType.XOR, "kostenpruefung"),
+                        node("e1n", GraphNodeType.END, null),
+                        node("e2n", GraphNodeType.END, null)),
+                List.of(edge("e1", "a", "x"),
+                        new GraphEdge("e2", "x", "e1n", null, "HAL nötig", "kosten > 5000"),
+                        edge("e3", "x", "e2n")));
+        String bpmn = GraphBpmnCompiler.compile("proc_num", "G", g);
+
+        assertThat(bpmn).contains("${execution.getVariable('kosten') > 5000}");
+        assertThat(bpmn).containsPattern("default=\"sf_kostenpruefung_end_[01]\"");
+    }
+
     @Test
     void andCompilesToParallelGateways() {
         var g = new GraphDefinition(

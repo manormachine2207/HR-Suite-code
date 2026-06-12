@@ -39,7 +39,8 @@ export const NODE_KEY_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
  * closed language — `variable == 'value'` or `!=` — never free-form JUEL (injection channel).
  */
 export const EDGE_CONDITION_PATTERN =
-  /^\s*[A-Za-z][A-Za-z0-9_]*\s*(==|!=)\s*'[A-Za-z0-9_ .\-äöüÄÖÜéèêàçÉÈÀ]*'\s*$/;
+  /^\s*[A-Za-z][A-Za-z0-9_]*\s*(==|!=|>=|<=|>|<)\s*('[A-Za-z0-9_ .\-äöüÄÖÜéèêàçÉÈÀ]*'|\d+(\.\d+)?)\s*$/;
+export const EDGE_ORDERING_OPERATORS = ['>', '>=', '<', '<='];
 export const ASSIGNEE_ROLES: readonly string[] = ['hr-reviewer', 'tenant-admin'];
 
 /**
