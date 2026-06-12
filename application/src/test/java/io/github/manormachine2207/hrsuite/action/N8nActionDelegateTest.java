@@ -93,4 +93,42 @@ class N8nActionDelegateTest {
         verify(service).run(eq("pi-1"), any(), eq("ad"), eq("provision-ad-account"), inputCaptor.capture());
         assertThat(inputCaptor.getValue()).containsExactlyEntriesOf(Map.of("upn", "a@b.ch"));
     }
+
+    /**
+     * SF-Connector (Cut 3, Prototyp-Gap 4): Mapping-Werte der Form {@code ${var}}
+     * werden als Prozessvariablen-Lookup aufgeloest — geschlossene Syntax (nur ein
+     * ganzer Variablenname), KEIN freies JUEL (Tenet 1). Fehlende Variablen werden
+     * weggelassen (Datenminimierung), alles andere geht literal durch.
+     */
+    @Test
+    void resolvesWholeValuePlaceholdersFromProcessVariables() {
+        stubExecution();
+        when(execution.getVariable("actionInput")).thenReturn(null);
+        when(execution.getVariable("personalnummer")).thenReturn("P-1234");
+        when(execution.getVariable("kosten")).thenReturn(7000);
+        when(execution.getVariable("fehlt")).thenReturn(null);
+        Expression mappingExpr = mock(Expression.class);
+        when(mappingExpr.getValue(execution)).thenReturn(
+                "{\"studentID\":\"${personalnummer}\",\"kosten\":\"${kosten}\","
+                + "\"comments\":\"Ref fix\",\"instructorName\":\"${fehlt}\","
+                + "\"evil\":\"${evilBean.run()}\"}");
+
+        ActionExecution succeeded = new ActionExecution(TENANT, "pi-1", "antrag-1", "ad", "provision-ad-account");
+        succeeded.markSucceeded();
+        when(service.run(eq("pi-1"), any(), eq("ad"), eq("provision-ad-account"), any())).thenReturn(succeeded);
+
+        N8nActionDelegate d = delegate();
+        d.setInputMappingJson(mappingExpr);
+        d.execute(execution);
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> inputCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(service).run(eq("pi-1"), any(), eq("ad"), eq("provision-ad-account"), inputCaptor.capture());
+        Map<String, Object> input = inputCaptor.getValue();
+        assertThat(input).containsEntry("studentID", "P-1234");
+        assertThat(input).containsEntry("kosten", 7000);                     // typed, not stringified
+        assertThat(input).containsEntry("comments", "Ref fix");             // literal passes through
+        assertThat(input).doesNotContainKey("instructorName");              // missing var -> omitted
+        assertThat(input).containsEntry("evil", "${evilBean.run()}");       // no JUEL: stays literal
+    }
 }

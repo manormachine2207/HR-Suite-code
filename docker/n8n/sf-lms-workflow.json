@@ -1,0 +1,42 @@
+{
+  "id": "sfLmsRecordLearnEv01",
+  "name": "sf-lms-record-learning-events (SF LMS mock)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sf-lms-record-learning-events",
+        "responseMode": "responseNode"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [400, 300],
+      "webhookId": "sf-lms-record-learning-events"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"ok\": true, \"sfEndpoint\": \"POST /learning/odatav4/public/admin/externalEvent/v1/recordLearningEvents\", \"recorded\": $json.body }"
+      },
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [620, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true
+}
