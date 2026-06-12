@@ -61,12 +61,36 @@
       "title": "Nouveau type de demande",
       "key": "Clé",
       "keyHint": "Minuscules, chiffres, _ et - uniquement",
-      "submit": "Créer",
+      "submit": "Créer & ouvrir le designer",
       "titleLabel": "Titre (multilingue)",
       "error": {
         "conflict": "Un type de demande avec cette clé existe déjà.",
         "generic": "La création a échoué. Veuillez réessayer."
-      }
+      },
+      "lead": "Crée un nouveau type de demande. Tu conçois ensuite le formulaire, la chaîne d'approbation et les actions dans le designer.",
+      "steps": {
+        "label": "Prochaines étapes",
+        "one": "Saisir les données de base",
+        "two": "Concevoir formulaire & flux",
+        "three": "Publier"
+      },
+      "keyHelp": "Identifiant technique du type de demande — proposé à partir du titre allemand et intégré à l'identifiant du processus. Uniquement minuscules, chiffres, _ et -.",
+      "keyPlaceholder": "p. ex. formation",
+      "titleHint": "Le titre allemand est obligatoire ; le français, l'italien et l'anglais peuvent être complétés jusqu'à la publication (ils seront alors tous obligatoires).",
+      "titleRequired": "Le titre allemand est obligatoire.",
+      "titlePlaceholder": {
+        "de": "p. ex. Aus- und Weiterbildung",
+        "fr": "p. ex. Formation continue",
+        "it": "p. ex. Formazione continua",
+        "en": "p. ex. Training & development"
+      },
+      "lang": {
+        "de": "Allemand",
+        "fr": "Français",
+        "it": "Italien",
+        "en": "Anglais"
+      },
+      "cancel": "Annuler"
     }
   },
   "builder": {

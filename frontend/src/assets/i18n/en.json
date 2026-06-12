@@ -61,12 +61,36 @@
       "title": "New Request Type",
       "key": "Key",
       "keyHint": "Lowercase letters, digits, _ and - only",
-      "submit": "Create",
+      "submit": "Create & open designer",
       "titleLabel": "Title (multilingual)",
       "error": {
         "conflict": "A request type with this key already exists.",
         "generic": "Creation failed. Please try again."
-      }
+      },
+      "lead": "Create a new request type. You will design the form, approval chain and actions in the designer afterwards.",
+      "steps": {
+        "label": "Next steps",
+        "one": "Enter basics",
+        "two": "Design form & flow",
+        "three": "Publish"
+      },
+      "keyHelp": "Technical identifier of the request type — suggested from the German title and part of the process identifier. Lowercase letters, digits, _ and - only.",
+      "keyPlaceholder": "e.g. training",
+      "titleHint": "The German title is required; French, Italian and English can follow any time before publishing (then all four are required).",
+      "titleRequired": "German title is required.",
+      "titlePlaceholder": {
+        "de": "e.g. Aus- und Weiterbildung",
+        "fr": "e.g. Formation continue",
+        "it": "e.g. Formazione continua",
+        "en": "e.g. Training & development"
+      },
+      "lang": {
+        "de": "German",
+        "fr": "French",
+        "it": "Italian",
+        "en": "English"
+      },
+      "cancel": "Cancel"
     }
   },
   "builder": {

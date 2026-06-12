@@ -61,12 +61,36 @@
       "title": "Nuovo tipo di richiesta",
       "key": "Chiave",
       "keyHint": "Solo minuscole, cifre, _ e -",
-      "submit": "Crea",
+      "submit": "Crea & apri il designer",
       "titleLabel": "Titolo (multilingue)",
       "error": {
         "conflict": "Esiste già un tipo di richiesta con questa chiave.",
         "generic": "Creazione non riuscita. Riprovare."
-      }
+      },
+      "lead": "Crea un nuovo tipo di richiesta. Il modulo, la catena di approvazione e le azioni si configurano poi nel designer.",
+      "steps": {
+        "label": "Prossimi passi",
+        "one": "Inserire i dati di base",
+        "two": "Configurare modulo & flusso",
+        "three": "Pubblicare"
+      },
+      "keyHelp": "Identificativo tecnico del tipo di richiesta — proposto dal titolo tedesco e parte dell'identificativo del processo. Solo minuscole, cifre, _ e -.",
+      "keyPlaceholder": "ad es. formazione",
+      "titleHint": "Il titolo tedesco è obbligatorio; francese, italiano e inglese possono essere completati fino alla pubblicazione (poi saranno tutti obbligatori).",
+      "titleRequired": "Il titolo tedesco è obbligatorio.",
+      "titlePlaceholder": {
+        "de": "ad es. Aus- und Weiterbildung",
+        "fr": "ad es. Formation continue",
+        "it": "ad es. Formazione continua",
+        "en": "ad es. Training & development"
+      },
+      "lang": {
+        "de": "Tedesco",
+        "fr": "Francese",
+        "it": "Italiano",
+        "en": "Inglese"
+      },
+      "cancel": "Annulla"
     }
   },
   "builder": {

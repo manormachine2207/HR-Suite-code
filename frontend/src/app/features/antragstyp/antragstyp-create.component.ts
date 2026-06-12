@@ -9,6 +9,20 @@ import { LANGS, Lang, LocaleMap } from '../form-designer/form-definition.model';
 
 type TitleGroup = FormGroup<{ [K in Lang]: FormControl<string> }>;
 
+/**
+ * Slug suggestion for the technical key from the (German) title: lowercase,
+ * umlauts/diacritics transliterated, anything outside [a-z0-9] collapses to "-".
+ * Pure so the transliteration rules stay unit-testable.
+ */
+export function suggestKey(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
 type CreateForm = FormGroup<{
   key: FormControl<string>;
   title: TitleGroup;
@@ -36,10 +50,25 @@ export class AntragstypCreateComponent {
 
   readonly form: CreateForm = this.fb.group({
     key: this.fb.control('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/^[a-z0-9_-]+$/)] }),
+    // German is the lead language and required up front; FR/IT/EN may follow any
+    // time before publish (the publish gate enforces full parity, BDR-005).
     title: this.fb.group(
-      Object.fromEntries(LANGS.map(l => [l, this.fb.control('', { nonNullable: true })])) as { [K in Lang]: FormControl<string> }
+      Object.fromEntries(LANGS.map(l =>
+        [l, this.fb.control('', { nonNullable: true, validators: l === 'de' ? [Validators.required] : [] })]
+      )) as { [K in Lang]: FormControl<string> }
     ) as TitleGroup,
   }) as CreateForm;
+
+  constructor() {
+    // Suggest the technical key from the German title until the user takes over
+    // (dirty = the key field was edited by hand; programmatic writes keep it pristine).
+    this.titleControl('de').valueChanges.subscribe(value => {
+      if (!this.form.controls.key.dirty) {
+        this.form.controls.key.setValue(suggestKey(value), { emitEvent: false });
+        this.cdr.markForCheck();
+      }
+    });
+  }
 
   titleControl(lang: Lang): FormControl<string> {
     return (this.form.controls.title as TitleGroup).controls[lang];

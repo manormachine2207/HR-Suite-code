@@ -5,7 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { AntragstypCreateComponent } from './antragstyp-create.component';
+import { AntragstypCreateComponent, suggestKey } from './antragstyp-create.component';
 import { RuntimeConfigService } from '../../core/runtime-config/runtime-config.service';
 
 const stubConfig = { get: () => ({ apiBaseUrl: '/api/v1' }) } as Partial<RuntimeConfigService>;
@@ -38,6 +38,9 @@ describe('AntragstypCreateComponent', () => {
     const router = TestBed.inject(Router);
     const nav = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
+    // markAsDirty = the user typed the key by hand; the title-based suggestion
+    // must not overwrite it (see suggestion spec below)
+    cmp.form.controls.key.markAsDirty();
     cmp.form.controls.key.setValue('urlaubsantrag');
     cmp.titleControl('de').setValue('Urlaub');
     cmp.submit();
@@ -75,8 +78,40 @@ describe('AntragstypCreateComponent', () => {
     const fixture = TestBed.createComponent(AntragstypCreateComponent);
     const cmp = fixture.componentInstance;
     cmp.form.controls.key.setValue('x');
+    cmp.titleControl('de').setValue('X');
     cmp.submit();
     http.expectOne('/api/v1/antragstyp').flush('boom', { status: 500, statusText: 'Server Error' });
     expect(cmp.errorKey).toBe('antragstyp.create.error.generic');
+  });
+
+  // ---- Owner-Feedback 2026-06-12: create page must guide, not just collect ----
+
+  it('requires the German title (other languages may follow until publish)', () => {
+    const fixture = TestBed.createComponent(AntragstypCreateComponent);
+    const cmp = fixture.componentInstance;
+    cmp.form.controls.key.setValue('weiterbildung');
+    cmp.submit();
+    http.expectNone('/api/v1/antragstyp');
+    expect(cmp.form.invalid).toBe(true);
+  });
+
+  it('suggests a slug key from the German title until the key is edited manually', () => {
+    const fixture = TestBed.createComponent(AntragstypCreateComponent);
+    const cmp = fixture.componentInstance;
+
+    cmp.titleControl('de').setValue('Weiterbildung & Kurse (CAS)');
+    expect(cmp.form.controls.key.value).toBe('weiterbildung-kurse-cas');
+
+    // a manually edited key is never overwritten by further title typing
+    cmp.form.controls.key.markAsDirty();
+    cmp.form.controls.key.setValue('mein-key');
+    cmp.titleControl('de').setValue('Ganz anderer Titel');
+    expect(cmp.form.controls.key.value).toBe('mein-key');
+  });
+
+  it('suggestKey transliterates umlauts and strips illegal characters', () => {
+    expect(suggestKey('Träger über Maß')).toBe('traeger-ueber-mass');
+    expect(suggestKey('  Éxposé / Test!  ')).toBe('expose-test');
+    expect(suggestKey('---')).toBe('');
   });
 });
