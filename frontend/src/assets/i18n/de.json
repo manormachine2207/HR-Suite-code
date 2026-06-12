@@ -17,6 +17,33 @@
     "imprint": "Impressum",
     "accessibility": "Barrierefreiheit"
   },
+  "home": {
+    "title": "Willkommen in der HR-Suite",
+    "subtitle": "Ihre Module auf einen Blick.",
+    "searchLabel": "Module durchsuchen",
+    "searchPlaceholder": "Suchbegriff eingeben …",
+    "onlyFavorites": "Nur favorisierte Module anzeigen",
+    "empty": "Keine Module gefunden.",
+    "open": "Öffnen",
+    "tag": "HR-Suite",
+    "favoriteAdd": "Als Favorit markieren:",
+    "favoriteRemove": "Favorit entfernen:",
+    "rolesLabel": "Erforderliche Rollen:",
+    "modules": {
+      "antragstypen": {
+        "title": "Antragstypen",
+        "description": "Antragstypen modellieren: Formular, Flow-Canvas und Veröffentlichung."
+      },
+      "antraege": {
+        "title": "Meine Anträge",
+        "description": "Eigene Anträge stellen und ihren Status verfolgen."
+      },
+      "aufgaben": {
+        "title": "Aufgaben",
+        "description": "Offene Aufgaben prüfen und Anträge entscheiden."
+      }
+    }
+  },
   "antragstyp": {
     "listTitle": "Antragstypen",
     "lead": "Übersicht aller verfügbaren Antragstypen.",

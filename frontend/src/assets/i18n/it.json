@@ -17,6 +17,33 @@
     "imprint": "Colofone",
     "accessibility": "Accessibilità"
   },
+  "home": {
+    "title": "Benvenuti in HR-Suite",
+    "subtitle": "I vostri moduli a colpo d'occhio.",
+    "searchLabel": "Cerca moduli",
+    "searchPlaceholder": "Inserire un termine di ricerca …",
+    "onlyFavorites": "Mostra solo i moduli preferiti",
+    "empty": "Nessun modulo trovato.",
+    "open": "Apri",
+    "tag": "HR-Suite",
+    "favoriteAdd": "Contrassegna come preferito:",
+    "favoriteRemove": "Rimuovi dai preferiti:",
+    "rolesLabel": "Ruoli richiesti:",
+    "modules": {
+      "antragstypen": {
+        "title": "Tipi di richiesta",
+        "description": "Modellare i tipi di richiesta: modulo, canvas del flusso e pubblicazione."
+      },
+      "antraege": {
+        "title": "Le mie richieste",
+        "description": "Presentare le proprie richieste e seguirne lo stato."
+      },
+      "aufgaben": {
+        "title": "Compiti",
+        "description": "Esaminare i compiti aperti e decidere sulle richieste."
+      }
+    }
+  },
   "antragstyp": {
     "listTitle": "Tipi di richiesta",
     "lead": "Panoramica di tutti i tipi di richiesta disponibili.",

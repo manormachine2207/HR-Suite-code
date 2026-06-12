@@ -1,0 +1,260 @@
+// Module dashboard (ADR-014) — same visual language as antrag-list/task-list:
+// Oblique/Bootstrap --bs-* tokens with hex fallbacks (BDR-008), card grid 1-4 columns.
+
+.hr-home {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.hr-head {
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0 0 0.4rem;
+    color: var(--bs-emphasis-color, #1f2d3d);
+  }
+}
+
+.hr-lead {
+  margin: 0;
+  color: var(--bs-secondary-color, #5a6b7b);
+  font-size: 1.05rem;
+}
+
+// --- toolbar: search + favorites toggle --------------------------------------
+.hr-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.hr-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1 1 16rem;
+  max-width: 28rem;
+
+  label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bs-body-color, #33404d);
+  }
+}
+
+.hr-input {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.95rem;
+  color: var(--bs-body-color, #33404d);
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #c9d2db);
+  border-radius: 0.375rem;
+
+  &:focus {
+    outline: 2px solid var(--bs-primary, #2570b8);
+    outline-offset: 1px;
+  }
+}
+
+.hr-fav-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.55rem;
+  font-size: 0.92rem;
+  color: var(--bs-body-color, #33404d);
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+// --- empty state --------------------------------------------------------------
+.hr-state {
+  padding: 2rem 1.25rem;
+  text-align: center;
+  color: var(--bs-secondary-color, #5a6b7b);
+  background: var(--bs-tertiary-bg, #f4f7fa);
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.5rem;
+}
+
+// --- card grid (responsive 1-4 columns) ---------------------------------------
+.hr-module-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+  gap: 1rem;
+}
+
+.hr-module-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 1.25rem 1rem;
+  background: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px rgba(15, 30, 50, 0.05);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:hover {
+    border-color: var(--bs-primary, #2570b8);
+    box-shadow: 0 2px 6px rgba(15, 30, 50, 0.12);
+  }
+
+  // Keyboard focus on the stretched link → visible ring on the whole card.
+  &:focus-within {
+    outline: 2px solid var(--bs-primary, #2570b8);
+    outline-offset: 2px;
+  }
+}
+
+.hr-module-icon {
+  width: 2rem;
+  height: 2rem;
+  font-size: 2rem;
+  color: var(--bs-primary, #2570b8);
+  margin-bottom: 0.75rem;
+}
+
+.hr-module-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.hr-module-link {
+  color: var(--bs-link-color, #2570b8);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  // Stretched link: makes the whole card the click target of this single <a>.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  // The card carries the focus ring via :focus-within.
+  &:focus-visible {
+    outline: none;
+  }
+}
+
+.hr-module-desc {
+  margin: 0 0 0.75rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+.hr-module-roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.75rem;
+}
+
+.hr-role-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: var(--bs-secondary-bg-subtle, #eef1f4);
+  color: var(--bs-secondary-color, #5a6b7b);
+  border: 1px solid var(--bs-border-color, #dbe1e8);
+}
+
+.hr-module-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--bs-border-color, #eef1f4);
+}
+
+.hr-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: var(--bs-info-bg-subtle, #d7eefb);
+  color: var(--bs-info-text-emphasis, #1c5a86);
+  border: 1px solid var(--bs-info-border-subtle, #b3ddf4);
+}
+
+.hr-open {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--bs-link-color, #2570b8);
+}
+
+// --- favorite star (above the stretched link) ----------------------------------
+.hr-fav-btn {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  z-index: 2; // above the stretched ::after of the card link
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--bs-secondary-color, #8a98a6);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--bs-tertiary-bg, #f4f7fa);
+    color: var(--bs-warning-text-emphasis, #8a5a00);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary, #2570b8);
+    outline-offset: 1px;
+  }
+
+  &.is-active {
+    color: var(--bs-warning-text-emphasis, #c98500);
+  }
+
+  mat-icon {
+    width: 1.3rem;
+    height: 1.3rem;
+    font-size: 1.3rem;
+  }
+}
+
+// --- screen-reader-only helper (SDR-003) ----------------------------------------
+.hr-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
