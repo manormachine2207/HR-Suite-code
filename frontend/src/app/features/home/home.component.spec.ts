@@ -2,9 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ObIconService } from '@oblique/oblique';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { HomeComponent, FAVORITES_STORAGE_KEY } from './home.component';
+import { TourService } from '../../core/tour/tour.service';
 
 /** Minimal DE texts so the live search runs over real translated card content. */
 const DE = {
@@ -13,16 +14,21 @@ const DE = {
       antragstypen: { title: 'Antragstypen', description: 'Antragstypen modellieren.' },
       antraege: { title: 'Meine Anträge', description: 'Eigene Anträge stellen.' },
       aufgaben: { title: 'Aufgaben', description: 'Offene Aufgaben prüfen.' },
+      hilfe: { title: 'Hilfe', description: 'Anleitungen und geführte Touren.' },
     },
   },
 };
 
+/** TourService stub: driver.js must never mount its overlay inside jsdom tests. */
+const tourStub = { maybeAutoStartDashboardTour: vi.fn(() => false) };
+
 describe('HomeComponent', () => {
   beforeEach(async () => {
     localStorage.clear();
+    tourStub.maybeAutoStartDashboardTour.mockClear();
     await TestBed.configureTestingModule({
       imports: [HomeComponent, TranslateModule.forRoot()],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), { provide: TourService, useValue: tourStub }],
     }).compileComponents();
     // Register the bundled Oblique icon set so <mat-icon svgIcon> resolves in jsdom.
     TestBed.inject(ObIconService).registerOnAppInit();
@@ -31,16 +37,33 @@ describe('HomeComponent', () => {
     translate.use('de');
   });
 
-  it('renders the three module cards as real links', async () => {
+  it('renders the four module cards as real links', async () => {
     const fixture = TestBed.createComponent(HomeComponent);
     await fixture.whenStable();
 
     const el: HTMLElement = fixture.nativeElement;
     const cards = el.querySelectorAll('.hr-module-card');
-    expect(cards).toHaveLength(3);
+    expect(cards).toHaveLength(4);
     const hrefs = [...el.querySelectorAll<HTMLAnchorElement>('a.hr-module-link')]
       .map(a => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/antragstypen', '/antraege', '/aufgaben']);
+    expect(hrefs).toEqual(['/antragstypen', '/antraege', '/aufgaben', '/hilfe']);
+  });
+
+  it('offers the dashboard tour auto-start exactly once after the first render (ADR-015)', async () => {
+    const fixture = TestBed.createComponent(HomeComponent);
+    await fixture.whenStable();
+
+    expect(tourStub.maybeAutoStartDashboardTour).toHaveBeenCalledTimes(1);
+  });
+
+  it('anchors the guided tour via data-tour attributes (search, star, first card)', async () => {
+    const fixture = TestBed.createComponent(HomeComponent);
+    await fixture.whenStable();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[data-tour="dashboard-search"]')).not.toBeNull();
+    expect(el.querySelectorAll('[data-tour="dashboard-favorite"]')).toHaveLength(1);
+    expect(el.querySelectorAll('[data-tour="dashboard-card"]')).toHaveLength(1);
   });
 
   it('search field filters the cards live (translated title, case-insensitive)', async () => {

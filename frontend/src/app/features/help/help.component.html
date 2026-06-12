@@ -1,0 +1,41 @@
+<section class="hr-help" aria-labelledby="help-title">
+  <header class="hr-head">
+    <h1 id="help-title">{{ 'help.title' | translate }}</h1>
+    <p class="hr-lead">{{ 'help.lead' | translate }}</p>
+  </header>
+
+  <!-- Role guides as native accordions (details/summary: keyboard +
+       aria-expanded for free, SDR-003). Content is pure i18n (BDR-005). -->
+  <h2 class="hr-help__section-title">{{ 'help.guides.title' | translate }}</h2>
+  @for (g of guides; track g.id) {
+    <details class="hr-guide">
+      <summary>
+        <span class="hr-guide__chev" aria-hidden="true">
+          <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" focusable="false"><path d="M6 3.5L10.5 8 6 12.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        {{ ('help.guides.' + g.id + '.title') | translate }}
+      </summary>
+      <ol class="hr-guide__steps">
+        @for (n of g.steps; track n) {
+          <li>{{ ('help.guides.' + g.id + '.step' + n) | translate }}</li>
+        }
+      </ol>
+    </details>
+  }
+
+  <!-- Guided tours (ADR-015 Ebene 3) -->
+  <h2 class="hr-help__section-title">{{ 'help.tours.title' | translate }}</h2>
+  <p class="hr-help__tours-lead">{{ 'help.tours.lead' | translate }}</p>
+  <div class="hr-help__tour-actions">
+    <button type="button" class="hr-btn hr-btn--primary" (click)="startDashboardTour()">
+      {{ 'help.tours.startDashboard' | translate }}
+    </button>
+    <button type="button" class="hr-btn hr-btn--secondary" (click)="startBuilderTour()"
+            [attr.aria-expanded]="builderHintVisible()">
+      {{ 'help.tours.startBuilder' | translate }}
+    </button>
+  </div>
+  @if (builderHintVisible()) {
+    <p class="hr-help__builder-hint" role="note">{{ 'help.tours.builderHint' | translate }}</p>
+  }
+</section>

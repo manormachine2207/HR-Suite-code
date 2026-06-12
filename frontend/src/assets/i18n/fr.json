@@ -41,6 +41,10 @@
       "aufgaben": {
         "title": "Tâches",
         "description": "Examiner les tâches ouvertes et statuer sur les demandes."
+      },
+      "hilfe": {
+        "title": "Aide",
+        "description": "Guides et visites guidées."
       }
     }
   },
@@ -92,6 +96,29 @@
       "stateDirty": "Modifications non enregistrées",
       "stateNew": "Pas encore enregistré",
       "edit": "Modifier"
+    },
+    "tourStart": "Démarrer la visite",
+    "help": {
+      "toggle": "Comment fonctionne cette étape ?",
+      "form": {
+        "p1": "Définissez les champs que les requérants remplissent lors du dépôt.",
+        "p2": "La clé identifie techniquement un champ et sert de nom de variable dans le flux ; elle doit être unique par formulaire.",
+        "p3": "Les libellés sont multilingues : l'allemand, le français, l'italien et l'anglais sont obligatoires pour la publication.",
+        "p4": "Enregistrez régulièrement comme brouillon — le type de demande n'est mis en ligne qu'à l'étape « Publier »."
+      },
+      "flow": {
+        "p1": "Modélisez le déroulement sous forme de graphe : début, formulaire, approbation, action, branchement (XOR), parallèle (AND) et fin.",
+        "p2": "Ajoutez des nœuds via la palette à gauche ; tracez les arêtes de la sortie droite d'un nœud vers l'entrée gauche du suivant.",
+        "p3": "Les sorties d'un branchement XOR reçoivent des conditions de la forme variable == 'valeur' (ou !=) ; la variable est une clé de champ ou le résultat d'une approbation.",
+        "p4": "Exactement une arête XOR reste sans condition — c'est le chemin par défaut si aucune condition ne s'applique.",
+        "p5": "Les avertissements dans l'inspecteur à droite signalent les points ouverts ; le serveur valide le graphe lors de la publication."
+      },
+      "publish": {
+        "p1": "Le récapitulatif montre les champs, les nœuds et les arêtes ainsi que l'état d'enregistrement du brouillon.",
+        "p2": "Lors de la publication, le serveur valide entièrement le graphe (début/fin, accessibilité, conditions XOR) et exige le titre et les libellés dans les quatre langues.",
+        "p3": "La publication met la version en ligne (LIVE) : les requérants peuvent immédiatement déposer des demandes ; une seule version est en ligne par type.",
+        "p4": "Les modifications valides non enregistrées sont enregistrées automatiquement avant la publication."
+      }
     }
   },
   "flow": {
@@ -130,6 +157,13 @@
         "zoomIn": "Agrandir",
         "zoomOut": "Réduire",
         "fit": "Ajuster la vue"
+      },
+      "empty": {
+        "title": "Construire un déroulement",
+        "step1": "Ajouter un nœud de début depuis la palette.",
+        "step2": "Compléter les étapes et les relier par glisser-déposer, de la sortie vers l'entrée.",
+        "step3": "Conditionner les sorties des branchements XOR (variable == 'valeur').",
+        "paletteHint": "La palette de nœuds se trouve à gauche du canevas."
       }
     }
   },
@@ -175,7 +209,6 @@
     "loading": "Chargement …",
     "addField": "Ajouter un champ",
     "fieldCount": "Champs",
-    "noFields": "Aucun champ pour l'instant. Ajoutez le premier champ.",
     "key": "Clé du champ",
     "type": "Type",
     "required": "Obligatoire",
@@ -211,6 +244,11 @@
       "generic": "L'action a échoué.",
       "publishRejected": "Publication refusée :",
       "saveBeforePublish": "Les modifications non enregistrées sont invalides et ne peuvent pas être enregistrées automatiquement — veuillez d'abord enregistrer un état valide."
+    },
+    "saveDisabledReason": "Au moins un champ avec une clé valide est requis.",
+    "emptyState": {
+      "title": "Ajoutez votre premier champ de formulaire",
+      "body": "Les champs définissent ce que les requérants saisissent. Chaque champ nécessite une clé unique et des libellés en quatre langues."
     }
   },
   "review": {
@@ -269,5 +307,104 @@
     "feedbackBody": "Veuillez signaler les obstacles aux responsables du projet via le dépôt public.",
     "preparationHeading": "Établissement de cette déclaration",
     "preparationBody": "Cette déclaration a été établie le 28.05.2026 et sera mise à jour à chaque livraison productive."
+  },
+  "help": {
+    "title": "Centre d'aide",
+    "lead": "Guides pas à pas et visites guidées pour HR-Suite.",
+    "headerAria": "Ouvrir le centre d'aide",
+    "guides": {
+      "title": "Guides par rôle",
+      "designer": {
+        "title": "Concepteur RH : créer et publier un type de demande",
+        "step1": "Ouvrez « Types de demande » et créez la clé et le titre dans les quatre langues via « Nouveau type de demande ».",
+        "step2": "Définissez les champs à l'étape « Formulaire » du builder ; chaque champ nécessite une clé unique.",
+        "step3": "Saisissez les libellés des champs en allemand, français, italien et anglais — sans traductions complètes, le serveur refuse la publication.",
+        "step4": "Modélisez le déroulement à l'étape « Flux » : placez le nœud de début, ajoutez les étapes (formulaire, approbation, action), reliez les arêtes par glisser-déposer, placez le nœud de fin.",
+        "step5": "Conditionnez les sorties XOR avec variable == 'valeur' (ou !=) ; exactement une arête reste sans condition comme chemin par défaut.",
+        "step6": "Enregistrez comme brouillon et contrôlez le récapitulatif à l'étape « Publier ».",
+        "step7": "Publiez : la version passe en ligne (LIVE) et le déroulement est déployé comme processus."
+      },
+      "applicant": {
+        "title": "Requérants : déposer et suivre une demande",
+        "step1": "Ouvrez « Mes demandes » et choisissez « Nouvelle demande ».",
+        "step2": "Sélectionnez un type de demande publié ; le formulaire apparaît automatiquement.",
+        "step3": "Remplissez les champs et déposez avec « Créer & soumettre ».",
+        "step4": "Suivez le statut de votre demande dans la liste (p. ex. Soumise, Terminée).",
+        "step5": "Vous pouvez soumettre ou annuler les brouillons ultérieurement."
+      },
+      "reviewer": {
+        "title": "Réviseurs : examiner les tâches et décider",
+        "step1": "Ouvrez « Tâches » — les tâches de révision ouvertes s'y trouvent.",
+        "step2": "Ouvrez les données de la demande via « Détails ».",
+        "step3": "Saisissez un commentaire si nécessaire.",
+        "step4": "Décidez avec « Approuver » ou « Refuser » — ou clôturez la tâche.",
+        "step5": "La demande reçoit ensuite automatiquement le nouveau statut."
+      }
+    },
+    "tours": {
+      "title": "Visites guidées",
+      "lead": "Les visites mettent en évidence les éléments les plus importants directement dans l'interface.",
+      "startDashboard": "Démarrer la visite du tableau de bord",
+      "startBuilder": "Démarrer la visite du builder",
+      "builderHint": "La visite du builder se déroule dans le builder : ouvrez un type de demande sous « Types de demande » et démarrez la visite via le bouton « Démarrer la visite » à côté des étapes."
+    }
+  },
+  "tour": {
+    "next": "Suivant",
+    "prev": "Retour",
+    "done": "Terminer",
+    "progress": "{{current}} sur {{total}}",
+    "dashboard": {
+      "welcome": {
+        "title": "Bienvenue dans HR-Suite",
+        "desc": "Cette courte visite présente les éléments les plus importants du tableau de bord. Vous pouvez quitter à tout moment avec Échap."
+      },
+      "search": {
+        "title": "Rechercher des modules",
+        "desc": "Filtrez les cartes de modules en direct — la recherche porte sur le titre et la description dans la langue active."
+      },
+      "favorite": {
+        "title": "Favoris",
+        "desc": "L'étoile marque un module comme favori ; le filtre « Afficher uniquement les modules favoris » masque le reste."
+      },
+      "card": {
+        "title": "Ouvrir les modules",
+        "desc": "Chaque carte ouvre un module, p. ex. les types de demande pour les concepteurs RH ; les puces indiquent les rôles typiques."
+      },
+      "help": {
+        "title": "Aide à tout moment",
+        "desc": "Le point d'interrogation dans l'en-tête mène au centre d'aide avec les guides et ces visites."
+      }
+    },
+    "builder": {
+      "stepper": {
+        "title": "Trois étapes vers le type de demande",
+        "desc": "Le builder guide à travers Formulaire, Flux et Publier ; vous pouvez changer d'étape à tout moment."
+      },
+      "toolbar": {
+        "title": "Gérer les champs",
+        "desc": "Vous voyez ici le nombre de champs et en ajoutez de nouveaux."
+      },
+      "fieldcard": {
+        "title": "La carte de champ",
+        "desc": "Par champ, vous définissez la clé, le type, le caractère obligatoire, les libellés multilingues et la validation."
+      },
+      "flow": {
+        "title": "L'étape Flux",
+        "desc": "Vous modélisez ici le déroulement de la demande sous forme de graphe."
+      },
+      "palette": {
+        "title": "Palette de nœuds",
+        "desc": "Ajoutez des nœuds d'un clic : début, formulaire, approbation, action, XOR, AND, fin."
+      },
+      "canvas": {
+        "title": "Canevas",
+        "desc": "Disposez les nœuds par glisser-déposer et tracez les arêtes de la sortie vers l'entrée ; l'inspecteur à droite édite la sélection et les arêtes."
+      },
+      "publish": {
+        "title": "Récapitulatif et publication",
+        "desc": "Vérifiez les champs, les nœuds et l'état d'enregistrement — « Publier » met le type de demande en ligne."
+      }
+    }
   }
 }

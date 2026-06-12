@@ -45,6 +45,12 @@ export const routes: Routes = [
       import('./features/accessibility/conformite.component').then(m => m.ConformiteComponent),
   },
   {
+    // Help center (ADR-015 Ebene 2) — also reachable via the header "?" entry.
+    path: 'hilfe',
+    loadComponent: () =>
+      import('./features/help/help.component').then(m => m.HelpComponent),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then(m => m.NotFoundComponent),

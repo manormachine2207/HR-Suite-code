@@ -1,0 +1,145 @@
+.hr-help {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem 4rem;
+}
+
+.hr-head {
+  margin-bottom: 1.25rem;
+
+  h1 {
+    margin: 0 0 0.4rem;
+    color: var(--bs-emphasis-color, #1f2d3d);
+  }
+}
+
+.hr-lead {
+  margin: 0;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+.hr-help__section-title {
+  margin: 1.75rem 0 0.75rem;
+  font-size: 1.05rem;
+  color: var(--bs-emphasis-color, #1f2d3d);
+}
+
+/* ---- role-guide accordions ------------------------------------------------ */
+
+.hr-guide {
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.6rem;
+  background: var(--bs-body-bg, #fff);
+  box-shadow: 0 1px 2px rgba(15, 30, 50, 0.05);
+  margin-bottom: 0.6rem;
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    font-weight: 600;
+    color: var(--bs-emphasis-color, #1f2d3d);
+    cursor: pointer;
+    list-style: none; /* custom chevron below */
+
+    &::-webkit-details-marker {
+      display: none;
+    }
+
+    &:hover {
+      color: var(--bs-primary, #1f6feb);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--bs-primary, #1f6feb);
+      outline-offset: 1px;
+      border-radius: 0.6rem;
+    }
+  }
+
+  &[open] summary {
+    border-bottom: 1px dashed var(--bs-border-color, #e0e5ea);
+  }
+
+  &__chev {
+    flex: none;
+    display: inline-flex;
+    width: 1rem;
+    height: 1rem;
+    color: var(--bs-secondary-color, #5a6b7b);
+    transition: transform 120ms ease;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  &[open] &__chev {
+    transform: rotate(90deg);
+  }
+
+  &__steps {
+    margin: 0;
+    padding: 0.9rem 1rem 1rem 2.4rem;
+    font-size: 0.92rem;
+    color: var(--bs-body-color, #33404d);
+
+    li {
+      margin-bottom: 0.45rem;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+/* ---- guided tours --------------------------------------------------------- */
+
+.hr-help__tours-lead {
+  margin: 0 0 0.9rem;
+  font-size: 0.92rem;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+.hr-help__tour-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.hr-help__builder-hint {
+  margin: 0.75rem 0 0;
+  padding: 0.65rem 0.9rem;
+  font-size: 0.88rem;
+  color: var(--bs-body-color, #33404d);
+  background: var(--bs-tertiary-bg, #f4f7fa);
+  border: 1px solid var(--bs-border-color, #e0e5ea);
+  border-radius: 0.5rem;
+}
+
+/* shared button look (mirrors the designer's .hr-btn token usage) */
+.hr-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.4rem;
+  border: 1px solid transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &--primary {
+    background: var(--bs-primary, #1f6feb);
+    color: #fff;
+  }
+
+  &--secondary {
+    background: var(--bs-secondary-bg, #eef2f6);
+    color: var(--bs-emphasis-color, #1f2d3d);
+    border-color: var(--bs-border-color, #d6dce3);
+  }
+}

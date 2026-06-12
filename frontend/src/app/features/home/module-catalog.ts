@@ -49,6 +49,15 @@ export const MODULE_CATALOG: readonly ModuleCardDef[] = [
     route: '/aufgaben',
     roles: ['hr-reviewer', 'tenant-admin'],
   },
+  {
+    // Help center (ADR-015 Ebene 2) — for everyone, hence roles: [].
+    id: 'hilfe',
+    icon: 'question_circle',
+    titleKey: 'home.modules.hilfe.title',
+    descriptionKey: 'home.modules.hilfe.description',
+    route: '/hilfe',
+    roles: [],
+  },
 ];
 
 export type TranslateFn = (key: string) => string;

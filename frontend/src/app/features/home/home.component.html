@@ -4,8 +4,10 @@
     <p class="hr-lead">{{ 'home.subtitle' | translate }}</p>
   </header>
 
+  <!-- data-tour attributes anchor the guided tour (ADR-015, tour-definitions.ts):
+       keep them when refactoring markup/classes. -->
   <div class="hr-toolbar">
-    <div class="hr-search">
+    <div class="hr-search" data-tour="dashboard-search">
       <label for="module-search">{{ 'home.searchLabel' | translate }}</label>
       <input id="module-search" type="search" class="hr-input"
              [value]="search()" (input)="search.set($any($event.target).value)"
@@ -22,9 +24,10 @@
     <div class="hr-state" role="status">{{ 'home.empty' | translate }}</div>
   } @else {
     <ul class="hr-module-grid">
-      @for (m of modules(); track m.id) {
-        <li class="hr-module-card">
+      @for (m of modules(); track m.id; let first = $first) {
+        <li class="hr-module-card" [attr.data-tour]="first ? 'dashboard-card' : null">
           <button type="button" class="hr-fav-btn"
+                  [attr.data-tour]="first ? 'dashboard-favorite' : null"
                   [class.is-active]="isFavorite(m.id)"
                   [attr.aria-pressed]="isFavorite(m.id)"
                   [attr.aria-label]="favoriteLabel(m)"

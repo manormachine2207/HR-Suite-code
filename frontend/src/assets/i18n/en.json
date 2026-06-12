@@ -41,6 +41,10 @@
       "aufgaben": {
         "title": "Tasks",
         "description": "Review open tasks and decide on requests."
+      },
+      "hilfe": {
+        "title": "Help",
+        "description": "Guides and guided tours."
       }
     }
   },
@@ -92,6 +96,29 @@
       "stateDirty": "Unsaved changes",
       "stateNew": "Not saved yet",
       "edit": "Edit"
+    },
+    "tourStart": "Start tour",
+    "help": {
+      "toggle": "How does this step work?",
+      "form": {
+        "p1": "Define the fields applicants fill in when submitting.",
+        "p2": "The field key identifies a field technically and serves as the variable name in the flow; it must be unique per form.",
+        "p3": "Labels are multilingual: German, French, Italian and English are required for publishing.",
+        "p4": "Save as draft at any time — the request type only goes live in the “Publish” step."
+      },
+      "flow": {
+        "p1": "Model the workflow as a graph: start, form, approval, action, branch (XOR), parallel (AND) and end.",
+        "p2": "Add nodes from the palette on the left; drag edges from a node's right-hand output to the next node's left-hand input.",
+        "p3": "Outgoing XOR edges take conditions of the form variable == 'value' (or !=); the variable is a field key or an approval outcome.",
+        "p4": "Exactly one XOR edge stays without a condition — it is the default path when no condition matches.",
+        "p5": "Warnings in the inspector on the right show open issues; the server fully validates the graph on publish."
+      },
+      "publish": {
+        "p1": "The summary shows fields, nodes and edges plus the draft's save state.",
+        "p2": "On publish the server fully validates the graph (start/end, reachability, XOR conditions) and requires the title and labels in all four languages.",
+        "p3": "Publishing puts the version LIVE: applicants can submit requests immediately; exactly one version is live per request type.",
+        "p4": "Unsaved valid changes are saved automatically before publishing."
+      }
     }
   },
   "flow": {
@@ -130,6 +157,13 @@
         "zoomIn": "Zoom in",
         "zoomOut": "Zoom out",
         "fit": "Fit view"
+      },
+      "empty": {
+        "title": "How to build a workflow",
+        "step1": "Add a start node from the palette.",
+        "step2": "Add steps and connect them by dragging from output to input.",
+        "step3": "Add conditions to XOR branch outputs (variable == 'value').",
+        "paletteHint": "The node palette is on the left of the canvas."
       }
     }
   },
@@ -175,7 +209,6 @@
     "loading": "Loading …",
     "addField": "Add field",
     "fieldCount": "Fields",
-    "noFields": "No fields yet. Add the first field.",
     "key": "Field key",
     "type": "Type",
     "required": "Required",
@@ -211,6 +244,11 @@
       "generic": "Action failed.",
       "publishRejected": "Publish rejected:",
       "saveBeforePublish": "Unsaved changes are invalid and cannot be saved automatically — please save a valid state first."
+    },
+    "saveDisabledReason": "At least one field with a valid key is required.",
+    "emptyState": {
+      "title": "Add your first form field",
+      "body": "Fields define what applicants fill in. Each field needs a unique key and labels in four languages."
     }
   },
   "review": {
@@ -269,5 +307,104 @@
     "feedbackBody": "Please report accessibility barriers to the project maintainers via the public repository.",
     "preparationHeading": "Preparation of this Statement",
     "preparationBody": "This statement was prepared on 2026-05-28 and will be updated with each productive release."
+  },
+  "help": {
+    "title": "Help center",
+    "lead": "Step-by-step guides and guided tours for HR-Suite.",
+    "headerAria": "Open help center",
+    "guides": {
+      "title": "Guides by role",
+      "designer": {
+        "title": "HR designer: create and publish a request type",
+        "step1": "Open “Request types” and create the key and the title in all four languages via “New request type”.",
+        "step2": "Define the fields in the builder's “Form” step; each field needs a unique key.",
+        "step3": "Maintain the field labels in German, French, Italian and English — without complete translations the server rejects publishing.",
+        "step4": "Model the workflow in the “Flow” step: place the start node, add steps (form, approval, action), connect edges by dragging, place the end node.",
+        "step5": "Add conditions to XOR outputs in the form variable == 'value' (or !=); exactly one edge stays unconditioned as the default path.",
+        "step6": "Save as draft and check the summary in the “Publish” step.",
+        "step7": "Publish: the version goes LIVE and the workflow is deployed as a process."
+      },
+      "applicant": {
+        "title": "Applicants: submit and track a request",
+        "step1": "Open “My requests” and choose “New request”.",
+        "step2": "Select a published request type; the form appears automatically.",
+        "step3": "Fill in the fields and submit with “Create & submit”.",
+        "step4": "Track the status of your request in the list (e.g. Submitted, Completed).",
+        "step5": "You can submit or cancel drafts later."
+      },
+      "reviewer": {
+        "title": "Reviewers: check tasks and decide",
+        "step1": "Open “Tasks” — the open review tasks are listed there.",
+        "step2": "Open a task's request data via “Details”.",
+        "step3": "Add a comment if needed.",
+        "step4": "Decide with “Approve” or “Reject” — or complete the task.",
+        "step5": "The request then automatically receives the new status."
+      }
+    },
+    "tours": {
+      "title": "Guided tours",
+      "lead": "The tours highlight the most important elements directly in the interface.",
+      "startDashboard": "Start dashboard tour",
+      "startBuilder": "Start builder tour",
+      "builderHint": "The builder tour runs inside the builder: open a request type under “Request types” and start the tour via the “Start tour” button next to the steps."
+    }
+  },
+  "tour": {
+    "next": "Next",
+    "prev": "Back",
+    "done": "Done",
+    "progress": "{{current}} of {{total}}",
+    "dashboard": {
+      "welcome": {
+        "title": "Welcome to HR-Suite",
+        "desc": "This short tour shows the most important elements of the dashboard. You can leave at any time with Esc."
+      },
+      "search": {
+        "title": "Search modules",
+        "desc": "Filter the module cards live — the search covers title and description in the active language."
+      },
+      "favorite": {
+        "title": "Favorites",
+        "desc": "The star marks modules as favorites; the “Show only favorite modules” filter hides everything else."
+      },
+      "card": {
+        "title": "Open modules",
+        "desc": "Each card opens a module, e.g. the request types for HR designers; the chips show the typical roles."
+      },
+      "help": {
+        "title": "Help at any time",
+        "desc": "The question mark in the header leads to the help center with guides and these tours."
+      }
+    },
+    "builder": {
+      "stepper": {
+        "title": "Three steps to a request type",
+        "desc": "The builder walks through Form, Flow and Publish; you can switch between steps at any time."
+      },
+      "toolbar": {
+        "title": "Manage fields",
+        "desc": "Here you see the number of fields and add new ones."
+      },
+      "fieldcard": {
+        "title": "The field card",
+        "desc": "Per field you define key, type, required flag, multilingual labels and validation."
+      },
+      "flow": {
+        "title": "The flow step",
+        "desc": "Here you model the request's workflow as a graph."
+      },
+      "palette": {
+        "title": "Node palette",
+        "desc": "Add nodes with a click: start, form, approval, action, XOR, AND, end."
+      },
+      "canvas": {
+        "title": "Canvas",
+        "desc": "Arrange nodes by dragging and draw edges from output to input; the inspector on the right edits selection and edges."
+      },
+      "publish": {
+        "title": "Summary and publishing",
+        "desc": "Check fields, nodes and save state — “Publish” puts the request type LIVE."
+      }
+    }
   }
 }

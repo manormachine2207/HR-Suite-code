@@ -8,6 +8,33 @@
   white-space: nowrap;
 }
 
+// Header help entry (ADR-015): rendered inside the Oblique service-navigation
+// list (projected #obHeaderControl template), sized to match its siblings.
+.hr-header-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.4rem;
+  color: var(--ob-text-strong, #1f2d3d);
+
+  &:hover {
+    color: var(--ob-primary, #dc0018);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ob-primary, #dc0018);
+    outline-offset: 1px;
+  }
+
+  mat-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 1.5rem;
+  }
+}
+
 .hr-version-badge {
   font-size: 0.68rem;
   font-weight: 600;

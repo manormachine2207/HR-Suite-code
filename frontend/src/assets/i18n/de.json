@@ -41,6 +41,10 @@
       "aufgaben": {
         "title": "Aufgaben",
         "description": "Offene Aufgaben prüfen und Anträge entscheiden."
+      },
+      "hilfe": {
+        "title": "Hilfe",
+        "description": "Anleitungen und geführte Touren."
       }
     }
   },
@@ -92,6 +96,29 @@
       "stateDirty": "Ungespeicherte Änderungen",
       "stateNew": "Noch nicht gespeichert",
       "edit": "Bearbeiten"
+    },
+    "tourStart": "Tour starten",
+    "help": {
+      "toggle": "Wie funktioniert dieser Schritt?",
+      "form": {
+        "p1": "Definieren Sie die Felder, die Antragstellende beim Einreichen ausfüllen.",
+        "p2": "Der Feld-Schlüssel identifiziert ein Feld technisch und dient im Flow als Variablenname; er muss pro Formular eindeutig sein.",
+        "p3": "Beschriftungen sind mehrsprachig: Für die Veröffentlichung sind Deutsch, Französisch, Italienisch und Englisch Pflicht.",
+        "p4": "Speichern Sie zwischendurch als Entwurf — live geht der Antragstyp erst im Schritt «Veröffentlichen»."
+      },
+      "flow": {
+        "p1": "Modellieren Sie den Ablauf als Graph: Start, Formular, Genehmigung, Aktion, Verzweigung (XOR), Parallel (AND) und Ende.",
+        "p2": "Knoten fügen Sie über die Palette links hinzu; Kanten ziehen Sie vom rechten Ausgang eines Knotens zum linken Eingang des nächsten.",
+        "p3": "Ausgänge einer XOR-Verzweigung erhalten Bedingungen in der Form variable == 'wert' (oder !=); als Variable dient ein Feld-Schlüssel oder das Ergebnis einer Genehmigung.",
+        "p4": "Genau eine XOR-Kante bleibt ohne Bedingung — sie ist der Default-Pfad, wenn keine Bedingung zutrifft.",
+        "p5": "Hinweise im Inspector rechts zeigen offene Punkte; beim Veröffentlichen prüft der Server den Graphen abschliessend."
+      },
+      "publish": {
+        "p1": "Die Zusammenfassung zeigt Felder, Knoten und Kanten sowie den Speicherstand des Entwurfs.",
+        "p2": "Beim Veröffentlichen prüft der Server den Graphen vollständig (Start/Ende, Erreichbarkeit, XOR-Bedingungen) und verlangt Titel und Beschriftungen in allen vier Sprachen.",
+        "p3": "Veröffentlichen schaltet die Version LIVE: Antragstellende können sofort Anträge stellen; pro Antragstyp ist genau eine Version live.",
+        "p4": "Ungespeicherte, gültige Änderungen werden vor dem Veröffentlichen automatisch gespeichert."
+      }
     }
   },
   "flow": {
@@ -130,6 +157,13 @@
         "zoomIn": "Vergrössern",
         "zoomOut": "Verkleinern",
         "fit": "Ansicht einpassen"
+      },
+      "empty": {
+        "title": "So bauen Sie einen Ablauf",
+        "step1": "Start-Knoten aus der Palette hinzufügen.",
+        "step2": "Schritte ergänzen und per Drag von Ausgang zu Eingang verbinden.",
+        "step3": "Ausgänge von XOR-Verzweigungen mit Bedingungen versehen (variable == 'wert').",
+        "paletteHint": "Die Knoten-Palette finden Sie links neben dem Canvas."
       }
     }
   },
@@ -175,7 +209,6 @@
     "loading": "Wird geladen …",
     "addField": "Feld hinzufügen",
     "fieldCount": "Felder",
-    "noFields": "Noch keine Felder. Füge das erste Feld hinzu.",
     "key": "Feld-Schlüssel",
     "type": "Typ",
     "required": "Pflichtfeld",
@@ -211,6 +244,11 @@
       "generic": "Aktion fehlgeschlagen.",
       "publishRejected": "Veröffentlichen abgelehnt:",
       "saveBeforePublish": "Ungespeicherte Änderungen sind ungültig und können nicht automatisch gespeichert werden — bitte zuerst gültig speichern."
+    },
+    "saveDisabledReason": "Mindestens ein Feld mit gültigem Schlüssel erforderlich.",
+    "emptyState": {
+      "title": "Fügen Sie Ihr erstes Formularfeld hinzu",
+      "body": "Felder definieren, was Antragstellende ausfüllen. Jedes Feld braucht einen eindeutigen Schlüssel und Beschriftungen in vier Sprachen."
     }
   },
   "review": {
@@ -269,5 +307,104 @@
     "feedbackBody": "Bitte melden Sie Barrieren an die Projektverantwortlichen über das öffentliche Repository.",
     "preparationHeading": "Erstellung dieser Erklärung",
     "preparationBody": "Diese Erklärung wurde am 28.05.2026 erstellt und wird mit jeder produktiven Auslieferung aktualisiert."
+  },
+  "help": {
+    "title": "Hilfe-Center",
+    "lead": "Schritt-für-Schritt-Anleitungen und geführte Touren für die HR-Suite.",
+    "headerAria": "Hilfe-Center öffnen",
+    "guides": {
+      "title": "Anleitungen nach Rolle",
+      "designer": {
+        "title": "HR-Designer: Antragstyp anlegen und veröffentlichen",
+        "step1": "Öffnen Sie «Antragstypen» und legen Sie über «Neuer Antragstyp» den Schlüssel und den Titel in allen vier Sprachen an.",
+        "step2": "Definieren Sie im Builder-Schritt «Formular» die Felder; jedes Feld braucht einen eindeutigen Schlüssel.",
+        "step3": "Pflegen Sie die Feld-Beschriftungen in Deutsch, Französisch, Italienisch und Englisch — ohne vollständige Übersetzungen lehnt der Server die Veröffentlichung ab.",
+        "step4": "Modellieren Sie im Schritt «Flow» den Ablauf: Start-Knoten setzen, Schritte (Formular, Genehmigung, Aktion) ergänzen, Kanten per Drag verbinden, End-Knoten setzen.",
+        "step5": "Versehen Sie XOR-Ausgänge mit Bedingungen der Form variable == 'wert' (oder !=); genau eine Kante bleibt als Default-Pfad ohne Bedingung.",
+        "step6": "Speichern Sie als Entwurf und kontrollieren Sie die Zusammenfassung im Schritt «Veröffentlichen».",
+        "step7": "Veröffentlichen Sie: Die Version geht LIVE, und der Ablauf wird als Prozess bereitgestellt."
+      },
+      "applicant": {
+        "title": "Antragstellende: Antrag stellen und verfolgen",
+        "step1": "Öffnen Sie «Meine Anträge» und wählen Sie «Neuer Antrag».",
+        "step2": "Wählen Sie einen veröffentlichten Antragstyp; das Formular erscheint automatisch.",
+        "step3": "Füllen Sie die Felder aus und reichen Sie mit «Erstellen & Einreichen» ein.",
+        "step4": "Verfolgen Sie den Status Ihres Antrags in der Liste (z. B. Eingereicht, Abgeschlossen).",
+        "step5": "Entwürfe können Sie später einreichen oder stornieren."
+      },
+      "reviewer": {
+        "title": "Reviewer: Aufgaben prüfen und entscheiden",
+        "step1": "Öffnen Sie «Aufgaben» — dort stehen die offenen Review-Aufgaben.",
+        "step2": "Öffnen Sie über «Details» die Antragsdaten einer Aufgabe.",
+        "step3": "Erfassen Sie bei Bedarf einen Kommentar.",
+        "step4": "Entscheiden Sie mit «Genehmigen» oder «Ablehnen» — bzw. schliessen Sie die Aufgabe ab.",
+        "step5": "Der Antrag erhält danach automatisch den neuen Status."
+      }
+    },
+    "tours": {
+      "title": "Geführte Touren",
+      "lead": "Die Touren markieren die wichtigsten Elemente direkt in der Oberfläche.",
+      "startDashboard": "Dashboard-Tour starten",
+      "startBuilder": "Builder-Tour starten",
+      "builderHint": "Die Builder-Tour läuft im Builder selbst: Öffnen Sie unter «Antragstypen» einen Antragstyp und starten Sie die Tour über den Knopf «Tour starten» neben den Schritten."
+    }
+  },
+  "tour": {
+    "next": "Weiter",
+    "prev": "Zurück",
+    "done": "Fertig",
+    "progress": "{{current}} von {{total}}",
+    "dashboard": {
+      "welcome": {
+        "title": "Willkommen in der HR-Suite",
+        "desc": "Diese kurze Tour zeigt die wichtigsten Elemente des Dashboards. Sie können jederzeit mit Esc abbrechen."
+      },
+      "search": {
+        "title": "Module durchsuchen",
+        "desc": "Filtern Sie die Modulkarten live — die Suche berücksichtigt Titel und Beschreibung in der aktiven Sprache."
+      },
+      "favorite": {
+        "title": "Favoriten",
+        "desc": "Mit dem Stern markieren Sie Module als Favoriten; der Filter «Nur favorisierte Module anzeigen» blendet alles andere aus."
+      },
+      "card": {
+        "title": "Module öffnen",
+        "desc": "Jede Karte öffnet ein Modul, z. B. die Antragstypen für HR-Designer; die Chips zeigen die typischen Rollen."
+      },
+      "help": {
+        "title": "Hilfe jederzeit",
+        "desc": "Das Fragezeichen im Kopfbereich führt zum Hilfe-Center mit Anleitungen und diesen Touren."
+      }
+    },
+    "builder": {
+      "stepper": {
+        "title": "Drei Schritte zum Antragstyp",
+        "desc": "Der Builder führt durch Formular, Flow und Veröffentlichen; Sie können jederzeit zwischen den Schritten wechseln."
+      },
+      "toolbar": {
+        "title": "Felder verwalten",
+        "desc": "Hier sehen Sie die Anzahl der Felder und fügen neue hinzu."
+      },
+      "fieldcard": {
+        "title": "Die Feld-Karte",
+        "desc": "Pro Feld definieren Sie Schlüssel, Typ, Pflicht, mehrsprachige Beschriftungen und Validierung."
+      },
+      "flow": {
+        "title": "Der Flow-Schritt",
+        "desc": "Hier modellieren Sie den Ablauf des Antrags als Graph."
+      },
+      "palette": {
+        "title": "Knoten-Palette",
+        "desc": "Fügen Sie per Klick Knoten hinzu: Start, Formular, Genehmigung, Aktion, XOR, AND, Ende."
+      },
+      "canvas": {
+        "title": "Canvas",
+        "desc": "Ordnen Sie Knoten per Drag an und ziehen Sie Kanten von Ausgang zu Eingang; der Inspector rechts bearbeitet Auswahl und Kanten."
+      },
+      "publish": {
+        "title": "Zusammenfassung und Veröffentlichung",
+        "desc": "Prüfen Sie Felder, Knoten und Speicherstand — «Veröffentlichen» schaltet den Antragstyp LIVE."
+      }
+    }
   }
 }
