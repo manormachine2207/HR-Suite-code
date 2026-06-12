@@ -42,6 +42,11 @@
         "title": "Aufgaben",
         "description": "Offene Aufgaben prüfen und Anträge entscheiden."
       },
+      "lohnrechner": {
+        "title": "Lohnrechner",
+        "description": "Brutto-Netto-Simulation mit Richtwerten 2025 — rein im Browser, ohne Speicherung.",
+        "badge": "Simulation"
+      },
       "hilfe": {
         "title": "Hilfe",
         "description": "Anleitungen und geführte Touren."
@@ -345,6 +350,51 @@
     "outcome": {
       "approve": "Genehmigen",
       "reject": "Ablehnen"
+    }
+  },
+  "lohnrechner": {
+    "title": "Lohnrechner",
+    "lead": "Simulieren Sie Brutto → Netto mit den Schweizer Sozialabzügen — die Berechnung läuft vollständig in Ihrem Browser.",
+    "banner": "Unverbindliche Simulation mit Richtwerten 2025 — keine Rechtsverbindlichkeit, keine Speicherung der Eingaben.",
+    "form": {
+      "legend": "Ihre Angaben",
+      "alter": "Alter",
+      "kanton": "Kanton",
+      "brutto": "Jahresbrutto (CHF, bei 100 %)",
+      "bruttoHint": "Bruttolohn pro Jahr, bezogen auf ein volles Pensum.",
+      "pensum": "Pensum (%)",
+      "pensumHint": "Das Pensum skaliert das Jahresbrutto linear.",
+      "qst": "Quellensteuer einrechnen",
+      "qstHint": "Grobe Schätzung je Kanton auf dem Netto nach Sozialabzügen."
+    },
+    "kanton": {
+      "BE": "Bern",
+      "ZH": "Zürich",
+      "GE": "Genf",
+      "VD": "Waadt",
+      "BS": "Basel-Stadt"
+    },
+    "result": {
+      "title": "Ihr Ergebnis",
+      "nettoMonat": "Netto pro Monat",
+      "nettoJahr": "Netto pro Jahr",
+      "bruttoEffektiv": "Effektives Jahresbrutto",
+      "position": "Abzug",
+      "satz": "Satz",
+      "jahr": "CHF/Jahr",
+      "monat": "CHF/Monat",
+      "total": "Total Abzüge",
+      "koordLohn": "Koordinierter Lohn (BVG)",
+      "qstBasis": "Quellensteuer-Basis (Netto nach Sozialabzügen)",
+      "bvgU25": "Unter 25 Jahren fällt kein BVG-Sparbeitrag an."
+    },
+    "position": {
+      "ahvIvEo": "AHV/IV/EO",
+      "alv": "ALV",
+      "nbu": "NBU (Nichtberufsunfall)",
+      "ktg": "KTG (Krankentaggeld)",
+      "bvg": "BVG (Sparbeitrag AN)",
+      "qst": "Quellensteuer"
     }
   },
   "status": {

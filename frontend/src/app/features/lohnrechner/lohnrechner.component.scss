@@ -1,0 +1,258 @@
+/* Lohnrechner (ADR-018) — gleiche visuelle Sprache wie home/antragstyp-create:
+   Token-Bridge `var(--bs-*, fallback)` (BDR-008), Karten, geführte Eingabe links,
+   prominentes Ergebnis rechts; responsive untereinander. */
+
+.hr-lohnrechner {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.hr-head {
+  h1 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--bs-emphasis-color, #1f2d3d);
+  }
+
+  .hr-lead {
+    margin: 0.35rem 0 0;
+    max-width: 44rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+}
+
+/* Simulations-Hinweis (ADR-018): bewusst auffällig, aber kein Fehler-Rot. */
+.hr-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--bs-warning-border-subtle, #f0d48a);
+  border-radius: 0.5rem;
+  background: var(--bs-warning-bg-subtle, #fdf6e3);
+  color: var(--bs-warning-text-emphasis, #6e4f00);
+
+  mat-icon {
+    flex: 0 0 auto;
+    width: 1.25rem;
+    height: 1.25rem;
+    font-size: 1.25rem;
+    margin-top: 0.1rem;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.45;
+    font-weight: 500;
+  }
+}
+
+/* Eingabe links (schmal), Ergebnis rechts (breit); mobil untereinander. */
+.hr-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+
+  @media (max-width: 52rem) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.hr-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--bs-border-color, #e1e6eb);
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg, #fff);
+  box-shadow: 0 1px 2px rgba(31, 45, 61, 0.05);
+}
+
+.hr-section__head {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+/* --- Eingabe-Karte (gleiche Control-Metrik wie der Builder) -------------------- */
+.hr-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+
+  &__label {
+    color: var(--bs-secondary-color, #5a6b7b);
+    font-weight: 500;
+  }
+
+  &__hint {
+    font-size: 0.78rem;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--bs-tertiary-color, #8a98a6);
+  }
+
+  input,
+  select {
+    box-sizing: border-box;
+    min-height: var(--hr-control-h, 2.25rem);
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--bs-border-color, #ced6df);
+    border-radius: 0.35rem;
+    font-size: 0.92rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #1f2d3d);
+
+    &:focus {
+      outline: 2px solid var(--bs-primary, #1f6feb);
+      outline-offset: 1px;
+    }
+  }
+}
+
+.hr-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--bs-body-color, #1f2d3d);
+  cursor: pointer;
+
+  input[type='checkbox'] {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.15rem;
+    flex: 0 0 auto;
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+}
+
+/* --- Ergebnis-Karte -------------------------------------------------------------- */
+.hr-netto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.75rem;
+}
+
+.hr-netto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--bs-border-color, #e1e6eb);
+  border-radius: 0.5rem;
+  background: var(--bs-tertiary-bg, #f6f8fa);
+
+  &--monat {
+    background: var(--bs-primary-bg-subtle, #e7f0fe);
+    border-color: var(--bs-primary-border-subtle, #b9d3f8);
+
+    .hr-netto__value {
+      color: var(--bs-primary-text-emphasis, #154a8c);
+    }
+  }
+
+  &__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+
+  &__value {
+    font-size: 1.55rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--bs-emphasis-color, #1f2d3d);
+  }
+
+  &__chf {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+}
+
+.hr-brutto-line {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--bs-secondary-color, #5a6b7b);
+
+  strong {
+    color: var(--bs-body-color, #1f2d3d);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.hr-abzug-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+
+  th,
+  td {
+    padding: 0.45rem 0.5rem;
+    border-bottom: 1px solid var(--bs-border-color, #edf1f5);
+    text-align: left;
+  }
+
+  thead th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+
+  tbody th[scope='row'] {
+    font-weight: 500;
+    color: var(--bs-body-color, #1f2d3d);
+  }
+
+  .hr-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .hr-total {
+    th,
+    td {
+      border-bottom: none;
+      border-top: 2px solid var(--bs-border-color, #ced6df);
+      font-weight: 700;
+      color: var(--bs-emphasis-color, #1f2d3d);
+    }
+  }
+}
+
+.hr-notes {
+  margin: 0;
+  padding-left: 1.1rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--bs-secondary-color, #5a6b7b);
+
+  li + li {
+    margin-top: 0.15rem;
+  }
+}

@@ -42,6 +42,11 @@
         "title": "Tasks",
         "description": "Review open tasks and decide on requests."
       },
+      "lohnrechner": {
+        "title": "Salary calculator",
+        "description": "Gross-to-net simulation with 2025 reference rates — browser-only, nothing stored.",
+        "badge": "Simulation"
+      },
       "hilfe": {
         "title": "Help",
         "description": "Guides and guided tours."
@@ -345,6 +350,51 @@
     "outcome": {
       "approve": "Approve",
       "reject": "Reject"
+    }
+  },
+  "lohnrechner": {
+    "title": "Salary calculator",
+    "lead": "Simulate gross → net with the Swiss social deductions — the calculation runs entirely in your browser.",
+    "banner": "Non-binding simulation using 2025 reference rates — no legal validity, your inputs are never stored.",
+    "form": {
+      "legend": "Your details",
+      "alter": "Age",
+      "kanton": "Canton",
+      "brutto": "Annual gross salary (CHF, at 100 %)",
+      "bruttoHint": "Gross annual salary for a full workload.",
+      "pensum": "Workload (%)",
+      "pensumHint": "The workload scales the gross salary linearly.",
+      "qst": "Include withholding tax",
+      "qstHint": "Rough estimate per canton on the net amount after social deductions."
+    },
+    "kanton": {
+      "BE": "Bern",
+      "ZH": "Zurich",
+      "GE": "Geneva",
+      "VD": "Vaud",
+      "BS": "Basel-Stadt"
+    },
+    "result": {
+      "title": "Your result",
+      "nettoMonat": "Net per month",
+      "nettoJahr": "Net per year",
+      "bruttoEffektiv": "Effective annual gross",
+      "position": "Deduction",
+      "satz": "Rate",
+      "jahr": "CHF/year",
+      "monat": "CHF/month",
+      "total": "Total deductions",
+      "koordLohn": "Coordinated salary (BVG)",
+      "qstBasis": "Withholding-tax base (net after social deductions)",
+      "bvgU25": "No BVG retirement credits are due under the age of 25."
+    },
+    "position": {
+      "ahvIvEo": "AHV/IV/EO (OASI)",
+      "alv": "ALV (unemployment insurance)",
+      "nbu": "NBU (non-occupational accident)",
+      "ktg": "KTG (daily sickness benefits)",
+      "bvg": "BVG (employee share)",
+      "qst": "Withholding tax"
     }
   },
   "status": {

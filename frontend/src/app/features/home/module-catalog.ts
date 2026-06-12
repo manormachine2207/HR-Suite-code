@@ -22,6 +22,12 @@ export interface ModuleCardDef {
   readonly route: string;
   /** Roles that use this module; [] = everyone. Shown as chips, never used to hide. */
   readonly roles: readonly string[];
+  /**
+   * Optional i18n key of a maturity badge that replaces the default footer tag
+   * ('home.tag'). Used e.g. by the Lohnrechner to flag itself as "Simulation"
+   * (ADR-018) — absent = regular module.
+   */
+  readonly badgeKey?: string;
 }
 
 export const MODULE_CATALOG: readonly ModuleCardDef[] = [
@@ -48,6 +54,17 @@ export const MODULE_CATALOG: readonly ModuleCardDef[] = [
     descriptionKey: 'home.modules.aufgaben.description',
     route: '/aufgaben',
     roles: ['hr-reviewer', 'tenant-admin'],
+  },
+  {
+    // Lohnrechner (ADR-018): client-side simulation for everyone — the badge marks
+    // its maturity level "Simulation" (Richtwerte 2025, no legal validity).
+    id: 'lohnrechner',
+    icon: 'calculator',
+    titleKey: 'home.modules.lohnrechner.title',
+    descriptionKey: 'home.modules.lohnrechner.description',
+    route: '/lohnrechner',
+    roles: [],
+    badgeKey: 'home.modules.lohnrechner.badge',
   },
   {
     // Help center (ADR-015 Ebene 2) — for everyone, hence roles: [].

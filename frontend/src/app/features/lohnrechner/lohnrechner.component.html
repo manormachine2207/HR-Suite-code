@@ -1,0 +1,134 @@
+<section class="hr-lohnrechner" aria-labelledby="lohnrechner-title">
+  <header class="hr-head">
+    <h1 id="lohnrechner-title">{{ 'lohnrechner.title' | translate }}</h1>
+    <p class="hr-lead">{{ 'lohnrechner.lead' | translate }}</p>
+  </header>
+
+  <!-- ADR-018: deutlicher Simulations-Hinweis — Richtwerte, keine Rechtsverbindlichkeit,
+       keine Speicherung. role="note" statt alert: dauerhafte Information, kein Fehler. -->
+  <div class="hr-banner" role="note">
+    <mat-icon svgIcon="info_circle" aria-hidden="true" />
+    <p>{{ 'lohnrechner.banner' | translate }}</p>
+  </div>
+
+  <div class="hr-layout">
+    <!-- Eingabe-Karte: live-Neuberechnung bei jeder Änderung, kein Submit nötig. -->
+    <form class="hr-card hr-form-card" (submit)="$event.preventDefault()"
+          [attr.aria-label]="'lohnrechner.form.legend' | translate">
+      <h2 class="hr-section__head">{{ 'lohnrechner.form.legend' | translate }}</h2>
+
+      <label class="hr-field" for="lr-alter">
+        <span class="hr-field__label">{{ 'lohnrechner.form.alter' | translate }}</span>
+        <input id="lr-alter" type="number" min="15" max="70" step="1" inputmode="numeric"
+               [value]="alter()" (input)="alter.set(readNumber($event))" />
+      </label>
+
+      <label class="hr-field" for="lr-kanton">
+        <span class="hr-field__label">{{ 'lohnrechner.form.kanton' | translate }}</span>
+        <select id="lr-kanton" [value]="kanton()" (change)="kanton.set(readKanton($event))">
+          @for (k of kantone; track k) {
+            <option [value]="k">{{ k }} — {{ 'lohnrechner.kanton.' + k | translate }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="hr-field" for="lr-brutto">
+        <span class="hr-field__label">{{ 'lohnrechner.form.brutto' | translate }}</span>
+        <input id="lr-brutto" type="number" min="0" step="500" inputmode="decimal"
+               [value]="jahresbrutto()" (input)="jahresbrutto.set(readNumber($event))" />
+        <small class="hr-field__hint">{{ 'lohnrechner.form.bruttoHint' | translate }}</small>
+      </label>
+
+      <label class="hr-field" for="lr-pensum">
+        <span class="hr-field__label">{{ 'lohnrechner.form.pensum' | translate }}</span>
+        <input id="lr-pensum" type="number" min="0" max="100" step="5" inputmode="numeric"
+               [value]="pensum()" (input)="pensum.set(readNumber($event))" />
+        <small class="hr-field__hint">{{ 'lohnrechner.form.pensumHint' | translate }}</small>
+      </label>
+
+      <label class="hr-check" for="lr-qst">
+        <input id="lr-qst" type="checkbox"
+               [checked]="mitQuellensteuer()"
+               (change)="mitQuellensteuer.set($any($event.target).checked)" />
+        <span>
+          {{ 'lohnrechner.form.qst' | translate }}
+          <small class="hr-field__hint">{{ 'lohnrechner.form.qstHint' | translate }}</small>
+        </span>
+      </label>
+    </form>
+
+    <!-- Ergebnis-Karte: Netto prominent, Abzugstabelle darunter. aria-live, damit
+         Screenreader die Live-Neuberechnung mitbekommen (polite, keine Unterbrechung). -->
+    <div class="hr-card hr-result-card" aria-live="polite">
+      <h2 class="hr-section__head">{{ 'lohnrechner.result.title' | translate }}</h2>
+
+      <div class="hr-netto-grid">
+        <div class="hr-netto hr-netto--monat">
+          <span class="hr-netto__label">{{ 'lohnrechner.result.nettoMonat' | translate }}</span>
+          <span class="hr-netto__value">
+            {{ ergebnis().nettoMonat | number:'1.2-2':numberLocale() }}
+            <span class="hr-netto__chf">CHF</span>
+          </span>
+        </div>
+        <div class="hr-netto">
+          <span class="hr-netto__label">{{ 'lohnrechner.result.nettoJahr' | translate }}</span>
+          <span class="hr-netto__value">
+            {{ ergebnis().nettoJahr | number:'1.2-2':numberLocale() }}
+            <span class="hr-netto__chf">CHF</span>
+          </span>
+        </div>
+      </div>
+
+      <p class="hr-brutto-line">
+        {{ 'lohnrechner.result.bruttoEffektiv' | translate }}:
+        <strong>{{ ergebnis().bruttoJahr | number:'1.2-2':numberLocale() }} CHF</strong>
+      </p>
+
+      <table class="hr-abzug-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'lohnrechner.result.position' | translate }}</th>
+            <th scope="col" class="hr-num">{{ 'lohnrechner.result.satz' | translate }}</th>
+            <th scope="col" class="hr-num">{{ 'lohnrechner.result.jahr' | translate }}</th>
+            <th scope="col" class="hr-num">{{ 'lohnrechner.result.monat' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of ergebnis().abzuege; track p.key) {
+            <tr>
+              <th scope="row">{{ 'lohnrechner.position.' + p.key | translate }}</th>
+              <td class="hr-num">{{ p.satzProzent | number:'1.1-2':numberLocale() }} %</td>
+              <td class="hr-num">{{ p.betragJahr | number:'1.2-2':numberLocale() }}</td>
+              <td class="hr-num">{{ p.betragMonat | number:'1.2-2':numberLocale() }}</td>
+            </tr>
+          }
+        </tbody>
+        <tfoot>
+          <tr class="hr-total">
+            <th scope="row" colspan="2">{{ 'lohnrechner.result.total' | translate }}</th>
+            <td class="hr-num">{{ ergebnis().totalAbzuegeJahr | number:'1.2-2':numberLocale() }}</td>
+            <td class="hr-num">{{ ergebnis().totalAbzuegeMonat | number:'1.2-2':numberLocale() }}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <ul class="hr-notes">
+        @if (ergebnis().koordinierterLohn > 0) {
+          <li>
+            {{ 'lohnrechner.result.koordLohn' | translate }}:
+            {{ ergebnis().koordinierterLohn | number:'1.2-2':numberLocale() }} CHF
+          </li>
+        }
+        @if (alter() < 25) {
+          <li>{{ 'lohnrechner.result.bvgU25' | translate }}</li>
+        }
+        @if (mitQuellensteuer()) {
+          <li>
+            {{ 'lohnrechner.result.qstBasis' | translate }}:
+            {{ ergebnis().nettoVorQstJahr | number:'1.2-2':numberLocale() }} CHF
+          </li>
+        }
+      </ul>
+    </div>
+  </div>
+</section>
