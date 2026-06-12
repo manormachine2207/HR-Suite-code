@@ -8,7 +8,8 @@
     "conformite": "Erklärung zur Barrierefreiheit",
     "language": "Sprache",
     "antragstypen": "Antragstypen",
-    "antraege": "Meine Anträge"
+    "antraege": "Meine Anträge",
+    "aufgaben": "Aufgaben"
   },
   "footer": {
     "legal": "Rechtliches",
@@ -152,6 +153,38 @@
       "saveBeforePublish": "Ungespeicherte Änderungen sind ungültig und können nicht automatisch gespeichert werden — bitte zuerst gültig speichern."
     }
   },
+  "review": {
+    "listTitle": "Offene Aufgaben",
+    "lead": "Übersicht der offenen Review-Aufgaben.",
+    "loading": "Wird geladen …",
+    "empty": "Keine offenen Aufgaben.",
+    "loadError": "Aufgaben konnten nicht geladen werden.",
+    "forbidden": "Sie haben keine Berechtigung, Aufgaben einzusehen.",
+    "colType": "Antragstyp",
+    "colStep": "Schritt",
+    "colApplicant": "Antragsteller",
+    "colStatus": "Antrag-Status",
+    "colReceived": "Eingegangen",
+    "colActions": "Aktionen",
+    "showDetail": "Details",
+    "hideDetail": "Ausblenden",
+    "detailTitle": "Aufgabe",
+    "payload": "Antragsdaten",
+    "payloadEmpty": "Keine Antragsdaten vorhanden.",
+    "colKey": "Feld",
+    "colValue": "Wert",
+    "comment": "Kommentar",
+    "completeAction": "Abschliessen",
+    "completing": "Wird abgeschlossen …",
+    "completeSuccess": "Aufgabe abgeschlossen. Neuer Antrag-Status:",
+    "completeError": "Aufgabe konnte nicht abgeschlossen werden.",
+    "loadDetailError": "Aufgabe konnte nicht geladen werden.",
+    "close": "Schliessen",
+    "outcome": {
+      "approve": "Genehmigen",
+      "reject": "Ablehnen"
+    }
+  },
   "status": {
     "DRAFT": "Entwurf",
     "LIVE": "Aktiv",
@@ -161,7 +194,8 @@
     "IN_REVIEW": "In Prüfung",
     "APPROVED": "Genehmigt",
     "REJECTED": "Abgelehnt",
-    "CANCELLED": "Storniert"
+    "CANCELLED": "Storniert",
+    "COMPLETED": "Abgeschlossen"
   },
   "errors": {
     "notFound": "Seite nicht gefunden",

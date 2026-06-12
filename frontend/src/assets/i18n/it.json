@@ -8,7 +8,8 @@
     "conformite": "Dichiarazione di accessibilità",
     "language": "Lingua",
     "antragstypen": "Tipi di richiesta",
-    "antraege": "Le mie richieste"
+    "antraege": "Le mie richieste",
+    "aufgaben": "Compiti"
   },
   "footer": {
     "legal": "Note legali",
@@ -152,6 +153,38 @@
       "saveBeforePublish": "Le modifiche non salvate non sono valide e non possono essere salvate automaticamente — salvare prima uno stato valido."
     }
   },
+  "review": {
+    "listTitle": "Compiti aperti",
+    "lead": "Panoramica dei compiti di revisione aperti.",
+    "loading": "Caricamento …",
+    "empty": "Nessun compito aperto.",
+    "loadError": "Impossibile caricare i compiti.",
+    "forbidden": "Non si dispone dell'autorizzazione per consultare i compiti.",
+    "colType": "Tipo di richiesta",
+    "colStep": "Fase",
+    "colApplicant": "Richiedente",
+    "colStatus": "Stato della richiesta",
+    "colReceived": "Ricevuta il",
+    "colActions": "Azioni",
+    "showDetail": "Dettagli",
+    "hideDetail": "Nascondi",
+    "detailTitle": "Compito",
+    "payload": "Dati della richiesta",
+    "payloadEmpty": "Nessun dato della richiesta disponibile.",
+    "colKey": "Campo",
+    "colValue": "Valore",
+    "comment": "Commento",
+    "completeAction": "Concludere",
+    "completing": "Conclusione in corso …",
+    "completeSuccess": "Compito concluso. Nuovo stato della richiesta:",
+    "completeError": "Impossibile concludere il compito.",
+    "loadDetailError": "Impossibile caricare il compito.",
+    "close": "Chiudi",
+    "outcome": {
+      "approve": "Approvare",
+      "reject": "Respingere"
+    }
+  },
   "status": {
     "DRAFT": "Bozza",
     "LIVE": "Attivo",
@@ -161,7 +194,8 @@
     "IN_REVIEW": "In esame",
     "APPROVED": "Approvata",
     "REJECTED": "Respinta",
-    "CANCELLED": "Annullata"
+    "CANCELLED": "Annullata",
+    "COMPLETED": "Concluso"
   },
   "errors": {
     "notFound": "Pagina non trovata",
