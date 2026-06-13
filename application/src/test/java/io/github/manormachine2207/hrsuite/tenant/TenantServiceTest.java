@@ -66,4 +66,57 @@ class TenantServiceTest {
         assertThatThrownBy(() -> service.findById(id))
                 .isInstanceOf(TenantNotFoundException.class);
     }
+
+    // ---- changeStatus (ADR-019 Stufe 1: Mandanten-Status verwalten) ----------
+
+    private Tenant tenant(TenantStatus status) {
+        return new Tenant(UUID.randomUUID(), "BIT", Map.of("de", "BIT"), "bit", status, "de");
+    }
+
+    @Test
+    void changeStatusSuspendsActiveTenant() {
+        Tenant t = tenant(TenantStatus.ACTIVE);
+        when(repository.findById(t.getId())).thenReturn(Optional.of(t));
+        when(repository.save(any(Tenant.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Tenant result = service.changeStatus(t.getId(), TenantStatus.SUSPENDED);
+
+        assertThat(result.getStatus()).isEqualTo(TenantStatus.SUSPENDED);
+    }
+
+    @Test
+    void changeStatusReactivatesSuspendedTenant() {
+        Tenant t = tenant(TenantStatus.SUSPENDED);
+        when(repository.findById(t.getId())).thenReturn(Optional.of(t));
+        when(repository.save(any(Tenant.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        assertThat(service.changeStatus(t.getId(), TenantStatus.ACTIVE).getStatus())
+                .isEqualTo(TenantStatus.ACTIVE);
+    }
+
+    @Test
+    void archivedTenantIsTerminalAndRejectsReactivation() {
+        Tenant t = tenant(TenantStatus.ARCHIVED);
+        when(repository.findById(t.getId())).thenReturn(Optional.of(t));
+
+        assertThatThrownBy(() -> service.changeStatus(t.getId(), TenantStatus.ACTIVE))
+                .isInstanceOf(TenantExceptions.IllegalTransition.class);
+    }
+
+    @Test
+    void changeStatusToSameStateIsRejected() {
+        Tenant t = tenant(TenantStatus.ACTIVE);
+        when(repository.findById(t.getId())).thenReturn(Optional.of(t));
+
+        assertThatThrownBy(() -> service.changeStatus(t.getId(), TenantStatus.ACTIVE))
+                .isInstanceOf(TenantExceptions.IllegalTransition.class);
+    }
+
+    @Test
+    void changeStatusOfMissingTenantIs404() {
+        UUID id = UUID.randomUUID();
+        when(repository.findById(id)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.changeStatus(id, TenantStatus.SUSPENDED))
+                .isInstanceOf(TenantNotFoundException.class);
+    }
 }

@@ -47,4 +47,12 @@ public class TenantService {
     public Tenant findById(UUID id) {
         return repository.findById(id).orElseThrow(() -> new TenantNotFoundException(id));
     }
+
+    /** Changes a tenant's lifecycle status (ADR-019 Stufe 1); 404 if missing, 422 on illegal transition. */
+    @Transactional
+    public Tenant changeStatus(UUID id, TenantStatus target) {
+        Tenant tenant = repository.findById(id).orElseThrow(() -> new TenantNotFoundException(id));
+        tenant.changeStatus(target);
+        return repository.save(tenant);
+    }
 }

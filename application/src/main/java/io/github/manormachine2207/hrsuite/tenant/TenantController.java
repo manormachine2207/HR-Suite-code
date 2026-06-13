@@ -1,10 +1,12 @@
 package io.github.manormachine2207.hrsuite.tenant;
 
+import io.github.manormachine2207.hrsuite.tenant.dto.ChangeTenantStatusRequest;
 import io.github.manormachine2207.hrsuite.tenant.dto.CreateTenantRequest;
 import io.github.manormachine2207.hrsuite.tenant.dto.TenantResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,7 +42,14 @@ public class TenantController {
     }
 
     @GetMapping("/{id}")
-    public TenantResponse get(@PathVariable UUID id) {
+    public TenantResponse get(@PathVariable("id") UUID id) {
         return TenantResponse.from(service.findById(id));
+    }
+
+    /** Mandanten-Lebenszyklus verwalten (ADR-019 Stufe 1); platform-admin via SecurityConfig. */
+    @PatchMapping("/{id}/status")
+    public TenantResponse changeStatus(@PathVariable("id") UUID id,
+                                       @Valid @RequestBody ChangeTenantStatusRequest request) {
+        return TenantResponse.from(service.changeStatus(id, request.status()));
     }
 }

@@ -65,6 +65,27 @@ public class Tenant {
         this.defaultLocale = defaultLocale;
     }
 
+    /**
+     * Legal status transitions (ADR-019 Stufe 1). ARCHIVED is terminal; ONBOARDING
+     * activates; ACTIVE/SUSPENDED toggle; any non-archived tenant can be archived.
+     * A no-op (same status) is rejected so the caller gets an explicit 422, not a
+     * silent success.
+     */
+    private static final java.util.Map<TenantStatus, java.util.Set<TenantStatus>> ALLOWED =
+            java.util.Map.of(
+                    TenantStatus.ONBOARDING, java.util.Set.of(TenantStatus.ACTIVE, TenantStatus.ARCHIVED),
+                    TenantStatus.ACTIVE, java.util.Set.of(TenantStatus.SUSPENDED, TenantStatus.ARCHIVED),
+                    TenantStatus.SUSPENDED, java.util.Set.of(TenantStatus.ACTIVE, TenantStatus.ARCHIVED),
+                    TenantStatus.ARCHIVED, java.util.Set.of());
+
+    /** Applies a status transition, enforcing the allowed-transition matrix. */
+    public void changeStatus(TenantStatus target) {
+        if (!ALLOWED.getOrDefault(this.status, java.util.Set.of()).contains(target)) {
+            throw new TenantExceptions.IllegalTransition(this.status, target);
+        }
+        this.status = target;
+    }
+
     @PrePersist
     void onCreate() {
         OffsetDateTime now = OffsetDateTime.now();
