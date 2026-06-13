@@ -64,6 +64,13 @@ export const routes: Routes = [
       import('./features/lohnrechner/lohnrechner.component').then(m => m.LohnrechnerComponent),
   },
   {
+    // Plattform-Management (ADR-019): platform-admin operator module — tenant
+    // administration (Stufe 1) plus module-internal tabs for SSO/SMTP/Logging.
+    path: 'plattform',
+    loadComponent: () =>
+      import('./features/plattform/plattform.component').then(m => m.PlattformComponent),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./features/not-found/not-found.component').then(m => m.NotFoundComponent),

@@ -11,7 +11,8 @@
     "language": "Language",
     "antragstypen": "Request Types",
     "antraege": "My Requests",
-    "aufgaben": "Tasks"
+    "aufgaben": "Tasks",
+    "plattform": "Platform"
   },
   "footer": {
     "legal": "Legal",
@@ -58,6 +59,10 @@
       "hilfe": {
         "title": "Help",
         "description": "Guides and guided tours."
+      },
+      "plattform": {
+        "title": "Platform management",
+        "description": "Manage tenants, SSO, SMTP and log forwarding."
       }
     }
   },
@@ -547,5 +552,60 @@
       "menuAria": "Development identities",
       "hint": "Development only: switches the dev bearer token and reloads the app."
     }
+  },
+  "plattform": {
+    "title": "Platform management",
+    "lead": "Operating the platform: tenants and (next) global configuration.",
+    "tablistAria": "Platform areas",
+    "soon": "soon",
+    "placeholder": "This area is in preparation.",
+    "tab": {
+      "mandanten": "Tenants",
+      "sso": "SSO",
+      "smtp": "SMTP",
+      "logging": "Logging"
+    },
+    "forbidden": "Accessible to platform management (platform-admin) only.",
+    "loading": "Loading …",
+    "loadError": "Could not load tenants.",
+    "mandanten": {
+      "lead": "Create and manage the platform tenants.",
+      "new": "New tenant",
+      "create": "Create",
+      "empty": "No tenants yet.",
+      "tableCaption": "List of tenants"
+    },
+    "field": {
+      "code": "Code",
+      "subdomain": "Subdomain",
+      "displayName": "Display name (multilingual)",
+      "defaultLocale": "Default language"
+    },
+    "col": {
+      "name": "Name",
+      "code": "Code",
+      "subdomain": "Subdomain",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "onboarding": "Onboarding",
+      "archived": "Archived"
+    },
+    "action": {
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "archive": "Archive"
+    },
+    "confirmStatus": "Tenant \"{{name}}\": {{verb}}?",
+    "statusChanged": "Status changed.",
+    "statusError": "Status change failed.",
+    "createSuccess": "Tenant created.",
+    "createConflict": "Code or subdomain already exists.",
+    "createError": "Creation failed.",
+    "cancel": "Cancel"
   }
 }

@@ -20,4 +20,11 @@ public final class TenantExceptions {
             super("Tenant " + id + " not found");
         }
     }
+
+    /** 422 — the requested status change is not a legal transition (ADR-019 Stufe 1). */
+    public static class IllegalTransition extends RuntimeException {
+        public IllegalTransition(TenantStatus from, TenantStatus to) {
+            super("Tenant status transition " + from + " -> " + to + " is not allowed");
+        }
+    }
 }

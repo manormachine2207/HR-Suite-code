@@ -75,6 +75,16 @@ export const MODULE_CATALOG: readonly ModuleCardDef[] = [
     route: '/hilfe',
     roles: [],
   },
+  {
+    // Plattform-Management (ADR-019): platform-admin only. The tile is not
+    // role-hidden (see note above); the page enforces via the 403 → operators-only state.
+    id: 'plattform',
+    icon: 'settings',
+    titleKey: 'home.modules.plattform.title',
+    descriptionKey: 'home.modules.plattform.description',
+    route: '/plattform',
+    roles: ['platform-admin'],
+  },
 ];
 
 export type TranslateFn = (key: string) => string;

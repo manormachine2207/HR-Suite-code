@@ -26,6 +26,12 @@ public class ApiExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(io.github.manormachine2207.hrsuite.tenant.TenantExceptions.IllegalTransition.class)
+    ProblemDetail handleTenantIllegalTransition(
+            io.github.manormachine2207.hrsuite.tenant.TenantExceptions.IllegalTransition ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
     @ExceptionHandler(AntragsTypExceptions.NotFound.class)
     ProblemDetail handleAntragsTypNotFound(AntragsTypExceptions.NotFound ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());

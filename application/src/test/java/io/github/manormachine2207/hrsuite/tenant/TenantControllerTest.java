@@ -16,8 +16,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -79,5 +81,40 @@ class TenantControllerTest {
                         .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_platform-admin")))
                         .contentType(MediaType.APPLICATION_JSON).content(invalid))
                 .andExpect(status().isBadRequest());
+    }
+
+    // ---- PATCH status (ADR-019 Stufe 1) -------------------------------------
+
+    @Test
+    void patchStatus_returns403_whenNotPlatformAdmin() throws Exception {
+        mvc.perform(patch("/api/v1/tenant/" + UUID.randomUUID() + "/status")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_tenant-admin")))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"SUSPENDED\"}"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void patchStatus_returns200_andNewStatus() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(service.changeStatus(eq(id), eq(TenantStatus.SUSPENDED))).thenReturn(new Tenant(
+                id, "BIT", Map.of("de", "BIT"), "bit", TenantStatus.SUSPENDED, "de"));
+
+        mvc.perform(patch("/api/v1/tenant/" + id + "/status")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_platform-admin")))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"SUSPENDED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("SUSPENDED"));
+    }
+
+    @Test
+    void patchStatus_maps_illegalTransition_to422() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(service.changeStatus(any(), any())).thenThrow(
+                new TenantExceptions.IllegalTransition(TenantStatus.ARCHIVED, TenantStatus.ACTIVE));
+
+        mvc.perform(patch("/api/v1/tenant/" + id + "/status")
+                        .with(jwt().authorities(new SimpleGrantedAuthority("ROLE_platform-admin")))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"status\":\"ACTIVE\"}"))
+                .andExpect(status().isUnprocessableEntity());
     }
 }
