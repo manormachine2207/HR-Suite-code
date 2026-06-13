@@ -11,7 +11,8 @@
     "language": "Lingua",
     "antragstypen": "Tipi di richiesta",
     "antraege": "Le mie richieste",
-    "aufgaben": "Compiti"
+    "aufgaben": "Compiti",
+    "plattform": "Piattaforma"
   },
   "footer": {
     "legal": "Note legali",
@@ -58,6 +59,10 @@
       "hilfe": {
         "title": "Aiuto",
         "description": "Guide e tour guidati."
+      },
+      "plattform": {
+        "title": "Gestione della piattaforma",
+        "description": "Gestire mandanti, SSO, SMTP e inoltro dei log."
       }
     }
   },
@@ -547,5 +552,60 @@
       "menuAria": "Identità di sviluppo",
       "hint": "Solo sviluppo: cambia il bearer token di sviluppo e ricarica l'applicazione."
     }
+  },
+  "plattform": {
+    "title": "Gestione della piattaforma",
+    "lead": "Esercizio della piattaforma: mandanti e (in seguito) configurazione globale.",
+    "tablistAria": "Aree della piattaforma",
+    "soon": "presto",
+    "placeholder": "Questa area è in preparazione.",
+    "tab": {
+      "mandanten": "Mandanti",
+      "sso": "SSO",
+      "smtp": "SMTP",
+      "logging": "Log"
+    },
+    "forbidden": "Accessibile solo alla gestione della piattaforma (platform-admin).",
+    "loading": "Caricamento …",
+    "loadError": "Impossibile caricare i mandanti.",
+    "mandanten": {
+      "lead": "Creare e gestire i mandanti della piattaforma.",
+      "new": "Nuovo mandante",
+      "create": "Crea",
+      "empty": "Ancora nessun mandante.",
+      "tableCaption": "Elenco dei mandanti"
+    },
+    "field": {
+      "code": "Codice",
+      "subdomain": "Sottodominio",
+      "displayName": "Nome visualizzato (multilingue)",
+      "defaultLocale": "Lingua predefinita"
+    },
+    "col": {
+      "name": "Nome",
+      "code": "Codice",
+      "subdomain": "Sottodominio",
+      "status": "Stato",
+      "created": "Creato",
+      "actions": "Azioni"
+    },
+    "status": {
+      "active": "Attivo",
+      "suspended": "Sospeso",
+      "onboarding": "Onboarding",
+      "archived": "Archiviato"
+    },
+    "action": {
+      "suspend": "Sospendi",
+      "activate": "Attiva",
+      "archive": "Archivia"
+    },
+    "confirmStatus": "Mandante «{{name}}»: {{verb}}?",
+    "statusChanged": "Stato modificato.",
+    "statusError": "Cambio di stato non riuscito.",
+    "createSuccess": "Mandante creato.",
+    "createConflict": "Codice o sottodominio già in uso.",
+    "createError": "Creazione non riuscita.",
+    "cancel": "Annulla"
   }
 }

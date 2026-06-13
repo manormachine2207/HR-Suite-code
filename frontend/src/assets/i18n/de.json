@@ -11,7 +11,8 @@
     "language": "Sprache",
     "antragstypen": "Antragstypen",
     "antraege": "Meine Anträge",
-    "aufgaben": "Aufgaben"
+    "aufgaben": "Aufgaben",
+    "plattform": "Plattform"
   },
   "footer": {
     "legal": "Rechtliches",
@@ -58,6 +59,10 @@
       "hilfe": {
         "title": "Hilfe",
         "description": "Anleitungen und geführte Touren."
+      },
+      "plattform": {
+        "title": "Plattform-Verwaltung",
+        "description": "Mandanten, SSO, SMTP und Log-Weiterleitung verwalten."
       }
     }
   },
@@ -547,5 +552,60 @@
       "menuAria": "Dev-Identitäten",
       "hint": "Nur Entwicklung: wechselt den Dev-Bearer-Token und lädt die App neu."
     }
+  },
+  "plattform": {
+    "title": "Plattform-Verwaltung",
+    "lead": "Betrieb der Plattform: Mandanten und (folgend) globale Konfiguration.",
+    "tablistAria": "Plattform-Bereiche",
+    "soon": "bald",
+    "placeholder": "Dieser Bereich ist in Vorbereitung.",
+    "tab": {
+      "mandanten": "Mandanten",
+      "sso": "SSO",
+      "smtp": "SMTP",
+      "logging": "Logging"
+    },
+    "forbidden": "Nur für die Plattform-Verwaltung (platform-admin) zugänglich.",
+    "loading": "Wird geladen …",
+    "loadError": "Mandanten konnten nicht geladen werden.",
+    "mandanten": {
+      "lead": "Mandanten der Plattform anlegen und verwalten.",
+      "new": "Neuer Mandant",
+      "create": "Anlegen",
+      "empty": "Noch keine Mandanten.",
+      "tableCaption": "Liste der Mandanten"
+    },
+    "field": {
+      "code": "Code",
+      "subdomain": "Subdomain",
+      "displayName": "Anzeigename (mehrsprachig)",
+      "defaultLocale": "Standardsprache"
+    },
+    "col": {
+      "name": "Name",
+      "code": "Code",
+      "subdomain": "Subdomain",
+      "status": "Status",
+      "created": "Erstellt",
+      "actions": "Aktionen"
+    },
+    "status": {
+      "active": "Aktiv",
+      "suspended": "Gesperrt",
+      "onboarding": "Onboarding",
+      "archived": "Archiviert"
+    },
+    "action": {
+      "suspend": "Sperren",
+      "activate": "Aktivieren",
+      "archive": "Archivieren"
+    },
+    "confirmStatus": "Mandant „{{name}}\" {{verb}}?",
+    "statusChanged": "Status geändert.",
+    "statusError": "Statuswechsel fehlgeschlagen.",
+    "createSuccess": "Mandant angelegt.",
+    "createConflict": "Code oder Subdomain ist bereits vergeben.",
+    "createError": "Anlegen fehlgeschlagen.",
+    "cancel": "Abbrechen"
   }
 }

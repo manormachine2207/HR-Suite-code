@@ -1,0 +1,82 @@
+/* Plattform module shell (ADR-019): compact head + module-internal tab bar.
+   Tab bar reads as in-module sub-navigation, distinct from the (now removed)
+   global nav (ADR-014 precision). */
+.hr-plattform {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.hr-head {
+  h1 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  .hr-lead {
+    margin: 0.3rem 0 0;
+    max-width: 44rem;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+}
+
+.hr-tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--bs-border-color, #e1e6eb);
+}
+
+.hr-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color, #5a6b7b);
+  cursor: pointer;
+
+  &:hover:not(:disabled) { color: var(--bs-body-color, #1f2d3d); }
+
+  &.is-active {
+    color: var(--bs-primary, #1f6feb);
+    border-bottom-color: var(--bs-primary, #1f6feb);
+  }
+
+  &:disabled { cursor: not-allowed; opacity: 0.6; }
+
+  &__soon {
+    padding: 0.05rem 0.35rem;
+    border-radius: 0.7rem;
+    background: var(--bs-tertiary-bg, #eef2f6);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #5a6b7b);
+  }
+}
+
+.hr-panel {
+  padding-top: 0.4rem;
+}
+
+.hr-state {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.4rem;
+  font-size: 0.88rem;
+  background: var(--bs-tertiary-bg, #f6f8fa);
+  color: var(--bs-secondary-color, #5a6b7b);
+
+  &--note { background: var(--bs-warning-bg-subtle, #fff4e0); color: var(--bs-warning-text-emphasis, #8a5a00); }
+}

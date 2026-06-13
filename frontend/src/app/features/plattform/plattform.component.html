@@ -1,0 +1,36 @@
+<section class="hr-plattform" aria-labelledby="plattform-title">
+  <app-breadcrumb [trail]="[{ labelKey: 'nav.plattform' }]" />
+
+  <header class="hr-head">
+    <h1 id="plattform-title">{{ 'plattform.title' | translate }}</h1>
+    <p class="hr-lead">{{ 'plattform.lead' | translate }}</p>
+  </header>
+
+  <!-- Module-internal tabs (ADR-014 navigation precision): tabs live INSIDE a
+       module, not on the dashboard. -->
+  <div class="hr-tabs" role="tablist" [attr.aria-label]="'plattform.tablistAria' | translate">
+    @for (tab of tabs; track tab.id) {
+      <button type="button" class="hr-tab"
+              role="tab"
+              [id]="'tab-' + tab.id"
+              [class.is-active]="active() === tab.id"
+              [attr.aria-selected]="active() === tab.id"
+              [attr.aria-controls]="'panel-' + tab.id"
+              [attr.aria-disabled]="!tab.enabled"
+              [disabled]="!tab.enabled"
+              (click)="select(tab)">
+        {{ tab.labelKey | translate }}
+        @if (!tab.enabled) { <span class="hr-tab__soon">{{ 'plattform.soon' | translate }}</span> }
+      </button>
+    }
+  </div>
+
+  <div class="hr-panel" role="tabpanel" [id]="'panel-' + active()" [attr.aria-labelledby]="'tab-' + active()">
+    @switch (active()) {
+      @case ('mandanten') { <app-mandanten /> }
+      @default {
+        <p class="hr-state hr-state--note" role="note">{{ 'plattform.placeholder' | translate }}</p>
+      }
+    }
+  </div>
+</section>

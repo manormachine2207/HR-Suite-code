@@ -28,10 +28,13 @@ const translateFn = (key: string): string => T[key] ?? key;
 const ids = (defs: readonly ModuleCardDef[]): string[] => defs.map(d => d.id);
 
 describe('MODULE_CATALOG', () => {
-  it('declares the five dashboard modules with route + roles', () => {
+  it('declares the six dashboard modules with route + roles', () => {
     expect(ids(MODULE_CATALOG)).toEqual([
-      'antragstypen', 'antraege', 'aufgaben', 'lohnrechner', 'hilfe',
+      'antragstypen', 'antraege', 'aufgaben', 'lohnrechner', 'hilfe', 'plattform',
     ]);
+    const all = new Map(MODULE_CATALOG.map(d => [d.id, d]));
+    expect(all.get('plattform')!.route).toBe('/plattform');
+    expect(all.get('plattform')!.roles).toEqual(['platform-admin']);
     const byId = new Map(MODULE_CATALOG.map(d => [d.id, d]));
     expect(byId.get('antragstypen')!.route).toBe('/antragstypen');
     expect(byId.get('antragstypen')!.roles).toEqual(['hr-designer', 'tenant-admin']);
@@ -68,11 +71,11 @@ describe('MODULE_CATALOG', () => {
 
 describe('filterModules', () => {
   it('returns all modules for an empty search without favorites-only', () => {
-    expect(filterModules(MODULE_CATALOG, '', false, [], translateFn)).toHaveLength(5);
+    expect(filterModules(MODULE_CATALOG, '', false, [], translateFn)).toHaveLength(6);
   });
 
   it('treats whitespace-only search as empty', () => {
-    expect(filterModules(MODULE_CATALOG, '   ', false, [], translateFn)).toHaveLength(5);
+    expect(filterModules(MODULE_CATALOG, '   ', false, [], translateFn)).toHaveLength(6);
   });
 
   it('matches the translated title case-insensitively', () => {

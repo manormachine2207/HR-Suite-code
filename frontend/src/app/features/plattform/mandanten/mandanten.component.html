@@ -1,0 +1,110 @@
+<div class="hr-mandanten">
+  @if (forbidden) {
+    <p class="hr-state hr-state--note" role="note">{{ 'plattform.forbidden' | translate }}</p>
+  } @else {
+    @if (successKey) { <p class="hr-state hr-state--ok" role="status">{{ successKey | translate }}</p> }
+    @if (errorKey) { <p class="hr-state hr-state--err" role="alert">{{ errorKey | translate }}</p> }
+    @if (errorDetail) { <p class="hr-state hr-state--err" role="alert">{{ errorDetail }}</p> }
+
+    <div class="hr-toolbar">
+      <p class="hr-sub">{{ 'plattform.mandanten.lead' | translate }}</p>
+      @if (!creating) {
+        <button type="button" class="hr-btn hr-btn--primary" (click)="openCreate()">
+          + {{ 'plattform.mandanten.new' | translate }}
+        </button>
+      }
+    </div>
+
+    @if (creating) {
+      <form class="hr-card" [formGroup]="form" (ngSubmit)="save()">
+        <div class="hr-grid2">
+          <label class="hr-field">
+            <span class="hr-field__label">{{ 'plattform.field.code' | translate }} <span class="hr-req">*</span></span>
+            <input formControlName="code" autocomplete="off" spellcheck="false"
+                   [class.hr-invalid]="form.controls['code'].touched && form.controls['code'].invalid" />
+          </label>
+          <label class="hr-field">
+            <span class="hr-field__label">{{ 'plattform.field.subdomain' | translate }} <span class="hr-req">*</span></span>
+            <input formControlName="subdomain" autocomplete="off" spellcheck="false"
+                   [class.hr-invalid]="form.controls['subdomain'].touched && form.controls['subdomain'].invalid" />
+          </label>
+        </div>
+
+        <fieldset class="hr-langs" formGroupName="title">
+          <legend>{{ 'plattform.field.displayName' | translate }}</legend>
+          <div class="hr-grid2">
+            @for (lang of langs; track lang) {
+              <label class="hr-field">
+                <span class="hr-field__label">{{ lang | uppercase }}
+                  @if (lang === 'de') { <span class="hr-req">*</span> }
+                </span>
+                <input [formControlName]="lang" autocomplete="off" />
+              </label>
+            }
+          </div>
+        </fieldset>
+
+        <label class="hr-field hr-field--narrow">
+          <span class="hr-field__label">{{ 'plattform.field.defaultLocale' | translate }}</span>
+          <select formControlName="defaultLocale">
+            @for (lang of langs; track lang) { <option [value]="lang">{{ lang | uppercase }}</option> }
+          </select>
+        </label>
+
+        <div class="hr-actions">
+          <button type="button" class="hr-btn hr-btn--ghost" (click)="cancelCreate()">
+            {{ 'plattform.cancel' | translate }}
+          </button>
+          <button type="submit" class="hr-btn hr-btn--primary" [disabled]="saving">
+            {{ 'plattform.mandanten.create' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+
+    @if (loading) {
+      <p class="hr-state" role="status">{{ 'plattform.loading' | translate }}</p>
+    } @else if (failed) {
+      <p class="hr-state hr-state--err" role="alert">{{ 'plattform.loadError' | translate }}</p>
+    } @else if (tenants.length === 0) {
+      <p class="hr-state" role="status">{{ 'plattform.mandanten.empty' | translate }}</p>
+    } @else {
+      <table class="hr-table">
+        <caption class="hr-visually-hidden">{{ 'plattform.mandanten.tableCaption' | translate }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">{{ 'plattform.col.name' | translate }}</th>
+            <th scope="col">{{ 'plattform.col.code' | translate }}</th>
+            <th scope="col">{{ 'plattform.col.subdomain' | translate }}</th>
+            <th scope="col">{{ 'plattform.col.status' | translate }}</th>
+            <th scope="col">{{ 'plattform.col.created' | translate }}</th>
+            <th scope="col">{{ 'plattform.col.actions' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (t of tenants; track t.id) {
+            <tr>
+              <td class="hr-name">{{ displayName(t) }}</td>
+              <td><span class="hr-chip">{{ t.code }}</span></td>
+              <td class="hr-mono">{{ t.subdomain }}</td>
+              <td>
+                <span class="hr-badge" [class]="statusClass(t.status)">
+                  {{ statusKey(t.status) ? (statusKey(t.status)! | translate) : t.status }}
+                </span>
+              </td>
+              <td>{{ t.createdAt | date:'dd.MM.yyyy':undefined:dateLocale }}</td>
+              <td class="hr-row-actions">
+                @for (a of actionsFor(t); track a.target) {
+                  <button type="button" class="hr-btn hr-btn--sm" [disabled]="rowBusyId === t.id"
+                          (click)="changeStatus(t, a)">{{ a.labelKey | translate }}</button>
+                } @empty {
+                  <span class="hr-muted">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</div>
