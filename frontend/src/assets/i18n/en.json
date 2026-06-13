@@ -5,6 +5,8 @@
   },
   "nav": {
     "home": "Home",
+    "dashboard": "Dashboard",
+    "breadcrumbAria": "Breadcrumb navigation",
     "conformite": "Accessibility Statement",
     "language": "Language",
     "antragstypen": "Request Types",
@@ -248,6 +250,7 @@
     "details": "Details",
     "detailsAria": "Show details of request “{{title}}”",
     "detail": {
+      "crumb": "Detail",
       "back": "Back to list",
       "loading": "Loading …",
       "loadError": "The request could not be loaded.",
@@ -286,6 +289,7 @@
     }
   },
   "designer": {
+    "crumb": "Designer",
     "back": "Back to list",
     "title": "Design form",
     "subtitle": "New major version (draft) for",

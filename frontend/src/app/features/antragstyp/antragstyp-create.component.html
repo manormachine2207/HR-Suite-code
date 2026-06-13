@@ -1,7 +1,8 @@
 <section class="hr-create" aria-labelledby="create-title">
-  <nav class="hr-crumbs">
-    <a routerLink="/antragstypen">&larr; {{ 'antragstyp.listTitle' | translate }}</a>
-  </nav>
+  <app-breadcrumb [trail]="[
+    { labelKey: 'nav.antragstypen', link: '/antragstypen' },
+    { labelKey: 'antragstyp.create.title' }
+  ]" />
 
   <header class="hr-head">
     <h1 id="create-title">{{ 'antragstyp.create.title' | translate }}</h1>

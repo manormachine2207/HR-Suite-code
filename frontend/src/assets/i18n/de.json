@@ -5,6 +5,8 @@
   },
   "nav": {
     "home": "Startseite",
+    "dashboard": "Dashboard",
+    "breadcrumbAria": "Brotkrümel-Navigation",
     "conformite": "Erklärung zur Barrierefreiheit",
     "language": "Sprache",
     "antragstypen": "Antragstypen",
@@ -248,6 +250,7 @@
     "details": "Details",
     "detailsAria": "Details zum Antrag «{{title}}» anzeigen",
     "detail": {
+      "crumb": "Detail",
       "back": "Zurück zur Liste",
       "loading": "Wird geladen …",
       "loadError": "Antrag konnte nicht geladen werden.",
@@ -286,6 +289,7 @@
     }
   },
   "designer": {
+    "crumb": "Designer",
     "back": "Zurück zur Liste",
     "title": "Formular entwerfen",
     "subtitle": "Neue Major-Version (Entwurf) für",

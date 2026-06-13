@@ -233,19 +233,8 @@
   }
 }
 
-.hr-crumbs {
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-
-  a {
-    color: var(--bs-secondary-color, #5a6b7b);
-    text-decoration: none;
-  }
-
-  a:hover {
-    text-decoration: underline;
-  }
-}
+/* Breadcrumb is now the shared <app-breadcrumb> (ADR-014); its styles live in
+   shared/breadcrumb/breadcrumb.component.scss — no local .hr-crumbs rule needed. */
 
 .hr-head {
   margin-bottom: var(--hr-rhythm, 1.25rem);

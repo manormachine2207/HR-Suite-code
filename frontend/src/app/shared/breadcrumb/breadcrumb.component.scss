@@ -1,0 +1,41 @@
+/* Shared breadcrumb look (ADR-014). Dezent, identisch zur bisherigen ad-hoc
+   `.hr-crumbs`-Zeile (token bridge `var(--bs-*, fallback)`), damit der Rücksprung
+   sichtbar, aber zurückhaltend ist. */
+.hr-crumbs {
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+
+  ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.1rem 0;
+  }
+
+  li {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  a {
+    color: var(--bs-secondary-color, #5a6b7b);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  /* current page: not a link, slightly stronger so it reads as "you are here" */
+  [aria-current='page'] {
+    color: var(--bs-emphasis-color, #1f2d3d);
+  }
+
+  &__sep {
+    margin: 0 0.4rem;
+    color: var(--bs-secondary-color, #8a97a5);
+  }
+}

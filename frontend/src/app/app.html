@@ -1,4 +1,9 @@
-<ob-master-layout [navigation]="navigation">
+<!-- No [navigation]: the global module-tab bar is gone (ADR-014 navigation
+     precision, 2026-06-12). Dashboard ('/') is the sole hub, the tiles are the
+     navigation; back to the hub is the federal-logo brand link (homePageRoute '/'
+     set in app.ts) + the per-page <app-breadcrumb>. The header keeps the
+     brand logo, product name + version, dev role switcher, help icon, language menu. -->
+<ob-master-layout>
   <!-- Official Oblique header-title slot: ob-master-layout projects [obHeaderTitle]
        into the brand link next to the federal logo (ObMasterLayoutComponent ng-content
        selector "[obHeaderTitle]"). Product name + release version from runtime.json. -->

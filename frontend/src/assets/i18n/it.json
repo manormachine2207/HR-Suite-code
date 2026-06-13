@@ -5,6 +5,8 @@
   },
   "nav": {
     "home": "Pagina iniziale",
+    "dashboard": "Dashboard",
+    "breadcrumbAria": "Percorso di navigazione",
     "conformite": "Dichiarazione di accessibilità",
     "language": "Lingua",
     "antragstypen": "Tipi di richiesta",
@@ -248,6 +250,7 @@
     "details": "Dettagli",
     "detailsAria": "Mostra i dettagli della richiesta «{{title}}»",
     "detail": {
+      "crumb": "Dettaglio",
       "back": "Torna all'elenco",
       "loading": "Caricamento …",
       "loadError": "Impossibile caricare la richiesta.",
@@ -286,6 +289,7 @@
     }
   },
   "designer": {
+    "crumb": "Designer",
     "back": "Torna all'elenco",
     "title": "Progetta il modulo",
     "subtitle": "Nuova versione maggiore (bozza) per",

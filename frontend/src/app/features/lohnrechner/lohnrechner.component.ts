@@ -5,6 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 
 import { dateLocaleFor } from '../../core/i18n/locale-text';
+import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 import {
   KANTONE,
   Kanton,
@@ -28,7 +29,7 @@ import {
   selector: 'app-lohnrechner',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule, DecimalPipe, MatIconModule],
+  imports: [TranslateModule, DecimalPipe, MatIconModule, BreadcrumbComponent],
   templateUrl: './lohnrechner.component.html',
   styleUrl: './lohnrechner.component.scss',
 })

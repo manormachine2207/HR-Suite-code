@@ -6,6 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ReviewService, ReviewTask } from './review.service';
 import { PayloadRow, outcomeLabelKey, payloadRows, problemDetailOf, statusKeyOf } from './review.logic';
 import { dateLocaleFor, resolveLocaleText } from '../../core/i18n/locale-text';
+import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 
 /**
  * Reviewer worklist (`/aufgaben`, ADR-013): open Flowable review tasks of the caller's
@@ -23,7 +24,7 @@ import { dateLocaleFor, resolveLocaleText } from '../../core/i18n/locale-text';
 @Component({
   selector: 'app-task-list',
   standalone: true,
-  imports: [TranslateModule, DatePipe],
+  imports: [TranslateModule, DatePipe, BreadcrumbComponent],
   templateUrl: './task-list.component.html',
   styleUrl: './task-list.component.scss'
 })

@@ -3,7 +3,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DOCUMENT } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
-import { ObMasterLayoutModule, ObINavigationLink } from '@oblique/oblique';
+import { ObMasterLayoutConfig, ObMasterLayoutModule } from '@oblique/oblique';
 import { RuntimeConfigService } from './core/runtime-config/runtime-config.service';
 import { DevRoleSwitcherComponent } from './core/auth/dev-role-switcher.component';
 
@@ -22,12 +22,19 @@ export class App implements OnInit {
   private readonly config = inject(RuntimeConfigService);
   private readonly document = inject(DOCUMENT);
 
-  /** Top navigation (Oblique master layout translates the label keys itself). */
-  readonly navigation: ObINavigationLink[] = [
-    { label: 'nav.antragstypen', url: 'antragstypen' },
-    { label: 'nav.antraege', url: 'antraege' },
-    { label: 'nav.aufgaben', url: 'aufgaben' },
-  ];
+  // No global top-tab bar: it duplicated the dashboard tiles and looked unfinished
+  // (ADR-014 navigation precision, Owner 2026-06-12). The Dashboard ('/') is the
+  // sole entry hub, the tiles ARE the navigation; tabs only ever appear as
+  // sub-navigation INSIDE a module. Back to the hub is via the federal-logo brand
+  // link + the per-page <app-breadcrumb> "Dashboard › Modul".
+  //
+  // Point the Oblique master-layout brand link at the dashboard. The default is
+  // '/home'; that route still exists and redirects to '/', but setting it here makes
+  // the logo target the hub directly (no redirect hop). ObMasterLayoutConfig is a
+  // root singleton with a mutable homePageRoute; set it before the layout renders.
+  constructor() {
+    inject(ObMasterLayoutConfig).homePageRoute = '/';
+  }
 
   /**
    * Release version for the header badge, from runtime.json (12-Factor; the

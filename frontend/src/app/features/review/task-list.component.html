@@ -1,4 +1,6 @@
 <section class="hr-task-list" aria-labelledby="task-title">
+  <app-breadcrumb [trail]="[{ labelKey: 'nav.aufgaben' }]" />
+
   <header class="hr-head">
     <h1 id="task-title">{{ 'review.listTitle' | translate }}</h1>
     <p class="hr-lead">{{ 'review.lead' | translate }}</p>

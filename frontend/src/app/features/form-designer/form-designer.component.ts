@@ -18,11 +18,12 @@ import { FlowCanvasEditorComponent } from './flow-canvas-editor.component';
 import { GraphDefinition } from './flow-graph.model';
 import { resolveLocaleText } from '../../core/i18n/locale-text';
 import { TourService } from '../../core/tour/tour.service';
+import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-form-designer',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslateModule, RouterLink, UpperCasePipe, FlowCanvasEditorComponent],
+  imports: [ReactiveFormsModule, TranslateModule, RouterLink, UpperCasePipe, FlowCanvasEditorComponent, BreadcrumbComponent],
   templateUrl: './form-designer.component.html',
   styleUrl: './form-designer.component.scss'
 })

@@ -14,6 +14,7 @@ import { AntragsTypService } from '../antragstyp/antragstyp.service';
 import { AntragsTypSummary } from '../antragstyp/antragstyp.model';
 import { FormFieldDef, OptionDef } from '../form-designer/form-definition.model';
 import { dateLocaleFor, resolveLocaleText } from '../../core/i18n/locale-text';
+import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 
 /**
  * Applicant view of own Anträge plus an inline "neuer Antrag" form. The form picks a
@@ -29,7 +30,7 @@ import { dateLocaleFor, resolveLocaleText } from '../../core/i18n/locale-text';
 @Component({
   selector: 'app-antrag-list',
   standalone: true,
-  imports: [TranslateModule, ReactiveFormsModule, DatePipe, RouterLink],
+  imports: [TranslateModule, ReactiveFormsModule, DatePipe, RouterLink, BreadcrumbComponent],
   templateUrl: './antrag-list.component.html',
   styleUrl: './antrag-list.component.scss'
 })

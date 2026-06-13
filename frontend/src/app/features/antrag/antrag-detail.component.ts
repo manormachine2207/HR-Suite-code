@@ -14,6 +14,7 @@ import { AntragsTypService } from '../antragstyp/antragstyp.service';
 import { AntragsTypSummary } from '../antragstyp/antragstyp.model';
 import { PayloadRow, payloadRows } from '../review/review.logic';
 import { dateLocaleFor, resolveLocaleText } from '../../core/i18n/locale-text';
+import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 
 /** One precomputed stepper row (zoneless NG0100 discipline: nothing derived in the template). */
 interface StepRow {
@@ -36,7 +37,7 @@ type CopyField = 'antragId' | 'processId';
 @Component({
   selector: 'app-antrag-detail',
   standalone: true,
-  imports: [TranslateModule, RouterLink, DatePipe],
+  imports: [TranslateModule, RouterLink, DatePipe, BreadcrumbComponent],
   templateUrl: './antrag-detail.component.html',
   styleUrl: './antrag-detail.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
