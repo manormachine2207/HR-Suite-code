@@ -21,19 +21,8 @@
   border: 0;
 }
 
-.hr-back {
-  margin: 0 0 1rem;
-
-  a {
-    color: var(--bs-primary, #2570b8);
-    text-decoration: none;
-
-    &:hover,
-    &:focus-visible {
-      text-decoration: underline;
-    }
-  }
-}
+/* Breadcrumb is now the shared <app-breadcrumb> (ADR-014); its styles live in
+   shared/breadcrumb/breadcrumb.component.scss — no local .hr-back rule needed. */
 
 .hr-head {
   margin-bottom: 1.25rem;

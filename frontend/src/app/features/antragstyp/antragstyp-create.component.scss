@@ -10,13 +10,8 @@
   gap: 1rem;
 }
 
-.hr-crumbs a {
-  font-size: 0.9rem;
-  text-decoration: none;
-  color: var(--bs-primary, #1f6feb);
-
-  &:hover { text-decoration: underline; }
-}
+/* Breadcrumb is now the shared <app-breadcrumb> (ADR-014); its styles live in
+   shared/breadcrumb/breadcrumb.component.scss — no local .hr-crumbs rule needed. */
 
 .hr-head {
   h1 {

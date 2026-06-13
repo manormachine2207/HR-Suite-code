@@ -1,7 +1,8 @@
 <section class="hr-antrag-detail" aria-labelledby="antrag-detail-title">
-  <p class="hr-back">
-    <a routerLink="/antraege">← {{ 'antrag.detail.back' | translate }}</a>
-  </p>
+  <app-breadcrumb [trail]="[
+    { labelKey: 'nav.antraege', link: '/antraege' },
+    { labelKey: 'antrag.detail.crumb' }
+  ]" />
 
   @if (loading) {
     <div class="hr-state" role="status">{{ 'antrag.detail.loading' | translate }}</div>

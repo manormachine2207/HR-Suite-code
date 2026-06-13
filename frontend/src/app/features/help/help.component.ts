@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { TourService } from '../../core/tour/tour.service';
+import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 
 /**
  * Help center on /hilfe (ADR-015 Ebene 2): role-based step-by-step guides as
@@ -25,7 +26,7 @@ import { TourService } from '../../core/tour/tour.service';
 @Component({
   selector: 'app-help',
   standalone: true,
-  imports: [TranslateModule],
+  imports: [TranslateModule, BreadcrumbComponent],
   templateUrl: './help.component.html',
   styleUrl: './help.component.scss',
 })

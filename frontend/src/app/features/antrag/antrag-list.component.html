@@ -1,4 +1,6 @@
 <section class="hr-antrag-list" aria-labelledby="antrag-title">
+  <app-breadcrumb [trail]="[{ labelKey: 'nav.antraege' }]" />
+
   <header class="hr-head">
     <h1 id="antrag-title">{{ 'antrag.listTitle' | translate }}</h1>
     <p class="hr-lead">{{ 'antrag.lead' | translate }}</p>

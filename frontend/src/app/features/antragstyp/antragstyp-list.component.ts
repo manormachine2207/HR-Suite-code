@@ -6,6 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AntragsTypService } from './antragstyp.service';
 import { AntragsTypSummary } from './antragstyp.model';
 import { resolveLocaleText } from '../../core/i18n/locale-text';
+import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 
 /** Statuses with a `status.*` translation (new backend statuses fall back to the raw enum). */
 const KNOWN_STATUSES = new Set(['DRAFT', 'LIVE', 'DEPRECATED', 'ARCHIVED']);
@@ -13,7 +14,7 @@ const KNOWN_STATUSES = new Set(['DRAFT', 'LIVE', 'DEPRECATED', 'ARCHIVED']);
 @Component({
   selector: 'app-antragstyp-list',
   standalone: true,
-  imports: [TranslateModule, RouterLink],
+  imports: [TranslateModule, RouterLink, BreadcrumbComponent],
   templateUrl: './antragstyp-list.component.html',
   styleUrl: './antragstyp-list.component.scss'
 })

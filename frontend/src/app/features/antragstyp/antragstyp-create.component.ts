@@ -6,6 +6,7 @@ import { UpperCasePipe } from '@angular/common';
 
 import { AntragsTypService } from './antragstyp.service';
 import { LANGS, Lang, LocaleMap } from '../form-designer/form-definition.model';
+import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 
 type TitleGroup = FormGroup<{ [K in Lang]: FormControl<string> }>;
 
@@ -31,7 +32,7 @@ type CreateForm = FormGroup<{
 @Component({
   selector: 'app-antragstyp-create',
   standalone: true,
-  imports: [ReactiveFormsModule, TranslateModule, RouterLink, UpperCasePipe],
+  imports: [ReactiveFormsModule, TranslateModule, RouterLink, UpperCasePipe, BreadcrumbComponent],
   templateUrl: './antragstyp-create.component.html',
   styleUrl: './antragstyp-create.component.scss',
 })

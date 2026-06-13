@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { registerLocaleData } from '@angular/common';
 import localeDeCh from '@angular/common/locales/de-CH';
+import { provideRouter } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ObIconService } from '@oblique/oblique';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -27,6 +28,8 @@ describe('LohnrechnerComponent (ADR-018)', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [LohnrechnerComponent, TranslateModule.forRoot()],
+      // The page now hosts <app-breadcrumb> (ADR-014), whose routerLink needs a router.
+      providers: [provideRouter([])],
     }).compileComponents();
     TestBed.inject(ObIconService).registerOnAppInit();
     const translate = TestBed.inject(TranslateService);

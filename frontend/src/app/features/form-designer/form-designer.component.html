@@ -1,7 +1,8 @@
 <section class="hr-designer" aria-labelledby="designer-title">
-  <nav class="hr-crumbs">
-    <a routerLink="/antragstypen">← {{ 'designer.back' | translate }}</a>
-  </nav>
+  <app-breadcrumb [trail]="[
+    { labelKey: 'nav.antragstypen', link: '/antragstypen' },
+    { labelKey: 'designer.crumb' }
+  ]" />
 
   <header class="hr-head">
     <h1 id="designer-title">{{ 'designer.title' | translate }}</h1>
