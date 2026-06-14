@@ -25,8 +25,13 @@ public class TenantN8nConfig {
     @Column(name = "base_url", nullable = false, length = 512)
     private String baseUrl;
 
-    @Column(name = "hmac_secret", nullable = false, length = 256)
-    private String hmacSecret;
+    /**
+     * Name of the env var holding the HMAC secret (never the secret itself, SDR-004).
+     * Resolved at sign time via {@code SecretResolver}; a blank/unset ref means the
+     * connector cannot sign and fails the action terminally.
+     */
+    @Column(name = "hmac_secret_ref", length = 128)
+    private String hmacSecretRef;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "allowed_refs", nullable = false, columnDefinition = "jsonb")
@@ -41,10 +46,10 @@ public class TenantN8nConfig {
     protected TenantN8nConfig() {
     }
 
-    public TenantN8nConfig(UUID tenantId, String baseUrl, String hmacSecret, List<String> allowedRefs) {
+    public TenantN8nConfig(UUID tenantId, String baseUrl, String hmacSecretRef, List<String> allowedRefs) {
         this.tenantId = tenantId;
         this.baseUrl = baseUrl;
-        this.hmacSecret = hmacSecret;
+        this.hmacSecretRef = hmacSecretRef;
         this.allowedRefs = allowedRefs;
     }
 
@@ -68,8 +73,8 @@ public class TenantN8nConfig {
         return baseUrl;
     }
 
-    public String getHmacSecret() {
-        return hmacSecret;
+    public String getHmacSecretRef() {
+        return hmacSecretRef;
     }
 
     public List<String> getAllowedRefs() {

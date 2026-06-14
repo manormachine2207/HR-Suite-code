@@ -5,11 +5,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.github.manormachine2207.hrsuite.shared.secret.SecretResolver;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,6 +31,9 @@ class N8nActionConnectorTest {
     private final AtomicReference<String> lastBody = new AtomicReference<>();
     private final AtomicReference<String> lastSignature = new AtomicReference<>();
     private final AtomicInteger callCount = new AtomicInteger(0);
+
+    private static final String HMAC_REF = "N8N_HMAC_REF";
+    private static final String HMAC_SECRET = "topsecret";
 
     private TenantN8nConfigRepository repo;
     private N8nActionConnector connector;
@@ -50,10 +56,12 @@ class N8nActionConnectorTest {
         port = server.getAddress().getPort();
 
         repo = mock(TenantN8nConfigRepository.class);
-        when(repo.findById(TENANT)).thenReturn(java.util.Optional.of(
-                new TenantN8nConfig(TENANT, "http://127.0.0.1:" + port, "topsecret",
+        when(repo.findById(TENANT)).thenReturn(Optional.of(
+                new TenantN8nConfig(TENANT, "http://127.0.0.1:" + port, HMAC_REF,
                         List.of("provision-ad-account"))));
-        connector = new N8nActionConnector(repo);
+        // SDR-004: the config carries the env-var NAME; the resolver supplies the value.
+        SecretResolver secretResolver = ref -> HMAC_REF.equals(ref) ? Optional.of(HMAC_SECRET) : Optional.empty();
+        connector = new N8nActionConnector(repo, secretResolver);
     }
 
     @AfterEach
@@ -71,7 +79,7 @@ class N8nActionConnectorTest {
         assertThat(r.success()).isTrue();
         assertThat(callCount.get()).isEqualTo(1);
         assertThat(lastSignature.get())
-                .isEqualTo(HmacSigner.hexSha256("topsecret",
+                .isEqualTo(HmacSigner.hexSha256(HMAC_SECRET,
                         connector.canonical(req("provision-ad-account"))));
         assertThat(lastBody.get()).contains("provision-ad-account").contains("a@b.ch");
     }
@@ -116,9 +124,23 @@ class N8nActionConnectorTest {
 
     @Test
     void missingConfigIsTerminal() {
-        when(repo.findById(TENANT)).thenReturn(java.util.Optional.empty());
+        when(repo.findById(TENANT)).thenReturn(Optional.empty());
         ActionResult r = connector.execute(req("provision-ad-account"));
         assertThat(r.success()).isFalse();
         assertThat(r.retryable()).isFalse();
+    }
+
+    /** SDR-004: an unset HMAC env var is a config gap — terminal, and never calls the server. */
+    @Test
+    void unconfiguredHmacSecretRefIsTerminalWithoutCallingServer() {
+        when(repo.findById(TENANT)).thenReturn(Optional.of(
+                new TenantN8nConfig(TENANT, "http://127.0.0.1:" + port, "UNSET_REF",
+                        List.of("provision-ad-account"))));   // resolver returns empty for UNSET_REF
+
+        ActionResult r = connector.execute(req("provision-ad-account"));
+
+        assertThat(r.success()).isFalse();
+        assertThat(r.retryable()).isFalse();
+        assertThat(callCount.get()).isZero();
     }
 }

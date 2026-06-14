@@ -1,6 +1,7 @@
 package io.github.manormachine2207.hrsuite.platform;
 
 import io.github.manormachine2207.hrsuite.platform.dto.UpdateOidcConfigRequest;
+import io.github.manormachine2207.hrsuite.shared.secret.SecretResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

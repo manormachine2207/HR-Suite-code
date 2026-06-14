@@ -1,6 +1,7 @@
 package io.github.manormachine2207.hrsuite.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.manormachine2207.hrsuite.shared.secret.SecretResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.http.client.ClientHttpRequestFactoryBuilder;
@@ -31,15 +32,18 @@ import java.util.Optional;
 public class N8nActionConnector implements ActionConnector {
 
     private final TenantN8nConfigRepository configRepo;
+    private final SecretResolver secretResolver;
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestClient restClient;
 
     @Autowired
     public N8nActionConnector(
             TenantN8nConfigRepository configRepo,
+            SecretResolver secretResolver,
             @Value("${hrsuite.action.connect-timeout-ms:3000}") int connectTimeoutMs,
             @Value("${hrsuite.action.read-timeout-ms:10000}") int readTimeoutMs) {
         this.configRepo = configRepo;
+        this.secretResolver = secretResolver;
         var factorySettings = ClientHttpRequestFactorySettings.defaults()
                 .withConnectTimeout(Duration.ofMillis(connectTimeoutMs))
                 .withReadTimeout(Duration.ofMillis(readTimeoutMs));
@@ -49,8 +53,8 @@ public class N8nActionConnector implements ActionConnector {
     }
 
     /** Test-only constructor — uses sane default timeouts (3 s connect, 10 s read). */
-    N8nActionConnector(TenantN8nConfigRepository configRepo) {
-        this(configRepo, 3000, 10000);
+    N8nActionConnector(TenantN8nConfigRepository configRepo, SecretResolver secretResolver) {
+        this(configRepo, secretResolver, 3000, 10000);
     }
 
     @Override
@@ -64,8 +68,17 @@ public class N8nActionConnector implements ActionConnector {
             return ActionResult.terminal(0, "ref not allowlisted: " + request.ref());
         }
 
+        // SDR-004: the HMAC secret is resolved from the env var NAMED by the config —
+        // never stored in the DB. A missing/unset ref means we cannot sign; fail
+        // terminally (retrying won't fix a config gap) without leaking the value.
+        Optional<String> secret = secretResolver.resolve(cfg.getHmacSecretRef());
+        if (secret.isEmpty()) {
+            return ActionResult.terminal(0, "hmac secret not configured (env var '"
+                    + cfg.getHmacSecretRef() + "') for tenant " + request.tenantId());
+        }
+
         String body = canonical(request);
-        String signature = HmacSigner.hexSha256(cfg.getHmacSecret(), body);
+        String signature = HmacSigner.hexSha256(secret.get(), body);
         String url = trimTrailingSlash(cfg.getBaseUrl()) + "/webhook/" + request.ref();
 
         try {

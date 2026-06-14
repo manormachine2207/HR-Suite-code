@@ -1,5 +1,7 @@
 package io.github.manormachine2207.hrsuite.notification;
 
+import io.github.manormachine2207.hrsuite.shared.secret.SecretResolver;
+
 /**
  * Sends a message through a given SMTP relay configuration (ADR-019 Stufe 3).
  * Engine-neutral so the later notification worker (ADR-017 Stufe 2) reuses it.

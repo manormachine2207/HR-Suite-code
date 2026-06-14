@@ -145,6 +145,16 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <!-- SDR-004: ITs that sign n8n webhooks resolve the per-tenant HMAC
+                         secret from this env var; the seeded tenant_n8n_config stores only
+                         the ref NAME (HRSUITE_N8N_HMAC_SECRET). Mirrors a real deployment
+                         providing the secret out-of-band — exercises the real
+                         EnvSecretResolver path, not a mock. -->
+                    <environmentVariables>
+                        <HRSUITE_N8N_HMAC_SECRET>it-hmac-secret</HRSUITE_N8N_HMAC_SECRET>
+                    </environmentVariables>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>

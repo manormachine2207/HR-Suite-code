@@ -122,7 +122,7 @@ class ActionRefsIT {
         // Seed config for tenant A only — must run inside inTenant so TenantContextAspect
         // pushes the GUC for the @Transactional seedConfig call.
         inTenant(tenantA, () ->
-                harness.seedConfig(tenantA, "http://n8n:5678", "secret",
+                harness.seedConfig(tenantA, "http://n8n:5678", "HRSUITE_N8N_HMAC_SECRET",
                         List.of("provision-ad-account", "sync-payroll")));
 
         // Tenant A sees its two refs.

@@ -2,6 +2,7 @@ package io.github.manormachine2207.hrsuite.notification;
 
 import io.github.manormachine2207.hrsuite.notification.dto.TestSendResponse;
 import io.github.manormachine2207.hrsuite.notification.dto.UpdateSmtpRelayRequest;
+import io.github.manormachine2207.hrsuite.shared.secret.SecretResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

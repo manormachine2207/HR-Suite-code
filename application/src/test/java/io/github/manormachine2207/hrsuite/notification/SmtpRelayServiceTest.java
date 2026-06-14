@@ -2,6 +2,7 @@ package io.github.manormachine2207.hrsuite.notification;
 
 import io.github.manormachine2207.hrsuite.notification.dto.TestSendResponse;
 import io.github.manormachine2207.hrsuite.notification.dto.UpdateSmtpRelayRequest;
+import io.github.manormachine2207.hrsuite.shared.secret.SecretResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

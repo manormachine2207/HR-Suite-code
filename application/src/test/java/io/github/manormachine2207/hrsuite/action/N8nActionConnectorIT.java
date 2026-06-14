@@ -175,7 +175,7 @@ class N8nActionConnectorIT {
         statusToReturn.set(200);
 
         inTenant(tenantA, () -> {
-            harness.seedConfig(tenantA, stubBaseUrl(), "top-secret", List.of(REF));
+            harness.seedConfig(tenantA, stubBaseUrl(), "HRSUITE_N8N_HMAC_SECRET", List.of(REF));
             harness.deployProcess(tenantA);
         });
 
@@ -199,7 +199,7 @@ class N8nActionConnectorIT {
         statusToReturn.set(500);
 
         inTenant(tenantB, () -> {
-            harness.seedConfig(tenantB, stubBaseUrl(), "top-secret", List.of(REF));
+            harness.seedConfig(tenantB, stubBaseUrl(), "HRSUITE_N8N_HMAC_SECRET", List.of(REF));
             harness.deployProcess(tenantB);
         });
 
@@ -226,7 +226,7 @@ class N8nActionConnectorIT {
         statusToReturn.set(200);
 
         inTenant(tenantA, () -> {
-            harness.seedConfig(tenantA, stubBaseUrl(), "top-secret", List.of(REF));
+            harness.seedConfig(tenantA, stubBaseUrl(), "HRSUITE_N8N_HMAC_SECRET", List.of(REF));
             harness.deployProcess(tenantA);
         });
         String pi = inTenant(tenantA, () ->
