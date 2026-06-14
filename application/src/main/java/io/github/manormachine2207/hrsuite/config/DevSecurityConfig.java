@@ -51,6 +51,9 @@ public class DevSecurityConfig {
                     return jwt(token, now, Map.of(
                             "sub", token,
                             "roles", List.of(role),
+                            // ADR-017 Stufe 2b: synthesize an email claim so the email path is
+                            // exercisable in dev (prod uses the real OIDC email claim).
+                            "email", role + "@dev.local",
                             TenantContextFilter.TENANT_CLAIM, tenantId));
                 }
             }

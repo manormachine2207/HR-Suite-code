@@ -92,7 +92,7 @@ class AntragServiceTest {
         when(antragsTypService.findPublishedMajor(atId)).thenReturn(Optional.of(new PublishedMajorRef(versionId, 2, "proc-key")));
         when(workflowEngine.startInstance(any(), eq("proc-key"), any(), any())).thenReturn("pi-1");
 
-        service.submit(a.getId(), SUBJECT);
+        service.submit(a.getId(), SUBJECT, "applicant@dev.local");
 
         assertThat(a.getStatus()).isEqualTo(AntragStatus.SUBMITTED);
         assertThat(a.getAntragstypVersionId()).isEqualTo(versionId);
@@ -116,7 +116,7 @@ class AntragServiceTest {
                 .thenReturn(Optional.of(new PublishedMajorRef(UUID.randomUUID(), 0, "proc-key")));
         when(workflowEngine.startInstance(any(), eq("proc-key"), any(), any())).thenReturn("pi-1");
 
-        service.submit(a.getId(), SUBJECT);
+        service.submit(a.getId(), SUBJECT, "applicant@dev.local");
 
         @SuppressWarnings("unchecked")
         var vars = org.mockito.ArgumentCaptor.forClass(Map.class);
@@ -139,7 +139,7 @@ class AntragServiceTest {
                         .AntragsTypExceptions.Invalid("payload does not match"))
                 .when(antragsTypService).validatePayloadForPublishedMajor(eq(atId), any());
 
-        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT))
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local"))
                 .hasMessageContaining("payload does not match");
 
         assertThat(a.getStatus()).isEqualTo(AntragStatus.DRAFT);
@@ -154,7 +154,7 @@ class AntragServiceTest {
         a.submit(UUID.randomUUID(), 0); // now SUBMITTED
         when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
 
-        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT))
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local"))
                 .isInstanceOf(AntragExceptions.IllegalState.class);
     }
 
@@ -165,7 +165,7 @@ class AntragServiceTest {
         when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
         when(antragsTypService.findPublishedMajor(atId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT))
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local"))
                 .isInstanceOf(AntragExceptions.IllegalState.class);
     }
 
@@ -175,7 +175,7 @@ class AntragServiceTest {
         Antrag a = draft(atId, OTHER_SUBJECT);   // owned by someone else
         when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
 
-        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT))
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local"))
                 .isInstanceOf(AntragExceptions.NotFound.class);
     }
 

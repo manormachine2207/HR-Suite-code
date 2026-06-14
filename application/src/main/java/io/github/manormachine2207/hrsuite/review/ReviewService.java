@@ -128,7 +128,8 @@ public class ReviewService {
                 // ADR-017 Stufe 2: notify the applicant their request was decided, in the
                 // same transaction (rolls back with the decision if anything fails).
                 notificationService.notifyAntragDecided(
-                        antrag.getAntragstellerSubject(), antrag.getId(), terminal.name());
+                        antrag.getAntragstellerSubject(), antrag.getId(), terminal.name(),
+                        antrag.getAntragstellerEmail());
             }
         }
         // SDR-002-Minimum bis zum Audit-Modul: strukturiertes Event (IDs, kein PII-Payload).

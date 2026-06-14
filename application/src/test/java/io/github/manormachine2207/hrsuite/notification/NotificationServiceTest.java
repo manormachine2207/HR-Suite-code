@@ -28,13 +28,21 @@ class NotificationServiceTest {
     private static final String OTHER = "dev-applicant~bb";
 
     @Mock NotificationRepository repository;
+    @Mock SmtpRelayService smtpRelayService;
+    @Mock MailSender mailSender;
     private NotificationService service;
 
     @BeforeEach
     void setUp() {
-        service = new NotificationService(repository);
+        service = new NotificationService(repository, smtpRelayService, mailSender);
         TenantContext.set(TENANT);
         lenient().when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
+    }
+
+    private SmtpRelayConfig relay(boolean enabled) {
+        SmtpRelayConfig c = new SmtpRelayConfig();
+        c.update("mailpit", 1025, SmtpSecurity.NONE, "no-reply@hr-suite.local", null, null, null, enabled);
+        return c;
     }
 
     @AfterEach
@@ -46,7 +54,7 @@ class NotificationServiceTest {
     void notifyAntragDecidedSavesTenantScopedRecipientNotification() {
         UUID antragId = UUID.randomUUID();
 
-        service.notifyAntragDecided(SUBJECT, antragId, "APPROVED");
+        service.notifyAntragDecided(SUBJECT, antragId, "APPROVED", null);
 
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
         org.mockito.Mockito.verify(repository).save(captor.capture());
@@ -57,6 +65,48 @@ class NotificationServiceTest {
         assertThat(n.getAntragId()).isEqualTo(antragId);
         assertThat(n.getParams()).containsEntry("status", "APPROVED");
         assertThat(n.isRead()).isFalse();
+    }
+
+    // ---- ADR-017 Stufe 2b: best-effort e-mail ------------------------------
+
+    @Test
+    void emailSentWhenRelayEnabledAndAddressKnown() {
+        when(smtpRelayService.get()).thenReturn(relay(true));
+
+        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "user@example.ch");
+
+        org.mockito.ArgumentCaptor<MailMessage> msg = org.mockito.ArgumentCaptor.forClass(MailMessage.class);
+        org.mockito.Mockito.verify(mailSender).send(any(), msg.capture());
+        assertThat(msg.getValue().to()).isEqualTo("user@example.ch");
+        assertThat(msg.getValue().bodyText()).contains("APPROVED");
+    }
+
+    @Test
+    void noEmailWhenRelayDisabled() {
+        when(smtpRelayService.get()).thenReturn(relay(false));
+
+        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "user@example.ch");
+
+        org.mockito.Mockito.verify(mailSender, org.mockito.Mockito.never()).send(any(), any());
+    }
+
+    @Test
+    void noEmailWhenAddressMissing() {
+        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", null);
+
+        org.mockito.Mockito.verifyNoInteractions(smtpRelayService);
+        org.mockito.Mockito.verify(mailSender, org.mockito.Mockito.never()).send(any(), any());
+    }
+
+    /** A mail failure is swallowed — the in-app notification (and the decision) stand. */
+    @Test
+    void mailFailureDoesNotPropagate() {
+        when(smtpRelayService.get()).thenReturn(relay(true));
+        org.mockito.Mockito.doThrow(new RuntimeException("smtp down")).when(mailSender).send(any(), any());
+
+        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "user@example.ch");
+
+        org.mockito.Mockito.verify(repository).save(any());   // in-app notification still saved
     }
 
     @Test
