@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
 
@@ -37,6 +37,7 @@ import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.componen
 export class AntragListComponent implements OnInit {
   private readonly antragService = inject(AntragService);
   private readonly antragstypService = inject(AntragsTypService);
+  private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -82,6 +83,11 @@ export class AntragListComponent implements OnInit {
 
   ngOnInit(): void {
     this.reload();
+    const neu = this.route.snapshot.queryParamMap.get('neu');
+    if (neu) {
+      this.openCreate();
+      this.onTypChange(neu);
+    }
   }
 
   private reload(): void {

@@ -8,13 +8,9 @@
 
   <div class="hr-actions">
     @if (!creating) {
-      <button type="button" class="hr-btn hr-btn--primary" (click)="openCreate()"
-              [disabled]="loading || liveTypen.length === 0">
+      <a class="hr-btn hr-btn--primary" routerLink="/antraege/neu">
         {{ 'antrag.new' | translate }}
-      </button>
-      @if (!loading && liveTypen.length === 0) {
-        <span class="hr-hint">{{ 'antrag.noLiveTypes' | translate }}</span>
-      }
+      </a>
     }
   </div>
 
