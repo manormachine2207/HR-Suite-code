@@ -641,6 +641,31 @@
       "testFail": "Échec de l’envoi de test",
       "testError": "Échec de l'envoi de test.",
       "lastTest": "Dernier test"
+    },
+    "sso": {
+      "lead": "Fournisseur d'identité OIDC global (authentification unique) pour toute la plateforme.",
+      "loadError": "Impossible de charger la configuration OIDC.",
+      "notActiveTitle": "Pas encore actif.",
+      "notActiveBody": "La configuration est enregistrée mais PAS encore activée — la connexion via ce fournisseur sera activée lors d'une étape ultérieure.",
+      "stateConfigured": "Marqué actif",
+      "stateInactive": "Inactif",
+      "issuer": "URL de l'émetteur",
+      "clientId": "ID client",
+      "scopes": "Scopes",
+      "redirectUri": "URI de redirection",
+      "tenantClaim": "Claim de mandant",
+      "tenantClaimHelp": "Claim qui associe une connexion à un mandant (appliqué lors d'une étape ultérieure).",
+      "clientSecret": "Secret client (référence)",
+      "clientSecretHelp": "Le secret n'est PAS enregistré. Il s'agit du NOM de la variable d'environnement dont le secret est lu à l'exécution (SDR-004).",
+      "clientSecretRefLabel": "Nom de la variable d'environnement",
+      "secretState": "État du secret",
+      "secretSet": "configuré",
+      "secretUnset": "non défini",
+      "enabled": "Marquer comme actif (enregistré uniquement — activation ultérieure)",
+      "save": "Enregistrer",
+      "saved": "Configuration OIDC enregistrée.",
+      "saveError": "Échec de l'enregistrement.",
+      "enableNeedsConfig": "L'activation nécessite au moins une URL d'émetteur et un ID client."
     }
   },
   "notification": {

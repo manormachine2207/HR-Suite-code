@@ -641,6 +641,31 @@
       "testFail": "Test-Versand fehlgeschlagen",
       "testError": "Test-Versand fehlgeschlagen.",
       "lastTest": "Letzter Test"
+    },
+    "sso": {
+      "lead": "Globaler OIDC-Identitätsanbieter (Single Sign-On) für die gesamte Plattform.",
+      "loadError": "OIDC-Konfiguration konnte nicht geladen werden.",
+      "notActiveTitle": "Noch nicht aktiv.",
+      "notActiveBody": "Die Konfiguration wird gespeichert, ist aber noch NICHT scharf geschaltet — die Live-Anmeldung über diesen Anbieter folgt in einem späteren Cut.",
+      "stateConfigured": "Als aktiv markiert",
+      "stateInactive": "Inaktiv",
+      "issuer": "Issuer-URL",
+      "clientId": "Client-ID",
+      "scopes": "Scopes",
+      "redirectUri": "Redirect-URI",
+      "tenantClaim": "Mandanten-Claim",
+      "tenantClaimHelp": "Claim, der eine Anmeldung einem Mandanten zuordnet (wird in einem späteren Cut erzwungen).",
+      "clientSecret": "Client-Secret (Referenz)",
+      "clientSecretHelp": "Das Secret wird NICHT gespeichert. Hier steht der NAME der Umgebungsvariable, aus der das Secret zur Laufzeit gelesen wird (SDR-004).",
+      "clientSecretRefLabel": "Name der Umgebungsvariable",
+      "secretState": "Secret-Status",
+      "secretSet": "konfiguriert",
+      "secretUnset": "nicht gesetzt",
+      "enabled": "Als aktiv markieren (nur gespeichert — Aktivierung folgt später)",
+      "save": "Speichern",
+      "saved": "OIDC-Konfiguration gespeichert.",
+      "saveError": "Speichern fehlgeschlagen.",
+      "enableNeedsConfig": "Zum Aktivieren werden mindestens Issuer-URL und Client-ID benötigt."
     }
   },
   "notification": {

@@ -1,0 +1,88 @@
+<div class="hr-sso">
+  @if (forbidden) {
+    <p class="hr-state hr-state--note" role="note">{{ 'plattform.forbidden' | translate }}</p>
+  } @else if (loading) {
+    <p class="hr-state" role="status">{{ 'plattform.loading' | translate }}</p>
+  } @else if (failed) {
+    <p class="hr-state hr-state--err" role="alert">{{ 'plattform.sso.loadError' | translate }}</p>
+  } @else {
+    <!-- Stufe 2 is configure-only: this banner makes the "saved but not active" state explicit. -->
+    <p class="hr-state hr-state--note hr-notice" role="note">
+      <strong>{{ 'plattform.sso.notActiveTitle' | translate }}</strong>
+      {{ 'plattform.sso.notActiveBody' | translate }}
+    </p>
+
+    @if (successKey) { <p class="hr-state hr-state--ok" role="status">{{ successKey | translate }}</p> }
+    @if (errorKey) { <p class="hr-state hr-state--err" role="alert">{{ errorKey | translate }}</p> }
+    @if (errorDetail) { <p class="hr-state hr-state--err" role="alert">{{ errorDetail }}</p> }
+
+    <p class="hr-sub">{{ 'plattform.sso.lead' | translate }}
+      @if (config?.enabled) {
+        <span class="hr-badge is-onboarding">{{ 'plattform.sso.stateConfigured' | translate }}</span>
+      } @else {
+        <span class="hr-badge is-archived">{{ 'plattform.sso.stateInactive' | translate }}</span>
+      }
+    </p>
+
+    <form class="hr-card" [formGroup]="form" (ngSubmit)="save()">
+      <div class="hr-grid2">
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.sso.issuer' | translate }}</span>
+          <input formControlName="issuer" autocomplete="off" spellcheck="false"
+                 placeholder="https://login.example.ch/realms/hr" />
+        </label>
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.sso.clientId' | translate }}</span>
+          <input formControlName="clientId" autocomplete="off" spellcheck="false" placeholder="hr-suite" />
+        </label>
+      </div>
+
+      <div class="hr-grid2">
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.sso.scopes' | translate }}</span>
+          <input formControlName="scopes" autocomplete="off" spellcheck="false" placeholder="openid profile email" />
+        </label>
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.sso.redirectUri' | translate }}</span>
+          <input formControlName="redirectUri" autocomplete="off" spellcheck="false"
+                 placeholder="https://hr.example.ch/login/callback" />
+        </label>
+      </div>
+
+      <label class="hr-field">
+        <span class="hr-field__label">{{ 'plattform.sso.tenantClaim' | translate }}</span>
+        <input formControlName="tenantClaim" autocomplete="off" spellcheck="false" placeholder="tenant_id" />
+        <span class="hr-field__hint">{{ 'plattform.sso.tenantClaimHelp' | translate }}</span>
+      </label>
+
+      <div class="hr-section hr-secret">
+        <h3 class="hr-section__head">{{ 'plattform.sso.clientSecret' | translate }}</h3>
+        <p class="hr-section__desc">{{ 'plattform.sso.clientSecretHelp' | translate }}</p>
+        <div class="hr-grid2">
+          <label class="hr-field">
+            <span class="hr-field__label">{{ 'plattform.sso.clientSecretRefLabel' | translate }}</span>
+            <input formControlName="clientSecretRef" autocomplete="off" spellcheck="false"
+                   placeholder="HRSUITE_OIDC_CLIENT_SECRET" />
+          </label>
+          <div class="hr-field">
+            <span class="hr-field__label">{{ 'plattform.sso.secretState' | translate }}</span>
+            <span class="hr-badge" [class.is-active]="config?.secretConfigured" [class.is-archived]="!config?.secretConfigured">
+              {{ (config?.secretConfigured ? 'plattform.sso.secretSet' : 'plattform.sso.secretUnset') | translate }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <label class="hr-check">
+        <input type="checkbox" formControlName="enabled" />
+        {{ 'plattform.sso.enabled' | translate }}
+      </label>
+
+      <div class="hr-actions">
+        <button type="submit" class="hr-btn hr-btn--primary" [disabled]="saving">
+          {{ 'plattform.sso.save' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

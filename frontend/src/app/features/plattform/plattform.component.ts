@@ -4,6 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
 import { MandantenComponent } from './mandanten/mandanten.component';
 import { SmtpComponent } from './smtp/smtp.component';
+import { SsoComponent } from './sso/sso.component';
 
 /** A module-internal tab. `enabled:false` = stage placeholder ("in Vorbereitung"). */
 interface PlattformTab {
@@ -22,14 +23,14 @@ interface PlattformTab {
   selector: 'app-plattform',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslateModule, BreadcrumbComponent, MandantenComponent, SmtpComponent],
+  imports: [TranslateModule, BreadcrumbComponent, MandantenComponent, SmtpComponent, SsoComponent],
   templateUrl: './plattform.component.html',
   styleUrl: './plattform.component.scss',
 })
 export class PlattformComponent {
   readonly tabs: readonly PlattformTab[] = [
     { id: 'mandanten', labelKey: 'plattform.tab.mandanten', enabled: true },
-    { id: 'sso', labelKey: 'plattform.tab.sso', enabled: false },
+    { id: 'sso', labelKey: 'plattform.tab.sso', enabled: true },
     { id: 'smtp', labelKey: 'plattform.tab.smtp', enabled: true },
     { id: 'logging', labelKey: 'plattform.tab.logging', enabled: false },
   ];
