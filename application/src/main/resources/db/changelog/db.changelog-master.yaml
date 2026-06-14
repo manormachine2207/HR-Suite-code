@@ -44,3 +44,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/changes/015-create-oidc-config.sql
       relativeToChangelogFile: false
+  - include:
+      file: db/changelog/changes/016-tenant-n8n-hmac-secret-ref.sql
+      relativeToChangelogFile: false

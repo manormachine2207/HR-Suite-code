@@ -94,6 +94,10 @@ services:
       # bootstrap superuser 'hrsuite' — superuser/BYPASSRLS roles bypass RLS.
       DB_USERNAME: hrsuite_app
       DB_PASSWORD: ${APP_DB_PASSWORD:-dev}
+      # SDR-004: the n8n HMAC secret is provided here (deployment layer), NOT in the DB.
+      # tenant_n8n_config.hmac_secret_ref names THIS variable; the connector resolves it
+      # at sign time. Prod sets a real value via K8s secret / .env override.
+      HRSUITE_N8N_HMAC_SECRET: ${N8N_HMAC_SECRET:-dev-n8n-secret}
     ports:
       - "8081:8080"
     healthcheck:

@@ -45,9 +45,13 @@ public class ActionItHarness {
         this.executionRepo = executionRepo;
     }
 
-    /** Seeds the RLS-scoped {@code tenant_n8n_config} row for the current tenant. */
-    public void seedConfig(UUID tenant, String baseUrl, String hmacSecret, List<String> allowedRefs) {
-        configRepo.save(new TenantN8nConfig(tenant, baseUrl, hmacSecret, allowedRefs));
+    /**
+     * Seeds the RLS-scoped {@code tenant_n8n_config} row for the current tenant.
+     * {@code hmacSecretRef} is the NAME of the env var holding the HMAC secret
+     * (SDR-004), resolved at sign time — never the secret value.
+     */
+    public void seedConfig(UUID tenant, String baseUrl, String hmacSecretRef, List<String> allowedRefs) {
+        configRepo.save(new TenantN8nConfig(tenant, baseUrl, hmacSecretRef, allowedRefs));
     }
 
     /** Deploys the action test BPMN for the given Flowable tenant. */

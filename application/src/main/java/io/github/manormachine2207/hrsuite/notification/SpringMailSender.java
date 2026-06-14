@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.notification;
 
+import io.github.manormachine2207.hrsuite.shared.secret.SecretResolver;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Component;

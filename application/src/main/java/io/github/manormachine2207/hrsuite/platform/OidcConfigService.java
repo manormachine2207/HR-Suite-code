@@ -1,6 +1,7 @@
 package io.github.manormachine2207.hrsuite.platform;
 
 import io.github.manormachine2207.hrsuite.platform.dto.UpdateOidcConfigRequest;
+import io.github.manormachine2207.hrsuite.shared.secret.SecretResolver;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

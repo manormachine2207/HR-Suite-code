@@ -204,7 +204,7 @@ class BpmnCompilerRoundtripIT {
         UUID tid = UUID.fromString(tenantId);
         TenantContext.set(tid);
         try {
-            harness.seedConfig(tid, baseUrl, "test-secret", List.of("provision-ad-account"));
+            harness.seedConfig(tid, baseUrl, "HRSUITE_N8N_HMAC_SECRET", List.of("provision-ad-account"));
         } finally {
             TenantContext.clear();
         }

@@ -69,11 +69,13 @@ VALUES ('019e754d-371c-70e0-b199-88ab785bef6e', 'BIT',
 ON CONFLICT (id) DO NOTHING;
 
 -- Seed n8n config for the fixed dev tenant so the smoke path works on a fresh DB.
-INSERT INTO tenant_n8n_config (tenant_id, base_url, hmac_secret, allowed_refs, created_at, updated_at)
-VALUES ('019e754d-371c-70e0-b199-88ab785bef6e', 'http://n8n:5678', 'dev-n8n-secret',
+-- SDR-004: hmac_secret_ref holds the NAME of the env var the backend resolves at sign
+-- time (set on the backend service in docker-compose); the secret value is never in DB.
+INSERT INTO tenant_n8n_config (tenant_id, base_url, hmac_secret_ref, allowed_refs, created_at, updated_at)
+VALUES ('019e754d-371c-70e0-b199-88ab785bef6e', 'http://n8n:5678', 'HRSUITE_N8N_HMAC_SECRET',
         '["provision-ad-account"]'::jsonb, now(), now())
 ON CONFLICT (tenant_id) DO UPDATE
-  SET base_url = EXCLUDED.base_url, hmac_secret = EXCLUDED.hmac_secret,
+  SET base_url = EXCLUDED.base_url, hmac_secret_ref = EXCLUDED.hmac_secret_ref,
       allowed_refs = EXCLUDED.allowed_refs, updated_at = now();
 SQL
 echo "Seeded fixed dev tenant (019e754d-…) + tenant_n8n_config (-> http://n8n:5678)"
