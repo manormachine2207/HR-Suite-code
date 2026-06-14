@@ -31,8 +31,8 @@ export class AntragsTypService {
     return this.http.get<AntragsTypVersion[]>(`${this.base}/antragstyp/${id}/versions`);
   }
 
-  createAntragstyp(key: string, title: LocaleMap): Observable<AntragsTypSummary> {
-    return this.http.post<AntragsTypSummary>(`${this.base}/antragstyp`, { key, title });
+  createAntragstyp(key: string, title: LocaleMap, category?: string): Observable<AntragsTypSummary> {
+    return this.http.post<AntragsTypSummary>(`${this.base}/antragstyp`, { key, title, ...(category ? { category } : {}) });
   }
 
   /**

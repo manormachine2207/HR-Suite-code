@@ -7,6 +7,7 @@ import { UpperCasePipe } from '@angular/common';
 import { AntragsTypService } from './antragstyp.service';
 import { LANGS, Lang, LocaleMap } from '../form-designer/form-definition.model';
 import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
+import { ANTRAGS_KATEGORIEN } from './kategorie.model';
 
 type TitleGroup = FormGroup<{ [K in Lang]: FormControl<string> }>;
 
@@ -27,6 +28,7 @@ export function suggestKey(title: string): string {
 type CreateForm = FormGroup<{
   key: FormControl<string>;
   title: TitleGroup;
+  category: FormControl<string>;
 }>;
 
 @Component({
@@ -45,6 +47,7 @@ export class AntragstypCreateComponent {
   private readonly cdr = inject(ChangeDetectorRef);
 
   readonly langs = LANGS;
+  readonly kategorien = ANTRAGS_KATEGORIEN;
   saving = false;
   /** i18n key of the current error (BDR-005 — translated in the template). */
   errorKey = '';
@@ -58,6 +61,7 @@ export class AntragstypCreateComponent {
         [l, this.fb.control('', { nonNullable: true, validators: l === 'de' ? [Validators.required] : [] })]
       )) as { [K in Lang]: FormControl<string> }
     ) as TitleGroup,
+    category: this.fb.control('', { nonNullable: true }),
   }) as CreateForm;
 
   constructor() {
@@ -87,7 +91,8 @@ export class AntragstypCreateComponent {
     const title: LocaleMap = Object.fromEntries(
       Object.entries(rawTitle).filter(([, v]) => v && v.trim().length > 0));
 
-    this.service.createAntragstyp(key, title).subscribe({
+    const category = this.form.controls.category.value || undefined;
+    this.service.createAntragstyp(key, title, category).subscribe({
       next: (created) => {
         this.saving = false;
         this.cdr.markForCheck();
