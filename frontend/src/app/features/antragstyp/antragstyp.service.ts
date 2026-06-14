@@ -70,6 +70,10 @@ export class AntragsTypService {
     return this.http.post<AntragsTypVersion>(`${this.base}/antragstyp/versions/${versionId}/publish`, {});
   }
 
+  setCategory(id: string, category: string | null): Observable<AntragsTypSummary> {
+    return this.http.put<AntragsTypSummary>(`${this.base}/antragstyp/${id}/category`, { category });
+  }
+
   listActionRefs(): Observable<string[]> {
     return this.http.get<string[]>(`${this.base}/action/refs`);
   }

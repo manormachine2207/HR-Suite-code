@@ -123,4 +123,12 @@ describe('AntragsTypService', () => {
     req.flush(['provision-ad-account']);
     expect(result).toEqual(['provision-ad-account']);
   });
+
+  it('PUTs the category to /antragstyp/:id/category', () => {
+    service.setCategory('id-1', 'ABSENCE').subscribe();
+    const req = http.expectOne('/api/v1/antragstyp/id-1/category');
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ category: 'ABSENCE' });
+    req.flush({});
+  });
 });

@@ -11,6 +11,7 @@ export interface AntragsTypSummary {
   title: Record<string, string>;
   description?: Record<string, string> | null;
   status: string;
+  readonly category: string | null;
   currentVersionId?: string | null;
   createdAt: string;
   updatedAt: string;
