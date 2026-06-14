@@ -74,7 +74,7 @@ class AntragsTypControllerTest {
     @Test
     void createReturns201ForHrDesigner() throws Exception {
         UUID id = UUID.randomUUID();
-        when(service.createDefinition(eq("sonderurlaub"), any(), any())).thenReturn(sampleType(id));
+        when(service.createDefinition(eq("sonderurlaub"), any(), any(), any())).thenReturn(sampleType(id));
 
         mvc.perform(post("/api/v1/antragstyp").with(jwt().authorities(role("hr-designer")))
                         .contentType(MediaType.APPLICATION_JSON).content(CREATE_BODY))
@@ -86,7 +86,7 @@ class AntragsTypControllerTest {
     void createReturns403WhenNoTenantInContext() throws Exception {
         // Authenticated hr-designer, but token carried no usable tenant_id claim, so the
         // service hits an empty TenantContext (ADR-008). Must surface as 403, not 500.
-        when(service.createDefinition(eq("sonderurlaub"), any(), any()))
+        when(service.createDefinition(eq("sonderurlaub"), any(), any(), any()))
                 .thenThrow(new MissingTenantContextException("no tenant in context"));
 
         mvc.perform(post("/api/v1/antragstyp").with(jwt().authorities(role("hr-designer")))

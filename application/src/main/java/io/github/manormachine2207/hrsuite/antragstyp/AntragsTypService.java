@@ -2,6 +2,7 @@ package io.github.manormachine2207.hrsuite.antragstyp;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.f4b6a3.uuid.UuidCreator;
+import io.github.manormachine2207.hrsuite.antragstyp.AntragsKategorie;
 import io.github.manormachine2207.hrsuite.antragstyp.flow.BpmnCompiler;
 import io.github.manormachine2207.hrsuite.antragstyp.flow.FlowDefinition;
 import io.github.manormachine2207.hrsuite.antragstyp.form.FormDefinition;
@@ -63,11 +64,19 @@ public class AntragsTypService {
         this.workflowEngine = workflowEngine;
     }
 
-    public AntragsTyp createDefinition(String key, Map<String, String> title, Map<String, String> description) {
+    public AntragsTyp createDefinition(String key, Map<String, String> title, Map<String, String> description,
+                                       AntragsKategorie category) {
         if (antragsTypRepository.existsByKey(key)) {
             throw new AntragsTypExceptions.Conflict("antragstyp key already exists: " + key);
         }
         AntragsTyp at = new AntragsTyp(UuidCreator.getTimeOrderedEpoch(), currentTenant(), key, title, description);
+        at.recategorize(category);
+        return antragsTypRepository.save(at);
+    }
+
+    public AntragsTyp setCategory(UUID id, AntragsKategorie category) {
+        AntragsTyp at = getDefinition(id);
+        at.recategorize(category);
         return antragsTypRepository.save(at);
     }
 

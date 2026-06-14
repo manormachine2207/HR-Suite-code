@@ -48,7 +48,7 @@ public class AntragsTypController {
     @PreAuthorize(WRITE_DRAFT)
     public ResponseEntity<AntragsTypResponse> create(@Valid @RequestBody CreateAntragsTypRequest req,
                                                      UriComponentsBuilder uri) {
-        AntragsTyp created = service.createDefinition(req.key(), req.title(), req.description());
+        AntragsTyp created = service.createDefinition(req.key(), req.title(), req.description(), req.category());
         URI location = uri.path("/api/v1/antragstyp/{id}").buildAndExpand(created.getId()).toUri();
         return ResponseEntity.created(location).body(AntragsTypResponse.from(created));
     }
