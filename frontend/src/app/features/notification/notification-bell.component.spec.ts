@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { registerLocaleData } from '@angular/common';
 import localeDeCh from '@angular/common/locales/de-CH';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { ObIconService } from '@oblique/oblique';
 import { of, throwError } from 'rxjs';
@@ -58,6 +58,10 @@ describe('NotificationBellComponent', () => {
     const fixture = TestBed.createComponent(NotificationBellComponent);
     fixture.detectChanges();
     await fixture.whenStable();
+
+    // Stub navigation: the test router has no routes, so a real navigate() to
+    // '/antraege/a1' would reject (NG04002) as an unhandled rejection and fail the run.
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
 
     const cmp = fixture.componentInstance;
     cmp.toggle();
