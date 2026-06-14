@@ -21,22 +21,29 @@ describe('PlattformComponent', () => {
     }).compileComponents();
   });
 
-  it('renders four module tabs with Mandanten + SMTP enabled (ADR-019 Stufe 1+3)', async () => {
+  it('renders four module tabs with Mandanten + SSO + SMTP enabled (ADR-019 Stufe 1+2+3)', async () => {
     const fixture = TestBed.createComponent(PlattformComponent);
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
     const tabs = [...el.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
     expect(tabs).toHaveLength(4);
     const enabledIds = fixture.componentInstance.tabs.filter(t => t.enabled).map(t => t.id);
-    expect(enabledIds).toEqual(['mandanten', 'smtp']);
-    expect(tabs.filter(t => !t.disabled)).toHaveLength(2);
+    expect(enabledIds).toEqual(['mandanten', 'sso', 'smtp']);
+    expect(tabs.filter(t => !t.disabled)).toHaveLength(3);
   });
 
   it('ignores clicks on disabled tabs (active stays mandanten)', () => {
     const fixture = TestBed.createComponent(PlattformComponent);
     const cmp = fixture.componentInstance;
-    cmp.select(cmp.tabs[1]); // sso, disabled
+    cmp.select(cmp.tabs[3]); // logging, disabled
     expect(cmp.active()).toBe('mandanten');
+  });
+
+  it('switches to the SSO tab when selected', () => {
+    const fixture = TestBed.createComponent(PlattformComponent);
+    const cmp = fixture.componentInstance;
+    cmp.select(cmp.tabs[1]); // sso, enabled
+    expect(cmp.active()).toBe('sso');
   });
 
   it('switches to the SMTP tab when selected', () => {

@@ -641,6 +641,31 @@
       "testFail": "Test send failed",
       "testError": "Test send failed.",
       "lastTest": "Last test"
+    },
+    "sso": {
+      "lead": "Global OIDC identity provider (single sign-on) for the whole platform.",
+      "loadError": "Could not load the OIDC configuration.",
+      "notActiveTitle": "Not active yet.",
+      "notActiveBody": "The configuration is saved but NOT switched live — sign-in via this provider will be enabled in a later cut.",
+      "stateConfigured": "Marked active",
+      "stateInactive": "Inactive",
+      "issuer": "Issuer URL",
+      "clientId": "Client ID",
+      "scopes": "Scopes",
+      "redirectUri": "Redirect URI",
+      "tenantClaim": "Tenant claim",
+      "tenantClaimHelp": "Claim that maps a sign-in to a tenant (enforced in a later cut).",
+      "clientSecret": "Client secret (reference)",
+      "clientSecretHelp": "The secret is NOT stored. This is the NAME of the environment variable the secret is read from at runtime (SDR-004).",
+      "clientSecretRefLabel": "Environment variable name",
+      "secretState": "Secret status",
+      "secretSet": "configured",
+      "secretUnset": "not set",
+      "enabled": "Mark as active (stored only — activation comes later)",
+      "save": "Save",
+      "saved": "OIDC configuration saved.",
+      "saveError": "Save failed.",
+      "enableNeedsConfig": "Enabling requires at least an issuer URL and a client ID."
     }
   },
   "notification": {
