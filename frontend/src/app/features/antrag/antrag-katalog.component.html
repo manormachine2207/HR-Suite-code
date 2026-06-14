@@ -1,0 +1,70 @@
+<section class="hr-katalog" aria-labelledby="katalog-title">
+  <app-breadcrumb [trail]="[
+    { labelKey: 'nav.antraege', link: '/antraege' },
+    { labelKey: 'antrag.katalog.title' }
+  ]" />
+
+  <header class="hr-head">
+    <h1 id="katalog-title">{{ 'antrag.katalog.title' | translate }}</h1>
+    <p class="hr-lead">{{ 'antrag.katalog.lead' | translate }}</p>
+  </header>
+
+  @if (loading()) {
+    <div class="hr-state" role="status">{{ 'antrag.loading' | translate }}</div>
+  } @else if (failed()) {
+    <div class="hr-state hr-state--error" role="alert">
+      {{ 'antrag.katalog.empty' | translate }}
+    </div>
+  } @else {
+    <!-- Category filter chips -->
+    @if (presentCategories().length > 1) {
+      <div class="hr-katalog-filter" role="group" [attr.aria-label]="'antragstyp.category.label' | translate">
+        <button
+          type="button"
+          class="hr-chip"
+          [class.is-active]="selectedCategory() === 'ALL'"
+          (click)="selectedCategory.set('ALL')"
+        >
+          {{ 'antrag.katalog.filterAll' | translate }}
+        </button>
+        @for (cat of presentCategories(); track cat) {
+          <button
+            type="button"
+            class="hr-chip"
+            [class.is-active]="selectedCategory() === cat"
+            (click)="selectedCategory.set(cat)"
+          >
+            {{ ('antragstyp.category.' + cat) | translate }}
+          </button>
+        }
+      </div>
+    }
+
+    <!-- Tile grid -->
+    @if (filtered().length === 0) {
+      <div class="hr-state" role="note">
+        {{ 'antrag.katalog.empty' | translate }}
+      </div>
+    } @else {
+      <ul class="hr-kachel-grid">
+        @for (t of filtered(); track t.id) {
+          <li>
+            <button
+              type="button"
+              class="hr-kachel"
+              (click)="start(t.id)"
+            >
+              <span class="hr-kachel__cat">
+                {{ ('antragstyp.category.' + kategorieOf(t.category)) | translate }}
+              </span>
+              <span class="hr-kachel__title">{{ titleOf(t) }}</span>
+              <span class="hr-kachel__foot">
+                <span class="hr-open">{{ 'antrag.katalog.start' | translate }} <span aria-hidden="true">→</span></span>
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</section>
