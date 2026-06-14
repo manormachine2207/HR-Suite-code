@@ -606,6 +606,41 @@
     "createSuccess": "Mandant créé.",
     "createConflict": "Le code ou le sous-domaine existe déjà.",
     "createError": "Échec de la création.",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "smtp": {
+      "lead": "Relais SMTP global pour les e-mails sortants.",
+      "verified": "Vérifié",
+      "unverified": "Non vérifié",
+      "loadError": "Impossible de charger la configuration SMTP.",
+      "host": "Hôte",
+      "port": "Port",
+      "security": "Sécurité de transport",
+      "fromAddress": "Adresse d'expéditeur",
+      "fromName": "Nom d'expéditeur",
+      "username": "Nom d'utilisateur",
+      "sec": {
+        "NONE": "Aucune (clair)",
+        "STARTTLS": "STARTTLS",
+        "TLS": "TLS"
+      },
+      "passwordRef": "Mot de passe (référence)",
+      "passwordRefHelp": "Le mot de passe n'est PAS stocké. Indiquez le NOM de la variable d'environnement d'où il est lu à l'exécution (SDR-004).",
+      "passwordRefLabel": "Nom de la variable d'environnement",
+      "secretState": "État du secret",
+      "secretSet": "configuré",
+      "secretUnset": "non défini",
+      "enabled": "Relais actif",
+      "save": "Enregistrer",
+      "saved": "Configuration SMTP enregistrée.",
+      "saveError": "Échec de l'enregistrement.",
+      "testHeading": "Envoi de test",
+      "testHelp": "Envoie un e-mail de test via la configuration actuelle.",
+      "testTo": "Test à",
+      "testSend": "Envoyer le test",
+      "testOk": "E-mail de test envoyé avec succès.",
+      "testFail": "Échec de l’envoi de test",
+      "testError": "Échec de l'envoi de test.",
+      "lastTest": "Dernier test"
+    }
   }
 }
