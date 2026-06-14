@@ -109,6 +109,14 @@
         "en": "Englisch"
       },
       "cancel": "Abbrechen"
+    },
+    "category": {
+      "label": "Kategorie",
+      "ABSENCE": "Urlaub & Abwesenheit",
+      "FINANCE": "Spesen & Finanzen",
+      "EMPLOYMENT": "Anstellung & Personal",
+      "DEVELOPMENT": "Weiterbildung",
+      "OTHER": "Sonstiges"
     }
   },
   "builder": {
@@ -291,6 +299,13 @@
       "cancelConfirm": "Möchten Sie diesen Antrag wirklich zurückziehen?",
       "cancelSuccess": "Antrag wurde zurückgezogen.",
       "cancelError": "Antrag konnte nicht zurückgezogen werden."
+    },
+    "katalog": {
+      "title": "Neuen Antrag stellen",
+      "lead": "Wählen Sie einen Antragstyp.",
+      "filterAll": "Alle",
+      "empty": "Keine Antragstypen verfügbar.",
+      "start": "Antrag starten"
     }
   },
   "designer": {

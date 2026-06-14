@@ -109,6 +109,14 @@
         "en": "English"
       },
       "cancel": "Cancel"
+    },
+    "category": {
+      "label": "Category",
+      "ABSENCE": "Leave & absence",
+      "FINANCE": "Expenses & finance",
+      "EMPLOYMENT": "Employment & staff",
+      "DEVELOPMENT": "Development & training",
+      "OTHER": "Other"
     }
   },
   "builder": {
@@ -291,6 +299,13 @@
       "cancelConfirm": "Do you really want to withdraw this request?",
       "cancelSuccess": "The request has been withdrawn.",
       "cancelError": "The request could not be withdrawn."
+    },
+    "katalog": {
+      "title": "Submit a new request",
+      "lead": "Choose a request type.",
+      "filterAll": "All",
+      "empty": "No request types available.",
+      "start": "Start request"
     }
   },
   "designer": {

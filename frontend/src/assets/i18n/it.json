@@ -109,6 +109,14 @@
         "en": "Inglese"
       },
       "cancel": "Annulla"
+    },
+    "category": {
+      "label": "Categoria",
+      "ABSENCE": "Congedi e assenze",
+      "FINANCE": "Spese e finanze",
+      "EMPLOYMENT": "Impiego e personale",
+      "DEVELOPMENT": "Formazione",
+      "OTHER": "Altro"
     }
   },
   "builder": {
@@ -291,6 +299,13 @@
       "cancelConfirm": "Vuoi davvero ritirare questa richiesta?",
       "cancelSuccess": "La richiesta è stata ritirata.",
       "cancelError": "Impossibile ritirare la richiesta."
+    },
+    "katalog": {
+      "title": "Presenta una nuova richiesta",
+      "lead": "Scegli un tipo di richiesta.",
+      "filterAll": "Tutti",
+      "empty": "Nessun tipo di richiesta disponibile.",
+      "start": "Avvia la richiesta"
     }
   },
   "designer": {
