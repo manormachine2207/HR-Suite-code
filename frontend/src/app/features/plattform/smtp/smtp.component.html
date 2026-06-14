@@ -1,0 +1,122 @@
+<div class="hr-smtp">
+  @if (forbidden) {
+    <p class="hr-state hr-state--note" role="note">{{ 'plattform.forbidden' | translate }}</p>
+  } @else if (loading) {
+    <p class="hr-state" role="status">{{ 'plattform.loading' | translate }}</p>
+  } @else if (failed) {
+    <p class="hr-state hr-state--err" role="alert">{{ 'plattform.smtp.loadError' | translate }}</p>
+  } @else {
+    @if (successKey) { <p class="hr-state hr-state--ok" role="status">{{ successKey | translate }}</p> }
+    @if (errorKey) { <p class="hr-state hr-state--err" role="alert">{{ errorKey | translate }}</p> }
+    @if (errorDetail) { <p class="hr-state hr-state--err" role="alert">{{ errorDetail }}</p> }
+
+    <p class="hr-sub">{{ 'plattform.smtp.lead' | translate }}
+      @if (relay?.verified) {
+        <span class="hr-badge is-active">{{ 'plattform.smtp.verified' | translate }}</span>
+      } @else {
+        <span class="hr-badge is-onboarding">{{ 'plattform.smtp.unverified' | translate }}</span>
+      }
+    </p>
+
+    <!-- Relay configuration -->
+    <form class="hr-card" [formGroup]="form" (ngSubmit)="save()">
+      <div class="hr-grid2">
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.smtp.host' | translate }} <span class="hr-req">*</span></span>
+          <input formControlName="host" autocomplete="off"
+                 [class.hr-invalid]="form.controls['host'].touched && form.controls['host'].invalid" />
+        </label>
+        <label class="hr-field hr-field--narrow">
+          <span class="hr-field__label">{{ 'plattform.smtp.port' | translate }} <span class="hr-req">*</span></span>
+          <input type="number" formControlName="port" min="1" max="65535"
+                 [class.hr-invalid]="form.controls['port'].touched && form.controls['port'].invalid" />
+        </label>
+      </div>
+
+      <div class="hr-grid2">
+        <label class="hr-field hr-field--narrow">
+          <span class="hr-field__label">{{ 'plattform.smtp.security' | translate }}</span>
+          <select formControlName="security">
+            @for (s of securities; track s) {
+              <option [value]="s">{{ 'plattform.smtp.sec.' + s | translate }}</option>
+            }
+          </select>
+        </label>
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.smtp.fromAddress' | translate }} <span class="hr-req">*</span></span>
+          <input formControlName="fromAddress" autocomplete="off"
+                 [class.hr-invalid]="form.controls['fromAddress'].touched && form.controls['fromAddress'].invalid" />
+        </label>
+      </div>
+
+      <div class="hr-grid2">
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.smtp.fromName' | translate }}</span>
+          <input formControlName="fromName" autocomplete="off" />
+        </label>
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.smtp.username' | translate }}</span>
+          <input formControlName="username" autocomplete="off" />
+        </label>
+      </div>
+
+      <div class="hr-section hr-secret">
+        <h3 class="hr-section__head">{{ 'plattform.smtp.passwordRef' | translate }}</h3>
+        <p class="hr-section__desc">{{ 'plattform.smtp.passwordRefHelp' | translate }}</p>
+        <div class="hr-grid2">
+          <label class="hr-field">
+            <span class="hr-field__label">{{ 'plattform.smtp.passwordRefLabel' | translate }}</span>
+            <input formControlName="passwordRef" autocomplete="off" spellcheck="false"
+                   placeholder="HRSUITE_SMTP_PASSWORD" />
+          </label>
+          <div class="hr-field">
+            <span class="hr-field__label">{{ 'plattform.smtp.secretState' | translate }}</span>
+            <span class="hr-badge" [class.is-active]="relay?.secretConfigured" [class.is-archived]="!relay?.secretConfigured">
+              {{ (relay?.secretConfigured ? 'plattform.smtp.secretSet' : 'plattform.smtp.secretUnset') | translate }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <label class="hr-check">
+        <input type="checkbox" formControlName="enabled" />
+        {{ 'plattform.smtp.enabled' | translate }}
+      </label>
+
+      <div class="hr-actions">
+        <button type="submit" class="hr-btn hr-btn--primary" [disabled]="saving">
+          {{ 'plattform.smtp.save' | translate }}
+        </button>
+      </div>
+    </form>
+
+    <!-- Test send -->
+    <form class="hr-card" [formGroup]="testForm" (ngSubmit)="test()">
+      <h3 class="hr-section__head">{{ 'plattform.smtp.testHeading' | translate }}</h3>
+      <p class="hr-section__desc">{{ 'plattform.smtp.testHelp' | translate }}</p>
+      <div class="hr-test-row">
+        <label class="hr-field">
+          <span class="hr-field__label">{{ 'plattform.smtp.testTo' | translate }}</span>
+          <input formControlName="to" autocomplete="off"
+                 [class.hr-invalid]="testForm.controls['to'].touched && testForm.controls['to'].invalid" />
+        </label>
+        <button type="submit" class="hr-btn hr-btn--ghost" [disabled]="testing">
+          {{ 'plattform.smtp.testSend' | translate }}
+        </button>
+      </div>
+      @if (testResult) {
+        <p class="hr-state" [class.hr-state--ok]="testResult.success" [class.hr-state--err]="!testResult.success"
+           role="status">
+          {{ (testResult.success ? 'plattform.smtp.testOk' : 'plattform.smtp.testFail') | translate }}
+          @if (!testResult.success) { — {{ testResult.outcome }} }
+        </p>
+      }
+      @if (relay?.lastTestAt) {
+        <p class="hr-muted hr-last-test">
+          {{ 'plattform.smtp.lastTest' | translate }}:
+          {{ relay!.lastTestAt | date:'dd.MM.yyyy HH:mm':undefined:dateLocale }} — {{ relay!.lastTestOutcome }}
+        </p>
+      }
+    </form>
+  }
+</div>

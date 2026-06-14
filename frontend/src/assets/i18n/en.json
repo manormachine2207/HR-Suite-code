@@ -606,6 +606,41 @@
     "createSuccess": "Tenant created.",
     "createConflict": "Code or subdomain already exists.",
     "createError": "Creation failed.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "smtp": {
+      "lead": "Global SMTP relay for outbound e-mail.",
+      "verified": "Verified",
+      "unverified": "Not verified",
+      "loadError": "Could not load the SMTP configuration.",
+      "host": "Host",
+      "port": "Port",
+      "security": "Transport security",
+      "fromAddress": "From address",
+      "fromName": "From name",
+      "username": "Username",
+      "sec": {
+        "NONE": "None (plaintext)",
+        "STARTTLS": "STARTTLS",
+        "TLS": "TLS"
+      },
+      "passwordRef": "Password (reference)",
+      "passwordRefHelp": "The password is NOT stored. Enter the NAME of the environment variable it is read from at runtime (SDR-004).",
+      "passwordRefLabel": "Environment variable name",
+      "secretState": "Secret state",
+      "secretSet": "configured",
+      "secretUnset": "not set",
+      "enabled": "Relay enabled",
+      "save": "Save",
+      "saved": "SMTP configuration saved.",
+      "saveError": "Saving failed.",
+      "testHeading": "Test send",
+      "testHelp": "Sends a test e-mail via the current configuration.",
+      "testTo": "Test to",
+      "testSend": "Send test",
+      "testOk": "Test e-mail sent successfully.",
+      "testFail": "Test send failed",
+      "testError": "Test send failed.",
+      "lastTest": "Last test"
+    }
   }
 }

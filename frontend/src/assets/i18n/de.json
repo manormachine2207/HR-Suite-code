@@ -606,6 +606,41 @@
     "createSuccess": "Mandant angelegt.",
     "createConflict": "Code oder Subdomain ist bereits vergeben.",
     "createError": "Anlegen fehlgeschlagen.",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "smtp": {
+      "lead": "Globaler SMTP-Relay für ausgehende E-Mails.",
+      "verified": "Verifiziert",
+      "unverified": "Nicht verifiziert",
+      "loadError": "SMTP-Konfiguration konnte nicht geladen werden.",
+      "host": "Host",
+      "port": "Port",
+      "security": "Transport-Sicherheit",
+      "fromAddress": "Absenderadresse",
+      "fromName": "Absendername",
+      "username": "Benutzername",
+      "sec": {
+        "NONE": "Keine (Klartext)",
+        "STARTTLS": "STARTTLS",
+        "TLS": "TLS"
+      },
+      "passwordRef": "Passwort (Referenz)",
+      "passwordRefHelp": "Das Passwort wird NICHT gespeichert. Hier steht der NAME der Umgebungsvariable, aus der das Passwort zur Laufzeit gelesen wird (SDR-004).",
+      "passwordRefLabel": "Name der Umgebungsvariable",
+      "secretState": "Secret-Status",
+      "secretSet": "konfiguriert",
+      "secretUnset": "nicht gesetzt",
+      "enabled": "Relay aktiv",
+      "save": "Speichern",
+      "saved": "SMTP-Konfiguration gespeichert.",
+      "saveError": "Speichern fehlgeschlagen.",
+      "testHeading": "Test-Versand",
+      "testHelp": "Sendet eine Test-E-Mail über die aktuelle Konfiguration.",
+      "testTo": "Test an",
+      "testSend": "Test senden",
+      "testOk": "Test-E-Mail erfolgreich versendet.",
+      "testFail": "Test-Versand fehlgeschlagen",
+      "testError": "Test-Versand fehlgeschlagen.",
+      "lastTest": "Letzter Test"
+    }
   }
 }

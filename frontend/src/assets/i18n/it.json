@@ -606,6 +606,41 @@
     "createSuccess": "Mandante creato.",
     "createConflict": "Codice o sottodominio già in uso.",
     "createError": "Creazione non riuscita.",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "smtp": {
+      "lead": "Relay SMTP globale per le e-mail in uscita.",
+      "verified": "Verificato",
+      "unverified": "Non verificato",
+      "loadError": "Impossibile caricare la configurazione SMTP.",
+      "host": "Host",
+      "port": "Porta",
+      "security": "Sicurezza di trasporto",
+      "fromAddress": "Indirizzo mittente",
+      "fromName": "Nome mittente",
+      "username": "Nome utente",
+      "sec": {
+        "NONE": "Nessuna (in chiaro)",
+        "STARTTLS": "STARTTLS",
+        "TLS": "TLS"
+      },
+      "passwordRef": "Password (riferimento)",
+      "passwordRefHelp": "La password NON viene memorizzata. Inserire il NOME della variabile d'ambiente da cui viene letta a runtime (SDR-004).",
+      "passwordRefLabel": "Nome della variabile d'ambiente",
+      "secretState": "Stato del secret",
+      "secretSet": "configurato",
+      "secretUnset": "non impostato",
+      "enabled": "Relay attivo",
+      "save": "Salva",
+      "saved": "Configurazione SMTP salvata.",
+      "saveError": "Salvataggio non riuscito.",
+      "testHeading": "Invio di prova",
+      "testHelp": "Invia una e-mail di prova con la configurazione attuale.",
+      "testTo": "Prova a",
+      "testSend": "Invia prova",
+      "testOk": "E-mail di prova inviata con successo.",
+      "testFail": "Invio di prova non riuscito",
+      "testError": "Invio di prova non riuscito.",
+      "lastTest": "Ultima prova"
+    }
   }
 }

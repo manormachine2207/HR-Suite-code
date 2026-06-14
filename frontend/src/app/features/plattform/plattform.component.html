@@ -28,6 +28,7 @@
   <div class="hr-panel" role="tabpanel" [id]="'panel-' + active()" [attr.aria-labelledby]="'tab-' + active()">
     @switch (active()) {
       @case ('mandanten') { <app-mandanten /> }
+      @case ('smtp') { <app-smtp /> }
       @default {
         <p class="hr-state hr-state--note" role="note">{{ 'plattform.placeholder' | translate }}</p>
       }

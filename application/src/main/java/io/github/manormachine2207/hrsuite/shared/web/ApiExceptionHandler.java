@@ -77,6 +77,12 @@ public class ApiExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
     }
 
+    @ExceptionHandler(io.github.manormachine2207.hrsuite.notification.NotificationExceptions.Invalid.class)
+    ProblemDetail handleNotificationInvalid(
+            io.github.manormachine2207.hrsuite.notification.NotificationExceptions.Invalid ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
     @ExceptionHandler(MissingTenantContextException.class)
     ProblemDetail handleMissingTenant(MissingTenantContextException ex) {
         // Authenticated, tenant-scoped role, but no tenant_id in context (ADR-008):

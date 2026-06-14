@@ -24,6 +24,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**", "/actuator/info").permitAll()
                         .requestMatchers("/api/v1/tenant/**").hasRole("platform-admin")
+                        // ADR-019: global platform configuration (SMTP relay, later SSO/logging).
+                        .requestMatchers("/api/v1/platform/**").hasRole("platform-admin")
                         .requestMatchers("/api/v1/antragstyp/**").authenticated()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth -> oauth
