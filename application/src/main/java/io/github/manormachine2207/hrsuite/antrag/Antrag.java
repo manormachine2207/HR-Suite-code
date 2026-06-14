@@ -53,6 +53,10 @@ public class Antrag {
     @Column(name = "antragsteller_subject", nullable = false, updatable = false, length = 256)
     private String antragstellerSubject;
 
+    /** Applicant e-mail captured from the OIDC claim at submit (ADR-017 Stufe 2b); null = in-app only. */
+    @Column(name = "antragsteller_email", length = 320)
+    private String antragstellerEmail;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 16)
     private AntragStatus status;
@@ -124,6 +128,11 @@ public class Antrag {
         this.submittedAt = OffsetDateTime.now();
     }
 
+    /** Captures the applicant e-mail from the OIDC claim at submit (ADR-017 Stufe 2b). */
+    public void recordApplicantEmail(String email) {
+        this.antragstellerEmail = (email == null || email.isBlank()) ? null : email;
+    }
+
     /** Records the started Flowable process-instance id after submission (ADR-009 §5). */
     public void attachWorkflowProcess(String processInstanceId) {
         this.workflowProcessId = processInstanceId;
@@ -164,6 +173,7 @@ public class Antrag {
     public Integer getSubmittedMinor() { return submittedMinor; }
     public UUID getMigratedFromVersionId() { return migratedFromVersionId; }
     public String getAntragstellerSubject() { return antragstellerSubject; }
+    public String getAntragstellerEmail() { return antragstellerEmail; }
     public AntragStatus getStatus() { return status; }
     public Map<String, Object> getPayload() {
         return payload == null ? null : Collections.unmodifiableMap(payload);

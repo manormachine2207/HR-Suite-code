@@ -63,7 +63,8 @@ public class AntragController {
     @PostMapping("/{id}/submit")
     @PreAuthorize(APPLICANT)
     public AntragResponse submit(@PathVariable("id") UUID id, @AuthenticationPrincipal Jwt jwt) {
-        return AntragResponse.from(service.submit(id, jwt.getSubject()));
+        // ADR-017 Stufe 2b: pass the applicant e-mail claim so a later decision can mail them.
+        return AntragResponse.from(service.submit(id, jwt.getSubject(), jwt.getClaimAsString("email")));
     }
 
     @PostMapping("/{id}/cancel")
