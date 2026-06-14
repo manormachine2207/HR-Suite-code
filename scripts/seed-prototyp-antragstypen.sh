@@ -301,3 +301,25 @@ for t in TYPES:
 print(f"== Fertig: {ok} publiziert, {skipped} übersprungen, {failed} Fehler ==")
 sys.exit(1 if failed else 0)
 PY
+
+# 3) Kategorien setzen (idempotent – UPDATE WHERE key IN (...)).
+echo "== Kategorien setzen =="
+docker exec -i -e PGPASSWORD="${POSTGRES_PASSWORD:-dev}" hrsuite-postgres \
+  psql -U hrsuite -d hrsuite -v ON_ERROR_STOP=1 <<SQL
+UPDATE antragstyp SET category = 'EMPLOYMENT'
+ WHERE tenant_id = '${TENANT_ID}'
+   AND key IN ('stellenantrag', 'nebenbeschaeftigung', 'bg_wechsel', 'eintritt_externe');
+
+UPDATE antragstyp SET category = 'DEVELOPMENT'
+ WHERE tenant_id = '${TENANT_ID}'
+   AND key IN ('weiterbildung', 'tagung');
+
+UPDATE antragstyp SET category = 'FINANCE'
+ WHERE tenant_id = '${TENANT_ID}'
+   AND key IN ('spontanpraemie');
+
+UPDATE antragstyp SET category = 'ABSENCE'
+ WHERE tenant_id = '${TENANT_ID}'
+   AND key IN ('treuepraemie_urlaub', 'pikett_vaz');
+SQL
+echo "== Kategorien gesetzt =="
