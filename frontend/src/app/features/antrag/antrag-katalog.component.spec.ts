@@ -101,6 +101,25 @@ describe('AntragKatalogComponent', () => {
   });
 
   // -------------------------------------------------------------------------
+  it('excludes DRAFT types — only LIVE tiles are rendered', async () => {
+    service.list.mockReturnValue(of([
+      makeTyp({ id: 'live1', key: 'k1', title: { de: 'Urlaub' }, status: 'LIVE',  category: 'ABSENCE' }),
+      makeTyp({ id: 'draft1', key: 'k2', title: { de: 'Entwurf' }, status: 'DRAFT', category: 'ABSENCE' }),
+    ]));
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    const fx = TestBed.createComponent(AntragKatalogComponent);
+    fx.detectChanges();
+    await fx.whenStable();
+    fx.detectChanges();
+
+    // Only the LIVE type should render as a tile; the DRAFT must be excluded.
+    const tiles = fx.nativeElement.querySelectorAll('.hr-kachel');
+    expect(tiles.length).toBe(1);
+    expect((tiles[0] as HTMLElement).getAttribute('aria-label')).toContain('Urlaub');
+  });
+
+  // -------------------------------------------------------------------------
   it('shows an empty/error state when the service call fails', async () => {
     service.list.mockReturnValue(throwError(() => new Error('network error')));
     vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);

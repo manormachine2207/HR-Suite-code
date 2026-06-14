@@ -305,6 +305,7 @@
       "lead": "Wählen Sie einen Antragstyp.",
       "filterAll": "Alle",
       "empty": "Keine Antragstypen verfügbar.",
+      "error": "Antragstypen konnten nicht geladen werden.",
       "start": "Antrag starten"
     }
   },

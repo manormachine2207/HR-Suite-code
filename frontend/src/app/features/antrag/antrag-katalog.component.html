@@ -13,7 +13,7 @@
     <div class="hr-state" role="status">{{ 'antrag.loading' | translate }}</div>
   } @else if (failed()) {
     <div class="hr-state hr-state--error" role="alert">
-      {{ 'antrag.katalog.empty' | translate }}
+      {{ 'antrag.katalog.error' | translate }}
     </div>
   } @else {
     <!-- Category filter chips -->
@@ -52,6 +52,7 @@
             <button
               type="button"
               class="hr-kachel"
+              [attr.aria-label]="titleOf(t)"
               (click)="start(t.id)"
             >
               <span class="hr-kachel__cat">

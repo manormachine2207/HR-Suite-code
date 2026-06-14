@@ -305,6 +305,7 @@
       "lead": "Choisissez un type de demande.",
       "filterAll": "Tous",
       "empty": "Aucun type de demande disponible.",
+      "error": "Impossible de charger les types de demande.",
       "start": "Démarrer la demande"
     }
   },

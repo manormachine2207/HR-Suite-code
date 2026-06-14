@@ -305,6 +305,7 @@
       "lead": "Choose a request type.",
       "filterAll": "All",
       "empty": "No request types available.",
+      "error": "Could not load request types.",
       "start": "Start request"
     }
   },
