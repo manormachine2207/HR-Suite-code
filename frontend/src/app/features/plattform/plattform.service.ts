@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { RuntimeConfigService } from '../../core/runtime-config/runtime-config.service';
 import { CreateTenantRequest, Tenant, TenantStatus } from './tenant.model';
 import { SmtpRelay, TestSendResult, UpdateSmtpRelay } from './smtp.model';
+import { OidcConfig, UpdateOidcConfig } from './sso.model';
 
 /**
  * Client for the platform admin API (`/api/v1/tenant`, `/api/v1/platform/*`,
@@ -43,5 +44,14 @@ export class PlattformService {
 
   testSmtp(to: string): Observable<TestSendResult> {
     return this.http.post<TestSendResult>(`${this.base}/platform/smtp/test`, { to });
+  }
+
+  // ---- OIDC / SSO (ADR-019 Stufe 2, configure-only) ----------------------
+  getOidc(): Observable<OidcConfig> {
+    return this.http.get<OidcConfig>(`${this.base}/platform/oidc`);
+  }
+
+  updateOidc(req: UpdateOidcConfig): Observable<OidcConfig> {
+    return this.http.put<OidcConfig>(`${this.base}/platform/oidc`, req);
   }
 }

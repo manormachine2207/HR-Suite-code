@@ -641,6 +641,31 @@
       "testFail": "Invio di prova non riuscito",
       "testError": "Invio di prova non riuscito.",
       "lastTest": "Ultima prova"
+    },
+    "sso": {
+      "lead": "Provider di identità OIDC globale (single sign-on) per l'intera piattaforma.",
+      "loadError": "Impossibile caricare la configurazione OIDC.",
+      "notActiveTitle": "Non ancora attivo.",
+      "notActiveBody": "La configurazione viene salvata ma NON è ancora attiva — l'accesso tramite questo provider sarà abilitato in un passaggio successivo.",
+      "stateConfigured": "Contrassegnato come attivo",
+      "stateInactive": "Inattivo",
+      "issuer": "URL dell'emittente",
+      "clientId": "ID client",
+      "scopes": "Scope",
+      "redirectUri": "URI di reindirizzamento",
+      "tenantClaim": "Claim del mandante",
+      "tenantClaimHelp": "Claim che associa un accesso a un mandante (applicato in un passaggio successivo).",
+      "clientSecret": "Secret client (riferimento)",
+      "clientSecretHelp": "Il secret NON viene salvato. Qui è indicato il NOME della variabile d'ambiente da cui il secret viene letto a runtime (SDR-004).",
+      "clientSecretRefLabel": "Nome della variabile d'ambiente",
+      "secretState": "Stato del secret",
+      "secretSet": "configurato",
+      "secretUnset": "non impostato",
+      "enabled": "Contrassegna come attivo (solo salvato — attivazione successiva)",
+      "save": "Salva",
+      "saved": "Configurazione OIDC salvata.",
+      "saveError": "Salvataggio non riuscito.",
+      "enableNeedsConfig": "Per attivare sono necessari almeno un URL dell'emittente e un ID client."
     }
   },
   "notification": {
