@@ -642,5 +642,13 @@
       "testError": "Test send failed.",
       "lastTest": "Last test"
     }
+  },
+  "notification": {
+    "title": "Notifications",
+    "bellAria": "Notifications",
+    "menuAria": "List of notifications",
+    "empty": "No notifications.",
+    "markAllRead": "Mark all as read",
+    "antragDecided": "Your request was decided:"
   }
 }

@@ -43,6 +43,8 @@ class ReviewServiceTest {
     private AntragService antragService;
     @Mock
     private AntragsTypService antragsTypService;
+    @Mock
+    private io.github.manormachine2207.hrsuite.notification.NotificationService notificationService;
 
     private ReviewService service;
 
@@ -52,7 +54,7 @@ class ReviewServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new ReviewService(workflowEngine, antragService, antragsTypService);
+        service = new ReviewService(workflowEngine, antragService, antragsTypService, notificationService);
         TenantContext.set(TENANT);
 
         UUID antragstypId = UUID.randomUUID();
@@ -84,6 +86,27 @@ class ReviewServiceTest {
 
         verify(workflowEngine).completeTask("t-1", Map.of("freigabe_outcome", "approve"));
         assertThat(antrag.getStatus()).isEqualTo(AntragStatus.APPROVED);
+    }
+
+    /** ADR-017 Stufe 2: a terminal decision notifies the applicant. */
+    @Test
+    void terminalDecisionNotifiesApplicant() {
+        when(workflowEngine.isInstanceRunning(TENANT, "pi-1")).thenReturn(false);
+
+        service.complete("t-1", "approve", null, Set.of("hr-reviewer"));
+
+        verify(notificationService).notifyAntragDecided(
+                antrag.getAntragstellerSubject(), antrag.getId(), "APPROVED");
+    }
+
+    @Test
+    void stillRunningTaskDoesNotNotify() {
+        when(workflowEngine.isInstanceRunning(TENANT, "pi-1")).thenReturn(true);
+
+        service.complete("t-1", "approve", null, Set.of("hr-reviewer"));
+
+        org.mockito.Mockito.verify(notificationService, org.mockito.Mockito.never())
+                .notifyAntragDecided(any(), any(), any());
     }
 
     @Test

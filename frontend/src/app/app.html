@@ -19,6 +19,11 @@
   <ng-template #obHeaderControl>
     <app-dev-role-switcher />
   </ng-template>
+  <!-- ADR-017 Stufe 2: in-app notification bell as Oblique header control. Polls the
+       unread count; renders nothing visible when empty (badge hidden at 0). -->
+  <ng-template #obHeaderControl>
+    <app-notification-bell />
+  </ng-template>
   <!-- ADR-015: help entry as Oblique header control. #obHeaderControl templates are
        projected by ob-master-layout into the service-navigation list, i.e. next to
        the language switcher. data-tour anchors the final dashboard-tour step. -->
