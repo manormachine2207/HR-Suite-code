@@ -1,0 +1,131 @@
+/* Header notification bell (ADR-017 Stufe 2). Anchored dropdown in the Oblique
+   service-navigation slot, shared hr-* look. */
+.hr-bell {
+  position: relative;
+  display: inline-flex;
+}
+
+.hr-bell__btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: transparent;
+  color: var(--bs-body-color, #1f2d3d);
+  cursor: pointer;
+
+  mat-icon { width: 1.25rem; height: 1.25rem; }
+  &:hover { color: var(--bs-primary, #1f6feb); }
+}
+
+.hr-bell__badge {
+  position: absolute;
+  top: -0.1rem;
+  right: -0.1rem;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.2rem;
+  border-radius: 0.6rem;
+  background: var(--bs-danger, #d6293e);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1rem;
+  text-align: center;
+}
+
+.hr-bell__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.hr-bell__menu {
+  position: absolute;
+  top: 2.4rem;
+  right: 0;
+  z-index: 50;
+  width: 22rem;
+  max-width: 90vw;
+  max-height: 70vh;
+  overflow-y: auto;
+  border: 1px solid var(--bs-border-color, #e1e6eb);
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg, #fff);
+  box-shadow: 0 6px 24px rgba(31, 45, 61, 0.16);
+}
+
+.hr-bell__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--bs-border-color, #edf1f5);
+}
+
+.hr-bell__title { font-weight: 600; font-size: 0.9rem; }
+
+.hr-bell__link {
+  border: 0;
+  background: transparent;
+  color: var(--bs-primary, #1f6feb);
+  font-size: 0.8rem;
+  cursor: pointer;
+  &:hover { text-decoration: underline; }
+}
+
+.hr-bell__empty {
+  margin: 0;
+  padding: 1.2rem 0.85rem;
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--bs-secondary-color, #5a6b7b);
+}
+
+.hr-bell__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.hr-bell__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.6rem 0.85rem;
+  border: 0;
+  border-bottom: 1px solid var(--bs-border-color, #f1f4f7);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover { background: var(--bs-tertiary-bg, #f6f8fa); }
+  &.is-unread { background: var(--bs-primary-bg-subtle, #eef4fe); }
+  &.is-unread:hover { background: var(--bs-primary-bg-subtle, #e3eefe); }
+}
+
+.hr-bell__row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hr-bell__msg { font-size: 0.86rem; color: var(--bs-body-color, #1f2d3d); }
+.hr-bell__date { font-size: 0.74rem; color: var(--bs-tertiary-color, #9aa7b4); }
+
+.hr-badge {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border-radius: 1rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+
+  &.is-approved { background: var(--bs-success-bg-subtle, #e6f4ea); color: var(--bs-success-text-emphasis, #1a7f37); }
+  &.is-rejected { background: var(--bs-danger-bg-subtle, #fdecea); color: var(--bs-danger-text-emphasis, #8a1622); }
+  &.is-review { background: var(--bs-info-bg-subtle, #e7f0fe); color: var(--bs-primary, #1f6feb); }
+  &.is-default { background: var(--bs-secondary-bg, #eef2f6); color: var(--bs-secondary-color, #5a6b7b); }
+}

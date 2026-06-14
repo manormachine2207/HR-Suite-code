@@ -642,5 +642,13 @@
       "testError": "Invio di prova non riuscito.",
       "lastTest": "Ultima prova"
     }
+  },
+  "notification": {
+    "title": "Notifiche",
+    "bellAria": "Notifiche",
+    "menuAria": "Elenco delle notifiche",
+    "empty": "Nessuna notifica.",
+    "markAllRead": "Segna tutto come letto",
+    "antragDecided": "La tua richiesta è stata decisa:"
   }
 }

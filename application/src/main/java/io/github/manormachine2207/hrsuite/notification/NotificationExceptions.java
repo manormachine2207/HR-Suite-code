@@ -12,4 +12,11 @@ public final class NotificationExceptions {
             super(message);
         }
     }
+
+    /** Notification not found, or owned by another recipient. HTTP 404. */
+    public static class NotFound extends RuntimeException {
+        public NotFound(String message) {
+            super(message);
+        }
+    }
 }

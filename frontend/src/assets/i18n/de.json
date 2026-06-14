@@ -642,5 +642,13 @@
       "testError": "Test-Versand fehlgeschlagen.",
       "lastTest": "Letzter Test"
     }
+  },
+  "notification": {
+    "title": "Benachrichtigungen",
+    "bellAria": "Benachrichtigungen",
+    "menuAria": "Liste der Benachrichtigungen",
+    "empty": "Keine Benachrichtigungen.",
+    "markAllRead": "Alle als gelesen markieren",
+    "antragDecided": "Ihr Antrag wurde entschieden:"
   }
 }

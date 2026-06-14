@@ -37,12 +37,15 @@ public class ReviewService {
     private final WorkflowEngine workflowEngine;
     private final AntragService antragService;
     private final AntragsTypService antragsTypService;
+    private final io.github.manormachine2207.hrsuite.notification.NotificationService notificationService;
 
     public ReviewService(WorkflowEngine workflowEngine, AntragService antragService,
-                         AntragsTypService antragsTypService) {
+                         AntragsTypService antragsTypService,
+                         io.github.manormachine2207.hrsuite.notification.NotificationService notificationService) {
         this.workflowEngine = workflowEngine;
         this.antragService = antragService;
         this.antragsTypService = antragsTypService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -120,7 +123,12 @@ public class ReviewService {
             if (running) {
                 antrag.beginReview();
             } else {
-                antrag.finishReview(terminalStatus(normalized));
+                AntragStatus terminal = terminalStatus(normalized);
+                antrag.finishReview(terminal);
+                // ADR-017 Stufe 2: notify the applicant their request was decided, in the
+                // same transaction (rolls back with the decision if anything fails).
+                notificationService.notifyAntragDecided(
+                        antrag.getAntragstellerSubject(), antrag.getId(), terminal.name());
             }
         }
         // SDR-002-Minimum bis zum Audit-Modul: strukturiertes Event (IDs, kein PII-Payload).

@@ -642,5 +642,13 @@
       "testError": "Échec de l'envoi de test.",
       "lastTest": "Dernier test"
     }
+  },
+  "notification": {
+    "title": "Notifications",
+    "bellAria": "Notifications",
+    "menuAria": "Liste des notifications",
+    "empty": "Aucune notification.",
+    "markAllRead": "Tout marquer comme lu",
+    "antragDecided": "Votre demande a été décidée :"
   }
 }

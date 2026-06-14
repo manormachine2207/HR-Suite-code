@@ -1,0 +1,49 @@
+@if (open()) {
+  <div class="hr-bell__backdrop" (click)="close()" aria-hidden="true"></div>
+}
+<div class="hr-bell">
+  <button type="button" class="hr-bell__btn"
+          [attr.aria-label]="('notification.bellAria' | translate) + ' (' + unread() + ')'"
+          [attr.aria-expanded]="open()"
+          aria-haspopup="menu"
+          (click)="toggle()">
+    <mat-icon svgIcon="notification" aria-hidden="true" />
+    @if (unread() > 0) {
+      <span class="hr-bell__badge" aria-hidden="true">{{ unread() > 99 ? '99+' : unread() }}</span>
+    }
+  </button>
+
+  @if (open()) {
+    <div class="hr-bell__menu" role="menu" [attr.aria-label]="'notification.menuAria' | translate">
+      <div class="hr-bell__head">
+        <span class="hr-bell__title">{{ 'notification.title' | translate }}</span>
+        @if (items().length > 0) {
+          <button type="button" class="hr-bell__link" (click)="markAllRead()">
+            {{ 'notification.markAllRead' | translate }}
+          </button>
+        }
+      </div>
+
+      @if (items().length === 0) {
+        <p class="hr-bell__empty">{{ 'notification.empty' | translate }}</p>
+      } @else {
+        <ul class="hr-bell__list">
+          @for (n of items(); track n.id) {
+            <li>
+              <button type="button" class="hr-bell__item" [class.is-unread]="!n.read"
+                      role="menuitem" (click)="onItem(n)">
+                <span class="hr-bell__row">
+                  <span class="hr-bell__msg">{{ 'notification.antragDecided' | translate }}</span>
+                  @if (statusKey(n)) {
+                    <span class="hr-badge" [class]="statusClass(n)">{{ statusKey(n)! | translate }}</span>
+                  }
+                </span>
+                <span class="hr-bell__date">{{ n.createdAt | date:'dd.MM.yyyy HH:mm':undefined:dateLocale() }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</div>
