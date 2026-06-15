@@ -79,7 +79,10 @@ export class AntragstypListComponent implements OnInit {
   /** Called when the designer changes the category select for a row (ADR-021). */
   setCategory(id: string, category: string): void {
     this.service.setCategory(id, category).subscribe({
-      next: () => { this.cdr.markForCheck(); },
+      next: (updated) => {
+        this.items = this.items.map(x => x.id === updated.id ? updated : x);
+        this.cdr.markForCheck();
+      },
       error: () => { this.cdr.markForCheck(); },
     });
   }

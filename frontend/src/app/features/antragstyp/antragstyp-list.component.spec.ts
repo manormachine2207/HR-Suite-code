@@ -30,7 +30,17 @@ describe('AntragstypListComponent', () => {
   beforeEach(async () => {
     serviceMock = {
       list: vi.fn(() => of([ROW_STUB])),
-      setCategory: vi.fn(() => of({})),
+      setCategory: vi.fn((id: string, category: string) => of({
+        id,
+        key: 'k',
+        title: { de: 'T' },
+        status: 'DRAFT',
+        category,
+        currentVersionId: null,
+        description: null,
+        createdAt: '',
+        updatedAt: '',
+      })),
     };
 
     await TestBed.configureTestingModule({
@@ -58,6 +68,7 @@ describe('AntragstypListComponent', () => {
 
   it('calls service.setCategory(rowId, value) when the category select changes', async () => {
     const fixture = TestBed.createComponent(AntragstypListComponent);
+    const component = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -71,5 +82,8 @@ describe('AntragstypListComponent', () => {
     select!.dispatchEvent(new Event('change'));
 
     expect(serviceMock.setCategory).toHaveBeenCalledWith('r1', 'ABSENCE');
+    // The local row must be updated from the service response so a later re-render
+    // (e.g. onLangChange → markForCheck) does not revert to the stale category.
+    expect(component.items[0].category).toBe('ABSENCE');
   });
 });
