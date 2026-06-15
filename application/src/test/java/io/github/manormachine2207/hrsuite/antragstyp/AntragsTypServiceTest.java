@@ -94,7 +94,7 @@ class AntragsTypServiceTest {
     void createDefinitionSavesDraftWhenKeyFree() {
         when(antragsTypRepository.existsByKey("sonderurlaub")).thenReturn(false);
 
-        AntragsTyp at = service.createDefinition("sonderurlaub", Map.of("de", "Sonderurlaub"), Map.of());
+        AntragsTyp at = service.createDefinition("sonderurlaub", Map.of("de", "Sonderurlaub"), Map.of(), null);
 
         assertThat(at.getKey()).isEqualTo("sonderurlaub");
         assertThat(at.getTenantId()).isEqualTo(TENANT);
@@ -105,7 +105,7 @@ class AntragsTypServiceTest {
     void createDefinitionThrowsConflictWhenKeyExists() {
         when(antragsTypRepository.existsByKey("dup")).thenReturn(true);
 
-        assertThatThrownBy(() -> service.createDefinition("dup", Map.of("de", "x"), Map.of()))
+        assertThatThrownBy(() -> service.createDefinition("dup", Map.of("de", "x"), Map.of(), null))
                 .isInstanceOf(AntragsTypExceptions.Conflict.class);
     }
 
@@ -415,6 +415,24 @@ class AntragsTypServiceTest {
 
         assertThatThrownBy(() -> service.archive(v.getId()))
                 .isInstanceOf(AntragsTypExceptions.IllegalState.class);
+    }
+
+    // ---- category (ADR-021) -----------------------------------------------
+    @Test
+    void createDefinitionPersistsCategory() {
+        when(antragsTypRepository.existsByKey("k")).thenReturn(false);
+        when(antragsTypRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        AntragsTyp created = service.createDefinition("k", Map.of("de", "T"), null, AntragsKategorie.ABSENCE);
+        assertThat(created.getCategory()).isEqualTo(AntragsKategorie.ABSENCE);
+    }
+
+    @Test
+    void setCategoryUpdatesExistingType() {
+        AntragsTyp t = new AntragsTyp(UUID.randomUUID(), TENANT, "k", Map.of("de", "T"), null);
+        when(antragsTypRepository.findById(t.getId())).thenReturn(Optional.of(t));
+        when(antragsTypRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        AntragsTyp updated = service.setCategory(t.getId(), AntragsKategorie.FINANCE);
+        assertThat(updated.getCategory()).isEqualTo(AntragsKategorie.FINANCE);
     }
 
     // ---- not found --------------------------------------------------------

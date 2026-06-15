@@ -8,13 +8,9 @@
 
   <div class="hr-actions">
     @if (!creating) {
-      <button type="button" class="hr-btn hr-btn--primary" (click)="openCreate()"
-              [disabled]="loading || liveTypen.length === 0">
+      <a class="hr-btn hr-btn--primary" routerLink="/antraege/neu">
         {{ 'antrag.new' | translate }}
-      </button>
-      @if (!loading && liveTypen.length === 0) {
-        <span class="hr-hint">{{ 'antrag.noLiveTypes' | translate }}</span>
-      }
+      </a>
     }
   </div>
 
@@ -34,10 +30,10 @@
       <div class="hr-field">
         <label for="typ-select">{{ 'antrag.chooseType' | translate }}</label>
         <select id="typ-select" class="hr-input"
-                [value]="selectedTypId" (change)="onTypChange($any($event.target).value)">
-          <option value="">{{ 'antrag.choosePlaceholder' | translate }}</option>
+                (change)="onTypChange($any($event.target).value)">
+          <option value="" [selected]="!selectedTypId">{{ 'antrag.choosePlaceholder' | translate }}</option>
           @for (t of liveTypen; track t.id) {
-            <option [value]="t.id">{{ typTitle(t.id) }}</option>
+            <option [value]="t.id" [selected]="t.id === selectedTypId">{{ typTitle(t.id) }}</option>
           }
         </select>
       </div>

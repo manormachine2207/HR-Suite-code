@@ -5,6 +5,7 @@ import io.github.manormachine2207.hrsuite.antragstyp.dto.AntragsTypVersionRespon
 import io.github.manormachine2207.hrsuite.antragstyp.dto.CreateAntragsTypRequest;
 import io.github.manormachine2207.hrsuite.antragstyp.dto.CreateVersionRequest;
 import io.github.manormachine2207.hrsuite.antragstyp.dto.MinorEditRequest;
+import io.github.manormachine2207.hrsuite.antragstyp.dto.SetCategoryRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -48,7 +49,7 @@ public class AntragsTypController {
     @PreAuthorize(WRITE_DRAFT)
     public ResponseEntity<AntragsTypResponse> create(@Valid @RequestBody CreateAntragsTypRequest req,
                                                      UriComponentsBuilder uri) {
-        AntragsTyp created = service.createDefinition(req.key(), req.title(), req.description());
+        AntragsTyp created = service.createDefinition(req.key(), req.title(), req.description(), req.category());
         URI location = uri.path("/api/v1/antragstyp/{id}").buildAndExpand(created.getId()).toUri();
         return ResponseEntity.created(location).body(AntragsTypResponse.from(created));
     }
@@ -69,6 +70,12 @@ public class AntragsTypController {
     @PreAuthorize(READ)
     public AntragsTypResponse get(@PathVariable("id") UUID id) {
         return AntragsTypResponse.from(service.getDefinition(id));
+    }
+
+    @PutMapping("/{id}/category")
+    @PreAuthorize(WRITE_DRAFT)
+    public AntragsTypResponse setCategory(@PathVariable("id") UUID id, @RequestBody SetCategoryRequest req) {
+        return AntragsTypResponse.from(service.setCategory(id, req.category()));
     }
 
     // ---- versions ---------------------------------------------------------

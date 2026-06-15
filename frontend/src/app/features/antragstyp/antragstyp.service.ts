@@ -31,8 +31,8 @@ export class AntragsTypService {
     return this.http.get<AntragsTypVersion[]>(`${this.base}/antragstyp/${id}/versions`);
   }
 
-  createAntragstyp(key: string, title: LocaleMap): Observable<AntragsTypSummary> {
-    return this.http.post<AntragsTypSummary>(`${this.base}/antragstyp`, { key, title });
+  createAntragstyp(key: string, title: LocaleMap, category?: string): Observable<AntragsTypSummary> {
+    return this.http.post<AntragsTypSummary>(`${this.base}/antragstyp`, { key, title, ...(category ? { category } : {}) });
   }
 
   /**
@@ -68,6 +68,10 @@ export class AntragsTypService {
 
   publish(versionId: string): Observable<AntragsTypVersion> {
     return this.http.post<AntragsTypVersion>(`${this.base}/antragstyp/versions/${versionId}/publish`, {});
+  }
+
+  setCategory(id: string, category: string | null): Observable<AntragsTypSummary> {
+    return this.http.put<AntragsTypSummary>(`${this.base}/antragstyp/${id}/category`, { category });
   }
 
   listActionRefs(): Observable<string[]> {

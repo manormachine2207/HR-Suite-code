@@ -7,6 +7,7 @@ import { AntragsTypService } from './antragstyp.service';
 import { AntragsTypSummary } from './antragstyp.model';
 import { resolveLocaleText } from '../../core/i18n/locale-text';
 import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.component';
+import { ANTRAGS_KATEGORIEN, kategorieOf } from './kategorie.model';
 
 /** Statuses with a `status.*` translation (new backend statuses fall back to the raw enum). */
 const KNOWN_STATUSES = new Set(['DRAFT', 'LIVE', 'DEPRECATED', 'ARCHIVED']);
@@ -26,6 +27,11 @@ export class AntragstypListComponent implements OnInit {
   items: AntragsTypSummary[] = [];
   loading = true;
   failed = false;
+
+  /** Exposed to the template for the category `<select>` options. */
+  readonly kategorien = ANTRAGS_KATEGORIEN;
+  /** Resolves null/unknown backend values to 'OTHER' for the select preselection. */
+  readonly kategorieOf = kategorieOf;
 
   constructor() {
     // Re-render resolved jsonb titles when the user switches the UI language (BDR-005).
@@ -68,5 +74,16 @@ export class AntragstypListComponent implements OnInit {
       case 'ARCHIVED': return 'is-archived';
       default: return 'is-default';
     }
+  }
+
+  /** Called when the designer changes the category select for a row (ADR-021). */
+  setCategory(id: string, category: string): void {
+    this.service.setCategory(id, category).subscribe({
+      next: (updated) => {
+        this.items = this.items.map(x => x.id === updated.id ? updated : x);
+        this.cdr.markForCheck();
+      },
+      error: () => { this.cdr.markForCheck(); },
+    });
   }
 }

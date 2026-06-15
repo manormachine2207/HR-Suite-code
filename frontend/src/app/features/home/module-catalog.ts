@@ -48,6 +48,16 @@ export const MODULE_CATALOG: readonly ModuleCardDef[] = [
     roles: [],
   },
   {
+    // Antrags-Katalog (ADR-021): CTA for applicants to pick and start a new request.
+    // Route /antraege/neu leads to the catalog page introduced in the Antrags-Katalog cut.
+    id: 'antragKatalog',
+    icon: 'plus',
+    titleKey: 'home.modules.antragKatalog.title',
+    descriptionKey: 'home.modules.antragKatalog.description',
+    route: '/antraege/neu',
+    roles: [],
+  },
+  {
     id: 'aufgaben',
     icon: 'inbox',
     titleKey: 'home.modules.aufgaben.title',

@@ -35,6 +35,13 @@ export const routes: Routes = [
       import('./features/antrag/antrag-list.component').then(m => m.AntragListComponent),
   },
   {
+    // Antrags-Katalog (ADR-021): applicant-facing tile view of all LIVE types.
+    // MUST be before 'antraege/:id' so the literal segment 'neu' is not swallowed by :id.
+    path: 'antraege/neu',
+    loadComponent: () =>
+      import('./features/antrag/antrag-katalog.component').then(m => m.AntragKatalogComponent),
+  },
+  {
     // Detail page with the approval-chain stepper (Cut D).
     path: 'antraege/:id',
     loadComponent: () =>

@@ -53,6 +53,10 @@ public class AntragsTyp {
     @Column(name = "current_version_id")
     private UUID currentVersionId;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 32)
+    private AntragsKategorie category;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
@@ -99,6 +103,11 @@ public class AntragsTyp {
      * for LIVE leaves the pointer unset.
      */
     public void setStatus(AntragsTypStatus status) { this.status = status; }
+
+    /** Sets/changes the catalog category (ADR-021). Null = uncategorized (shown as OTHER). */
+    public void recategorize(AntragsKategorie category) { this.category = category; }
+
+    public AntragsKategorie getCategory() { return category; }
 
     public UUID getId() { return id; }
     public UUID getTenantId() { return tenantId; }

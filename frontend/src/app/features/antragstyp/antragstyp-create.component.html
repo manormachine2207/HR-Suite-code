@@ -66,6 +66,18 @@
       </label>
     </div>
 
+    <div class="hr-section">
+      <h2 class="hr-section__head">{{ 'antragstyp.category.label' | translate }}</h2>
+      <label class="hr-field" for="at-category">
+        <select id="at-category" formControlName="category" class="hr-select" [attr.aria-label]="'antragstyp.category.label' | translate">
+          <option value="">—</option>
+          @for (k of kategorien; track k) {
+            <option [value]="k">{{ ('antragstyp.category.' + k) | translate }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
     <div class="hr-actions">
       <a class="hr-btn hr-btn--ghost" routerLink="/antragstypen">
         {{ 'antragstyp.create.cancel' | translate }}

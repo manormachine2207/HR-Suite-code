@@ -114,4 +114,38 @@ describe('AntragstypCreateComponent', () => {
     expect(suggestKey('  Éxposé / Test!  ')).toBe('expose-test');
     expect(suggestKey('---')).toBe('');
   });
+
+  it('passes the selected category as 3rd arg to createAntragstyp', () => {
+    const fixture = TestBed.createComponent(AntragstypCreateComponent);
+    const cmp = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    cmp.form.controls.key.markAsDirty();
+    cmp.form.controls.key.setValue('mykey');
+    cmp.titleControl('de').setValue('My Type');
+    cmp.form.controls.category.setValue('ABSENCE');
+    cmp.submit();
+
+    const req = http.expectOne('/api/v1/antragstyp');
+    expect(req.request.body).toEqual({ key: 'mykey', title: { de: 'My Type' }, category: 'ABSENCE' });
+    req.flush({ id: 'at-cat' });
+  });
+
+  it('omits category from the request body when no category is selected', () => {
+    const fixture = TestBed.createComponent(AntragstypCreateComponent);
+    const cmp = fixture.componentInstance;
+    const router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+
+    cmp.form.controls.key.markAsDirty();
+    cmp.form.controls.key.setValue('mykey');
+    cmp.titleControl('de').setValue('My Type');
+    // leave category empty (default '')
+    cmp.submit();
+
+    const req = http.expectOne('/api/v1/antragstyp');
+    expect(req.request.body).toEqual({ key: 'mykey', title: { de: 'My Type' } });
+    req.flush({ id: 'at-no-cat' });
+  });
 });

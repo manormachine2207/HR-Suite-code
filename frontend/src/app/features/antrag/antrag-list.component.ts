@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
 
@@ -37,6 +37,7 @@ import { BreadcrumbComponent } from '../../shared/breadcrumb/breadcrumb.componen
 export class AntragListComponent implements OnInit {
   private readonly antragService = inject(AntragService);
   private readonly antragstypService = inject(AntragsTypService);
+  private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -81,10 +82,14 @@ export class AntragListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.reload();
+    // Capture the ?neu= param BEFORE reload() so it's available in the
+    // type-list callback — the preselect must happen AFTER liveTypen is
+    // populated, otherwise the native <select> has no matching <option> yet.
+    const neu = this.route.snapshot.queryParamMap.get('neu');
+    this.reload(neu ?? undefined);
   }
 
-  private reload(): void {
+  private reload(preselectTypId?: string): void {
     this.loading = true;
     this.failed = false;
     forkJoin({
@@ -97,6 +102,12 @@ export class AntragListComponent implements OnInit {
         this.liveTypen = typen.filter(t => t.status === 'LIVE');
         this.rebuildTitleMap();
         this.loading = false;
+        // Preselect the type AFTER liveTypen is set so the native <select>
+        // already has its <option> elements when [value] is bound (ADR-021).
+        if (preselectTypId) {
+          this.openCreate();
+          this.onTypChange(preselectTypId);
+        }
         this.cdr.markForCheck();
       },
       error: () => {

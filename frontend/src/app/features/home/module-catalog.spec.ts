@@ -28,9 +28,9 @@ const translateFn = (key: string): string => T[key] ?? key;
 const ids = (defs: readonly ModuleCardDef[]): string[] => defs.map(d => d.id);
 
 describe('MODULE_CATALOG', () => {
-  it('declares the six dashboard modules with route + roles', () => {
+  it('declares the seven dashboard modules with route + roles', () => {
     expect(ids(MODULE_CATALOG)).toEqual([
-      'antragstypen', 'antraege', 'aufgaben', 'lohnrechner', 'hilfe', 'plattform',
+      'antragstypen', 'antraege', 'antragKatalog', 'aufgaben', 'lohnrechner', 'hilfe', 'plattform',
     ]);
     const all = new Map(MODULE_CATALOG.map(d => [d.id, d]));
     expect(all.get('plattform')!.route).toBe('/plattform');
@@ -71,11 +71,11 @@ describe('MODULE_CATALOG', () => {
 
 describe('filterModules', () => {
   it('returns all modules for an empty search without favorites-only', () => {
-    expect(filterModules(MODULE_CATALOG, '', false, [], translateFn)).toHaveLength(6);
+    expect(filterModules(MODULE_CATALOG, '', false, [], translateFn)).toHaveLength(7);
   });
 
   it('treats whitespace-only search as empty', () => {
-    expect(filterModules(MODULE_CATALOG, '   ', false, [], translateFn)).toHaveLength(6);
+    expect(filterModules(MODULE_CATALOG, '   ', false, [], translateFn)).toHaveLength(7);
   });
 
   it('matches the translated title case-insensitively', () => {
@@ -112,5 +112,21 @@ describe('filterModules', () => {
       key === 'home.modules.antraege.title' ? 'My Requests' : key;
     expect(ids(filterModules(MODULE_CATALOG, 'requests', false, [], en))).toEqual(['antraege']);
     expect(ids(filterModules(MODULE_CATALOG, 'anträge', false, [], en))).toEqual([]);
+  });
+});
+
+describe('MODULE_CATALOG — antragKatalog entry (ADR-021)', () => {
+  it('includes a "new request" entry routing to /antraege/neu', () => {
+    expect(MODULE_CATALOG.some(m => m.route === '/antraege/neu')).toBe(true);
+  });
+
+  it('antragKatalog card: for everyone (roles []), correct i18n keys, placed near antraege', () => {
+    const entry = MODULE_CATALOG.find(d => d.id === 'antragKatalog');
+    expect(entry).toBeDefined();
+    expect(entry!.route).toBe('/antraege/neu');
+    expect(entry!.roles).toEqual([]);
+    expect(entry!.titleKey).toBe('home.modules.antragKatalog.title');
+    expect(entry!.descriptionKey).toBe('home.modules.antragKatalog.description');
+    expect(entry!.badgeKey).toBeUndefined();
   });
 });

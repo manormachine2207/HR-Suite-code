@@ -1,5 +1,6 @@
 package io.github.manormachine2207.hrsuite.antragstyp.dto;
 
+import io.github.manormachine2207.hrsuite.antragstyp.AntragsKategorie;
 import io.github.manormachine2207.hrsuite.antragstyp.AntragsTyp;
 import io.github.manormachine2207.hrsuite.antragstyp.AntragsTypStatus;
 
@@ -13,6 +14,7 @@ public record AntragsTypResponse(
         Map<String, String> title,
         Map<String, String> description,
         AntragsTypStatus status,
+        AntragsKategorie category,
         UUID currentVersionId,
         OffsetDateTime createdAt,
         OffsetDateTime updatedAt
@@ -20,6 +22,6 @@ public record AntragsTypResponse(
     public static AntragsTypResponse from(AntragsTyp a) {
         return new AntragsTypResponse(
                 a.getId(), a.getKey(), a.getTitle(), a.getDescription(),
-                a.getStatus(), a.getCurrentVersionId(), a.getCreatedAt(), a.getUpdatedAt());
+                a.getStatus(), a.getCategory(), a.getCurrentVersionId(), a.getCreatedAt(), a.getUpdatedAt());
     }
 }

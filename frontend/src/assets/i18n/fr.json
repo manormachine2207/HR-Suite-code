@@ -47,6 +47,10 @@
         "title": "Mes demandes",
         "description": "Déposer vos propres demandes et suivre leur statut."
       },
+      "antragKatalog": {
+        "title": "Déposer une nouvelle demande",
+        "description": "Choisir un type de demande dans le catalogue et le démarrer."
+      },
       "aufgaben": {
         "title": "Tâches",
         "description": "Examiner les tâches ouvertes et statuer sur les demandes."
@@ -109,6 +113,14 @@
         "en": "Anglais"
       },
       "cancel": "Annuler"
+    },
+    "category": {
+      "label": "Catégorie",
+      "ABSENCE": "Congés & absences",
+      "FINANCE": "Frais & finances",
+      "EMPLOYMENT": "Emploi & personnel",
+      "DEVELOPMENT": "Formation",
+      "OTHER": "Autres"
     }
   },
   "builder": {
@@ -291,6 +303,14 @@
       "cancelConfirm": "Voulez-vous vraiment retirer cette demande ?",
       "cancelSuccess": "La demande a été retirée.",
       "cancelError": "La demande n'a pas pu être retirée."
+    },
+    "katalog": {
+      "title": "Déposer une nouvelle demande",
+      "lead": "Choisissez un type de demande.",
+      "filterAll": "Tous",
+      "empty": "Aucun type de demande disponible.",
+      "error": "Impossible de charger les types de demande.",
+      "start": "Démarrer la demande"
     }
   },
   "designer": {

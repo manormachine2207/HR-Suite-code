@@ -21,6 +21,7 @@
             <th scope="col">{{ 'antragstyp.colTitle' | translate }}</th>
             <th scope="col">{{ 'antragstyp.colKey' | translate }}</th>
             <th scope="col">{{ 'antragstyp.colStatus' | translate }}</th>
+            <th scope="col">{{ 'antragstyp.category.label' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -34,6 +35,17 @@
                 <span class="hr-status" [class]="statusClass(item.status)">
                   {{ statusKey(item.status) ? (statusKey(item.status)! | translate) : item.status }}
                 </span>
+              </td>
+              <td>
+                <select
+                  class="hr-select hr-select--sm"
+                  [value]="kategorieOf(item.category)"
+                  [attr.aria-label]="'antragstyp.category.label' | translate"
+                  (change)="setCategory(item.id, $any($event.target).value)">
+                  @for (k of kategorien; track k) {
+                    <option [value]="k">{{ ('antragstyp.category.' + k) | translate }}</option>
+                  }
+                </select>
               </td>
             </tr>
           }

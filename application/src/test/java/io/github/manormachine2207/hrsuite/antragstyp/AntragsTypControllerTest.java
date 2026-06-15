@@ -57,6 +57,10 @@ class AntragsTypControllerTest {
         return new AntragsTyp(id, UUID.randomUUID(), "sonderurlaub", Map.of("de", "Sonderurlaub"), Map.of());
     }
 
+    private static AntragsTyp sampleType() {
+        return sampleType(UUID.randomUUID());
+    }
+
     // ---- create definition (write.draft = hr-designer only) --------------
     @Test
     void createReturns401WithoutToken() throws Exception {
@@ -74,7 +78,7 @@ class AntragsTypControllerTest {
     @Test
     void createReturns201ForHrDesigner() throws Exception {
         UUID id = UUID.randomUUID();
-        when(service.createDefinition(eq("sonderurlaub"), any(), any())).thenReturn(sampleType(id));
+        when(service.createDefinition(eq("sonderurlaub"), any(), any(), any())).thenReturn(sampleType(id));
 
         mvc.perform(post("/api/v1/antragstyp").with(jwt().authorities(role("hr-designer")))
                         .contentType(MediaType.APPLICATION_JSON).content(CREATE_BODY))
@@ -86,7 +90,7 @@ class AntragsTypControllerTest {
     void createReturns403WhenNoTenantInContext() throws Exception {
         // Authenticated hr-designer, but token carried no usable tenant_id claim, so the
         // service hits an empty TenantContext (ADR-008). Must surface as 403, not 500.
-        when(service.createDefinition(eq("sonderurlaub"), any(), any()))
+        when(service.createDefinition(eq("sonderurlaub"), any(), any(), any()))
                 .thenThrow(new MissingTenantContextException("no tenant in context"));
 
         mvc.perform(post("/api/v1/antragstyp").with(jwt().authorities(role("hr-designer")))
@@ -150,5 +154,31 @@ class AntragsTypControllerTest {
                         .with(jwt().authorities(role("hr-designer")))
                         .contentType(MediaType.APPLICATION_JSON).content(MINOR_BODY))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    // ---- set category (hr-designer, ADR-021) -----------------------------
+    @Test
+    void putCategory_returns200_forDesigner() throws Exception {
+        when(service.setCategory(any(), eq(AntragsKategorie.ABSENCE))).thenReturn(sampleType());
+        mvc.perform(put("/api/v1/antragstyp/{id}/category", UUID.randomUUID())
+                        .with(jwt().authorities(role("hr-designer")))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"category\":\"ABSENCE\"}"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void putCategory_returns400_onInvalidValue() throws Exception {
+        mvc.perform(put("/api/v1/antragstyp/{id}/category", UUID.randomUUID())
+                        .with(jwt().authorities(role("hr-designer")))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"category\":\"NONSENSE\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void putCategory_returns403_forApplicant() throws Exception {
+        mvc.perform(put("/api/v1/antragstyp/{id}/category", UUID.randomUUID())
+                        .with(jwt().authorities(role("applicant")))
+                        .contentType(MediaType.APPLICATION_JSON).content("{\"category\":\"ABSENCE\"}"))
+                .andExpect(status().isForbidden());
     }
 }
