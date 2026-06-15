@@ -80,7 +80,58 @@ describe('AntragListComponent', () => {
 
   // -------------------------------------------------------------------------
   it('with ?neu=x: auto-opens create form preselected with type x (ADR-021)', async () => {
-    const { fixture } = await createFixture('x');
+    // The service stubs must return the type BEFORE the fixture is created so
+    // the preselect path (inside reload()'s success callback) can run after
+    // liveTypen is populated — that is the race fix being tested here.
+    const antragSvc   = makeAntragService();
+    const antragTypSvc = makeAntragsTypService();
+    antragTypSvc.list.mockReturnValue(of([
+      {
+        id: 'x',
+        key: 'typ-x',
+        title: { de: 'Typ X' },
+        status: 'LIVE',
+        category: null,
+        currentVersionId: null,
+        description: null,
+        createdAt: '',
+        updatedAt: '',
+      }
+    ]));
+    // listVersions is called by onTypChange — keep it returning empty so the
+    // subscribe resolves without errors.
+    antragTypSvc.listVersions.mockReturnValue(of([]));
+
+    await TestBed.configureTestingModule({
+      imports: [AntragListComponent, TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AntragService,     useValue: antragSvc },
+        { provide: AntragsTypService, useValue: antragTypSvc },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              queryParamMap: convertToParamMap({ neu: 'x' }),
+            },
+          },
+        },
+        {
+          provide: RuntimeConfigService,
+          useValue: { get: () => ({ apiBaseUrl: '/api/v1' }) },
+        },
+      ],
+    }).compileComponents();
+
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    const fixture = TestBed.createComponent(AntragListComponent);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
     expect(fixture.componentInstance.creating).toBe(true);
     expect(fixture.componentInstance.selectedTypId).toBe('x');
   });

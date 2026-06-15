@@ -82,15 +82,14 @@ export class AntragListComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.reload();
+    // Capture the ?neu= param BEFORE reload() so it's available in the
+    // type-list callback — the preselect must happen AFTER liveTypen is
+    // populated, otherwise the native <select> has no matching <option> yet.
     const neu = this.route.snapshot.queryParamMap.get('neu');
-    if (neu) {
-      this.openCreate();
-      this.onTypChange(neu);
-    }
+    this.reload(neu ?? undefined);
   }
 
-  private reload(): void {
+  private reload(preselectTypId?: string): void {
     this.loading = true;
     this.failed = false;
     forkJoin({
@@ -103,6 +102,12 @@ export class AntragListComponent implements OnInit {
         this.liveTypen = typen.filter(t => t.status === 'LIVE');
         this.rebuildTitleMap();
         this.loading = false;
+        // Preselect the type AFTER liveTypen is set so the native <select>
+        // already has its <option> elements when [value] is bound (ADR-021).
+        if (preselectTypId) {
+          this.openCreate();
+          this.onTypChange(preselectTypId);
+        }
         this.cdr.markForCheck();
       },
       error: () => {
