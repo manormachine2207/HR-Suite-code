@@ -47,6 +47,10 @@
         "title": "My Requests",
         "description": "Submit your own requests and track their status."
       },
+      "antragKatalog": {
+        "title": "Submit a new request",
+        "description": "Pick a request type from the catalog and start it."
+      },
       "aufgaben": {
         "title": "Tasks",
         "description": "Review open tasks and decide on requests."

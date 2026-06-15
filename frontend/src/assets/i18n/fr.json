@@ -47,6 +47,10 @@
         "title": "Mes demandes",
         "description": "Déposer vos propres demandes et suivre leur statut."
       },
+      "antragKatalog": {
+        "title": "Déposer une nouvelle demande",
+        "description": "Choisir un type de demande dans le catalogue et le démarrer."
+      },
       "aufgaben": {
         "title": "Tâches",
         "description": "Examiner les tâches ouvertes et statuer sur les demandes."

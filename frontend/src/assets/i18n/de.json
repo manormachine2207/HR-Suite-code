@@ -47,6 +47,10 @@
         "title": "Meine Anträge",
         "description": "Eigene Anträge stellen und ihren Status verfolgen."
       },
+      "antragKatalog": {
+        "title": "Neuen Antrag stellen",
+        "description": "Aus dem Katalog einen Antragstyp wählen und starten."
+      },
       "aufgaben": {
         "title": "Aufgaben",
         "description": "Offene Aufgaben prüfen und Anträge entscheiden."

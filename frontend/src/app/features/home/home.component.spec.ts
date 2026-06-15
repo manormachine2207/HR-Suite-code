@@ -22,6 +22,7 @@ const DE = {
     modules: {
       antragstypen: { title: 'Antragstypen', description: 'Antragstypen modellieren.' },
       antraege: { title: 'Meine Anträge', description: 'Eigene Anträge stellen.' },
+      antragKatalog: { title: 'Neuen Antrag stellen', description: 'Aus dem Katalog einen Antragstyp wählen und starten.' },
       aufgaben: { title: 'Aufgaben', description: 'Offene Aufgaben prüfen.' },
       lohnrechner: {
         title: 'Lohnrechner',
@@ -105,16 +106,16 @@ describe('HomeComponent', () => {
     expect(values).toEqual(['–', '0', '–']); // tasks loaded fine (empty list)
   });
 
-  it('renders the six module cards as real links', async () => {
+  it('renders the seven module cards as real links', async () => {
     const fixture = TestBed.createComponent(HomeComponent);
     await fixture.whenStable();
 
     const el: HTMLElement = fixture.nativeElement;
     const cards = el.querySelectorAll('.hr-module-card');
-    expect(cards).toHaveLength(6);
+    expect(cards).toHaveLength(7);
     const hrefs = [...el.querySelectorAll<HTMLAnchorElement>('a.hr-module-link')]
       .map(a => a.getAttribute('href'));
-    expect(hrefs).toEqual(['/antragstypen', '/antraege', '/aufgaben', '/lohnrechner', '/hilfe', '/plattform']);
+    expect(hrefs).toEqual(['/antragstypen', '/antraege', '/antraege/neu', '/aufgaben', '/lohnrechner', '/hilfe', '/plattform']);
   });
 
   it('Lohnrechner card carries the "Simulation" maturity badge, the others the product tag (ADR-018)', async () => {
@@ -124,7 +125,7 @@ describe('HomeComponent', () => {
     const el: HTMLElement = fixture.nativeElement;
     const tags = [...el.querySelectorAll('.hr-tag')].map(t => t.textContent?.trim());
     // 'home.tag' is untranslated in this spec → the raw key identifies the default tag.
-    expect(tags).toEqual(['home.tag', 'home.tag', 'home.tag', 'Simulation', 'home.tag', 'home.tag']);
+    expect(tags).toEqual(['home.tag', 'home.tag', 'home.tag', 'home.tag', 'Simulation', 'home.tag', 'home.tag']);
     expect(el.querySelectorAll('.hr-tag--badge')).toHaveLength(1);
   });
 

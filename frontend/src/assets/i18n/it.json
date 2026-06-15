@@ -47,6 +47,10 @@
         "title": "Le mie richieste",
         "description": "Presentare le proprie richieste e seguirne lo stato."
       },
+      "antragKatalog": {
+        "title": "Presenta una nuova richiesta",
+        "description": "Scegli un tipo di richiesta dal catalogo e avvialo."
+      },
       "aufgaben": {
         "title": "Compiti",
         "description": "Esaminare i compiti aperti e decidere sulle richieste."
