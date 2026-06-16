@@ -27,3 +27,33 @@ Prozessvariablen-Lookups, kein JUEL — siehe `N8nActionDelegate`).
 3. e2e: Weiterbildungs-Antrag mit `kosten > 5000` einreichen, Kette über `/aufgaben`
    genehmigen (Erfassung → VG → HR-BP → HAL) → `action_execution` zeigt
    `sf_lms_uebergabe | sf-lms-record-learning-events | SUCCEEDED`.
+
+# HMAC-Signatur-Erzwingung (ADR-010 Trust-Boundary, Spec ADR-010-spec-n8n-signature-enforcement)
+
+Beide Workflows validieren den vom Backend gesendeten `X-HRSuite-Signature`
+(HMAC-SHA256 über den Roh-Body). Voraussetzung: die n8n-ENV
+`HRSUITE_N8N_HMAC_SECRET` / `NODE_FUNCTION_ALLOW_BUILTIN=crypto` /
+`N8N_BLOCK_ENV_ACCESS_IN_NODE=false` sind gesetzt (docker-compose) und der Secret
+stimmt mit dem des Backends überein (`${N8N_HMAC_SECRET:-dev-n8n-secret}`).
+
+1. Aktualisierte Workflows importieren (idempotent, mit fixer id):
+   ```bash
+   for w in echo sf-lms; do
+     id=$([ $w = echo ] && echo provisiondemo001 || echo sfLmsRecordLearnEv01)
+     docker cp docker/n8n/$w-workflow.json hrsuite-n8n:/tmp/$w.json
+     docker exec hrsuite-n8n n8n import:workflow --input=/tmp/$w.json
+     docker exec hrsuite-n8n n8n update:workflow --id=$id --active=true
+   done
+   docker restart hrsuite-n8n
+   ```
+   (Webhook-Registrierung hinkt dem `healthz` nach — den Endpoint pollen, bis er
+   nicht mehr 404 liefert.)
+2. Tamper-Check (Dev):
+   ```bash
+   S=dev-n8n-secret; B='{"idempotencyKey":"t:1","ref":"provision-ad-account","input":{}}'
+   SIG=$(printf '%s' "$B" | openssl dgst -sha256 -hmac "$S" -r | cut -d' ' -f1)
+   curl -s -o /dev/null -w "korrekt: %{http_code}\n"  -X POST localhost:5678/webhook/provision-ad-account -H "X-HRSuite-Signature: $SIG" -H "Content-Type: application/json" -d "$B"   # 200
+   curl -s -o /dev/null -w "falsch:  %{http_code}\n"  -X POST localhost:5678/webhook/provision-ad-account -H "X-HRSuite-Signature: bad" -H "Content-Type: application/json" -d "$B"     # 401
+   curl -s -o /dev/null -w "ohne:    %{http_code}\n"  -X POST localhost:5678/webhook/provision-ad-account -H "Content-Type: application/json" -d "$B"                                    # 401
+   ```
+   Erwartet: 200 / 401 / 401. Ungültige Signatur → 4xx → Connector terminal (FAILED).
