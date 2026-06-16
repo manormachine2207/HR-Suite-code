@@ -126,6 +126,14 @@ services:
       N8N_PROTOCOL: http
       WEBHOOK_URL: http://n8n:5678/
       GENERIC_TIMEZONE: Europe/Zurich
+      # ADR-010 trust-boundary: the workflows validate the backend's HMAC signature
+      # (X-HRSuite-Signature) over the raw body. The Code node needs the builtin
+      # `crypto` module and read access to the shared secret env var (same value the
+      # backend resolves via tenant_n8n_config.hmac_secret_ref → SDR-004). Concept
+      # stage: one shared dev secret (per-tenant n8n auth is a later infra concern).
+      NODE_FUNCTION_ALLOW_BUILTIN: crypto
+      N8N_BLOCK_ENV_ACCESS_IN_NODE: "false"
+      HRSUITE_N8N_HMAC_SECRET: ${N8N_HMAC_SECRET:-dev-n8n-secret}
     ports:
       - "5678:5678"
     volumes:

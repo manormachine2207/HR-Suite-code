@@ -6,23 +6,91 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "sf-lms-record-learning-events",
-        "responseMode": "responseNode"
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
       },
       "name": "Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [400, 300],
+      "position": [
+        300,
+        300
+      ],
       "webhookId": "sf-lms-record-learning-events"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ADR-010 trust-boundary: validate the backend's HMAC-SHA256 over the RAW body\n// (X-HRSuite-Signature). Raw body is in binary.data (webhook \"Raw Body\" on); the\n// shared secret is in $env (tenant_n8n_config.hmac_secret_ref -> SDR-004). Does NOT\n// throw (a throwing Code node yields an empty 200 = fail-open in responseNode mode);\n// instead sets __valid for the IF node, which routes invalid calls to a 401 Respond.\nconst crypto=require('crypto');\nconst it=$input.first();\nconst sig=String((it.json.headers||{})['x-hrsuite-signature']||'');\nconst secret=$env.HRSUITE_N8N_HMAC_SECRET||'';\nlet ok=false;\ntry{\n  const raw=Buffer.from((((it.binary||{}).data||{}).data)||'','base64');\n  const expected=crypto.createHmac('sha256',secret).update(raw).digest('hex');\n  ok = sig.length===expected.length && crypto.timingSafeEqual(Buffer.from(sig),Buffer.from(expected));\n}catch(e){ ok=false; }\nreturn [{ json: Object.assign({}, it.json, { __valid: ok }) }];"
+      },
+      "name": "Verify Signature",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "valid",
+              "leftValue": "={{ $json.__valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        740,
+        300
+      ]
     },
     {
       "parameters": {
         "respondWith": "json",
         "responseBody": "={\"ok\": true, \"sfEndpoint\": \"POST /learning/odatav4/public/admin/externalEvent/v1/recordLearningEvents\", \"recorded\": $json.body }"
       },
-      "name": "Respond to Webhook",
+      "name": "Respond OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [620, 300]
+      "position": [
+        960,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\"error\": \"invalid signature\" }",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "name": "Respond 401",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        960,
+        400
+      ]
     }
   ],
   "connections": {
@@ -30,7 +98,36 @@
       "main": [
         [
           {
-            "node": "Respond to Webhook",
+            "node": "Verify Signature",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Signature": {
+      "main": [
+        [
+          {
+            "node": "Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Valid?": {
+      "main": [
+        [
+          {
+            "node": "Respond OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 401",
             "type": "main",
             "index": 0
           }
