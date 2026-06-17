@@ -92,7 +92,7 @@ class AntragServiceTest {
         when(antragsTypService.findPublishedMajor(atId)).thenReturn(Optional.of(new PublishedMajorRef(versionId, 2, "proc-key")));
         when(workflowEngine.startInstance(any(), eq("proc-key"), any(), any())).thenReturn("pi-1");
 
-        service.submit(a.getId(), SUBJECT, "applicant@dev.local");
+        service.submit(a.getId(), SUBJECT, "applicant@dev.local", "de");
 
         assertThat(a.getStatus()).isEqualTo(AntragStatus.SUBMITTED);
         assertThat(a.getAntragstypVersionId()).isEqualTo(versionId);
@@ -116,7 +116,7 @@ class AntragServiceTest {
                 .thenReturn(Optional.of(new PublishedMajorRef(UUID.randomUUID(), 0, "proc-key")));
         when(workflowEngine.startInstance(any(), eq("proc-key"), any(), any())).thenReturn("pi-1");
 
-        service.submit(a.getId(), SUBJECT, "applicant@dev.local");
+        service.submit(a.getId(), SUBJECT, "applicant@dev.local", "de");
 
         @SuppressWarnings("unchecked")
         var vars = org.mockito.ArgumentCaptor.forClass(Map.class);
@@ -139,7 +139,7 @@ class AntragServiceTest {
                         .AntragsTypExceptions.Invalid("payload does not match"))
                 .when(antragsTypService).validatePayloadForPublishedMajor(eq(atId), any());
 
-        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local"))
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local", "de"))
                 .hasMessageContaining("payload does not match");
 
         assertThat(a.getStatus()).isEqualTo(AntragStatus.DRAFT);
@@ -154,7 +154,7 @@ class AntragServiceTest {
         a.submit(UUID.randomUUID(), 0); // now SUBMITTED
         when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
 
-        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local"))
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local", "de"))
                 .isInstanceOf(AntragExceptions.IllegalState.class);
     }
 
@@ -165,7 +165,7 @@ class AntragServiceTest {
         when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
         when(antragsTypService.findPublishedMajor(atId)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local"))
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local", "de"))
                 .isInstanceOf(AntragExceptions.IllegalState.class);
     }
 
@@ -175,8 +175,40 @@ class AntragServiceTest {
         Antrag a = draft(atId, OTHER_SUBJECT);   // owned by someone else
         when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
 
-        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local"))
+        assertThatThrownBy(() -> service.submit(a.getId(), SUBJECT, "applicant@dev.local", "de"))
                 .isInstanceOf(AntragExceptions.NotFound.class);
+    }
+
+    /** ADR-017 Stufe 2c: locale captured at submit so the outbox worker can render the right language. */
+    @Test
+    void submitCapturesLocaleOnAntrag() {
+        UUID atId = UUID.randomUUID();
+        UUID versionId = UUID.randomUUID();
+        Antrag a = draft(atId, SUBJECT);
+        when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
+        when(antragsTypService.findPublishedMajor(atId))
+                .thenReturn(Optional.of(new PublishedMajorRef(versionId, 0, "proc-key")));
+        when(workflowEngine.startInstance(any(), any(), any(), any())).thenReturn("pi-1");
+
+        service.submit(a.getId(), SUBJECT, "applicant@dev.local", "fr");
+
+        assertThat(a.getAntragstellerLocale()).isEqualTo("fr");
+    }
+
+    /** ADR-017 Stufe 2c: null locale stores null (worker falls back to "de"). */
+    @Test
+    void submitWithNullLocaleStoresNull() {
+        UUID atId = UUID.randomUUID();
+        UUID versionId = UUID.randomUUID();
+        Antrag a = draft(atId, SUBJECT);
+        when(antragRepository.findById(a.getId())).thenReturn(Optional.of(a));
+        when(antragsTypService.findPublishedMajor(atId))
+                .thenReturn(Optional.of(new PublishedMajorRef(versionId, 0, "proc-key")));
+        when(workflowEngine.startInstance(any(), any(), any(), any())).thenReturn("pi-1");
+
+        service.submit(a.getId(), SUBJECT, "applicant@dev.local", null);
+
+        assertThat(a.getAntragstellerLocale()).isNull();
     }
 
     // ---- cancel -----------------------------------------------------------

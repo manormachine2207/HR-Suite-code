@@ -57,6 +57,10 @@ public class Antrag {
     @Column(name = "antragsteller_email", length = 320)
     private String antragstellerEmail;
 
+    /** Applicant locale captured from the OIDC claim at submit (ADR-017 Stufe 2c); null → worker falls back to "de". */
+    @Column(name = "antragsteller_locale", length = 5)
+    private String antragstellerLocale;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 16)
     private AntragStatus status;
@@ -133,6 +137,11 @@ public class Antrag {
         this.antragstellerEmail = (email == null || email.isBlank()) ? null : email;
     }
 
+    /** Captures the applicant locale from the OIDC claim at submit (ADR-017 Stufe 2c). */
+    public void recordApplicantLocale(String locale) {
+        this.antragstellerLocale = (locale == null || locale.isBlank()) ? null : locale;
+    }
+
     /** Records the started Flowable process-instance id after submission (ADR-009 §5). */
     public void attachWorkflowProcess(String processInstanceId) {
         this.workflowProcessId = processInstanceId;
@@ -174,6 +183,7 @@ public class Antrag {
     public UUID getMigratedFromVersionId() { return migratedFromVersionId; }
     public String getAntragstellerSubject() { return antragstellerSubject; }
     public String getAntragstellerEmail() { return antragstellerEmail; }
+    public String getAntragstellerLocale() { return antragstellerLocale; }
     public AntragStatus getStatus() { return status; }
     public Map<String, Object> getPayload() {
         return payload == null ? null : Collections.unmodifiableMap(payload);

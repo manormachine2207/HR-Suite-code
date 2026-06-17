@@ -97,7 +97,7 @@ class ReviewServiceTest {
 
         verify(notificationService).notifyAntragDecided(
                 antrag.getAntragstellerSubject(), antrag.getId(), "APPROVED",
-                antrag.getAntragstellerEmail());
+                antrag.getAntragstellerEmail(), antrag.getAntragstellerLocale());
     }
 
     @Test
@@ -107,7 +107,7 @@ class ReviewServiceTest {
         service.complete("t-1", "approve", null, Set.of("hr-reviewer"));
 
         org.mockito.Mockito.verify(notificationService, org.mockito.Mockito.never())
-                .notifyAntragDecided(any(), any(), any(), any());
+                .notifyAntragDecided(any(), any(), any(), any(), any());
     }
 
     @Test

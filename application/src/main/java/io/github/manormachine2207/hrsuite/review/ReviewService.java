@@ -129,7 +129,7 @@ public class ReviewService {
                 // same transaction (rolls back with the decision if anything fails).
                 notificationService.notifyAntragDecided(
                         antrag.getAntragstellerSubject(), antrag.getId(), terminal.name(),
-                        antrag.getAntragstellerEmail());
+                        antrag.getAntragstellerEmail(), antrag.getAntragstellerLocale());
             }
         }
         // SDR-002-Minimum bis zum Audit-Modul: strukturiertes Event (IDs, kein PII-Payload).

@@ -16,6 +16,12 @@ import java.util.UUID;
  * transitions (from the review path) and read by the recipient via the bell.
  * Tenant-scoped through {@link TenantContext} + RLS (ADR-008); the recipient
  * boundary is the {@code recipientSubject} match (same pattern as antrag ownership).
+ *
+ * <p>ADR-017 Stufe 2c: decision e-mails are no longer sent synchronously here;
+ * instead a {@link EmailOutbox} row is enqueued inside the same transaction.
+ * The background worker (task C2-4) picks up PENDING rows and sends them.
+ * {@link SmtpRelayService} and {@link MailSender} are intentionally NOT injected
+ * here — they live in the SMTP relay configuration / worker path only.
  */
 @Service
 @Transactional
@@ -24,53 +30,46 @@ public class NotificationService {
     private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
 
     private final NotificationRepository repository;
-    private final SmtpRelayService smtpRelayService;
-    private final MailSender mailSender;
+    private final EmailOutboxRepository outboxRepository;
 
     public NotificationService(NotificationRepository repository,
-                               SmtpRelayService smtpRelayService, MailSender mailSender) {
+                               EmailOutboxRepository outboxRepository) {
         this.repository = repository;
-        this.smtpRelayService = smtpRelayService;
-        this.mailSender = mailSender;
+        this.outboxRepository = outboxRepository;
     }
 
     /**
      * Records that an applicant's request reached a terminal decision. Called from the
-     * review path in the same transaction, so the IN-APP notification shares the tenant
-     * GUC and rolls back with the decision. The optional e-mail (ADR-017 Stufe 2b) is a
-     * best-effort last step: gated by an enabled relay + a known recipient address, and
-     * caught so a mail failure NEVER rolls back the decision.
+     * review path in the same transaction, so the IN-APP notification and the outbox row
+     * share the tenant GUC and roll back with the decision if anything fails.
+     *
+     * <p>If {@code recipientEmail} is known, a {@link EmailOutbox} row in state PENDING
+     * is enqueued for the background worker (ADR-017 Stufe 2c).
+     *
+     * @param recipientLocale BCP-47 locale; falls back to {@code "de"} when null/blank.
+     *     Note: ideally we would read {@code tenant.default_locale} but that would
+     *     introduce a notification→tenant module dependency. "de" is the lead language
+     *     per Tenet 6 / BDR-005 and a safe fallback until a tenant-locale lookup is added.
      */
     public void notifyAntragDecided(String recipientSubject, UUID antragId, String status,
-                                    String recipientEmail) {
+                                    String recipientEmail, String recipientLocale) {
         Notification n = new Notification(
                 UuidCreator.getTimeOrderedEpoch(), TenantContext.require(), recipientSubject,
                 NotificationType.ANTRAG_DECIDED, antragId, Map.of("status", status));
         repository.save(n);
-        sendEmailBestEffort(antragId, status, recipientEmail);
-    }
 
-    /** Sends the decision e-mail if the relay is enabled and an address is known; never throws. */
-    private void sendEmailBestEffort(UUID antragId, String status, String recipientEmail) {
-        if (recipientEmail == null || recipientEmail.isBlank()) {
-            return;
-        }
-        try {
-            SmtpRelayConfig relay = smtpRelayService.get();
-            if (!relay.isEnabled()) {
-                return;
-            }
-            MailMessage msg = MailMessage.text(recipientEmail,
-                    "HR-Suite: Ihr Antrag wurde entschieden",
-                    "Guten Tag\n\nIhr Antrag wurde entschieden: " + status + ".\n\n"
-                            + "Details finden Sie in der HR-Suite unter \"Meine Anträge\" "
-                            + "(Antrag-Referenz " + antragId + ").\n\n"
-                            + "Freundliche Grüsse\nHR-Suite");
-            mailSender.send(relay, msg);
-            log.info("notification.email.sent antrag={} status={}", antragId, status);
-        } catch (RuntimeException e) {
-            // Best-effort (ADR-017 Stufe 2b): the in-app notification + decision stand.
-            log.warn("notification.email.failed antrag={} error={}", antragId, e.getMessage());
+        if (recipientEmail != null && !recipientEmail.isBlank()) {
+            String locale = (recipientLocale != null && !recipientLocale.isBlank())
+                    ? recipientLocale : "de";
+            EmailOutbox outbox = new EmailOutbox(
+                    UuidCreator.getTimeOrderedEpoch(),
+                    TenantContext.require(),
+                    recipientEmail,
+                    locale,
+                    EmailTemplates.ANTRAG_DECIDED,
+                    Map.of("status", status, "antragId", antragId.toString()));
+            outboxRepository.save(outbox);
+            log.info("notification.outbox.enqueued antrag={} status={} locale={}", antragId, status, locale);
         }
     }
 

@@ -54,6 +54,8 @@ public class DevSecurityConfig {
                             // ADR-017 Stufe 2b: synthesize an email claim so the email path is
                             // exercisable in dev (prod uses the real OIDC email claim).
                             "email", role + "@dev.local",
+                            // ADR-017 Stufe 2c: synthesize a locale claim (prod: real OIDC locale claim).
+                            "locale", "de",
                             TenantContextFilter.TENANT_CLAIM, tenantId));
                 }
             }
