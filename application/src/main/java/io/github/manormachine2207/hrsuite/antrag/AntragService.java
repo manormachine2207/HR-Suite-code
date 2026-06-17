@@ -62,13 +62,15 @@ public class AntragService {
      * (ADR-009 §4). Re-reads the published major at submission time, so a major
      * published after the draft was created is the one that gets pinned.
      */
-    public Antrag submit(UUID antragId, String subject, String email) {
+    public Antrag submit(UUID antragId, String subject, String email, String locale) {
         Antrag antrag = getOwned(antragId, subject);
         if (antrag.getStatus() != AntragStatus.DRAFT) {
             throw new AntragExceptions.IllegalState("only DRAFT requests can be submitted: " + antragId);
         }
         // ADR-017 Stufe 2b: capture the applicant e-mail so a later decision can mail them.
         antrag.recordApplicantEmail(email);
+        // ADR-017 Stufe 2c: capture the applicant locale for multilingual outbox rendering.
+        antrag.recordApplicantLocale(locale);
         PublishedMajorRef major = antragsTypService.findPublishedMajor(antrag.getAntragstypId())
                 .orElseThrow(() -> new AntragExceptions.IllegalState(
                         "antragstyp has no published major to pin: " + antrag.getAntragstypId()));

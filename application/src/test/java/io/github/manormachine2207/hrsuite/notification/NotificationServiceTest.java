@@ -18,7 +18,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
@@ -28,21 +30,15 @@ class NotificationServiceTest {
     private static final String OTHER = "dev-applicant~bb";
 
     @Mock NotificationRepository repository;
-    @Mock SmtpRelayService smtpRelayService;
-    @Mock MailSender mailSender;
+    @Mock EmailOutboxRepository outboxRepository;
     private NotificationService service;
 
     @BeforeEach
     void setUp() {
-        service = new NotificationService(repository, smtpRelayService, mailSender);
+        service = new NotificationService(repository, outboxRepository);
         TenantContext.set(TENANT);
         lenient().when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
-    }
-
-    private SmtpRelayConfig relay(boolean enabled) {
-        SmtpRelayConfig c = new SmtpRelayConfig();
-        c.update("mailpit", 1025, SmtpSecurity.NONE, "no-reply@hr-suite.local", null, null, null, enabled);
-        return c;
+        lenient().when(outboxRepository.save(any())).thenAnswer(i -> i.getArgument(0));
     }
 
     @AfterEach
@@ -50,14 +46,16 @@ class NotificationServiceTest {
         TenantContext.clear();
     }
 
+    // ---- in-app notification -------------------------------------------------
+
     @Test
     void notifyAntragDecidedSavesTenantScopedRecipientNotification() {
         UUID antragId = UUID.randomUUID();
 
-        service.notifyAntragDecided(SUBJECT, antragId, "APPROVED", null);
+        service.notifyAntragDecided(SUBJECT, antragId, "APPROVED", null, null);
 
         ArgumentCaptor<Notification> captor = ArgumentCaptor.forClass(Notification.class);
-        org.mockito.Mockito.verify(repository).save(captor.capture());
+        verify(repository).save(captor.capture());
         Notification n = captor.getValue();
         assertThat(n.getTenantId()).isEqualTo(TENANT);
         assertThat(n.getRecipientSubject()).isEqualTo(SUBJECT);
@@ -67,53 +65,70 @@ class NotificationServiceTest {
         assertThat(n.isRead()).isFalse();
     }
 
-    // ---- ADR-017 Stufe 2b: best-effort e-mail ------------------------------
+    // ---- ADR-017 Stufe 2c: outbox enqueue ------------------------------------
 
+    /** Happy path: address + locale known → PENDING outbox row with right fields. */
     @Test
-    void emailSentWhenRelayEnabledAndAddressKnown() {
-        when(smtpRelayService.get()).thenReturn(relay(true));
+    void decidedEnqueuesOutboxRowWhenEmailKnown() {
+        UUID antragId = UUID.randomUUID();
 
-        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "user@example.ch");
+        service.notifyAntragDecided(SUBJECT, antragId, "APPROVED", "user@example.ch", "fr");
 
-        org.mockito.ArgumentCaptor<MailMessage> msg = org.mockito.ArgumentCaptor.forClass(MailMessage.class);
-        org.mockito.Mockito.verify(mailSender).send(any(), msg.capture());
-        assertThat(msg.getValue().to()).isEqualTo("user@example.ch");
-        assertThat(msg.getValue().bodyText()).contains("APPROVED");
+        ArgumentCaptor<EmailOutbox> captor = ArgumentCaptor.forClass(EmailOutbox.class);
+        verify(outboxRepository).save(captor.capture());
+        EmailOutbox row = captor.getValue();
+        assertThat(row.getRecipientEmail()).isEqualTo("user@example.ch");
+        assertThat(row.getLocale()).isEqualTo("fr");
+        assertThat(row.getTemplateKey()).isEqualTo(EmailTemplates.ANTRAG_DECIDED);
+        assertThat(row.getStatus()).isEqualTo(EmailOutboxStatus.PENDING);
+        assertThat(row.getParams()).containsEntry("status", "APPROVED");
+        assertThat(row.getParams()).containsEntry("antragId", antragId.toString());
+        assertThat(row.getTenantId()).isEqualTo(TENANT);
     }
 
+    /** No email address → no outbox row. */
     @Test
-    void noEmailWhenRelayDisabled() {
-        when(smtpRelayService.get()).thenReturn(relay(false));
+    void noOutboxRowWhenEmailMissing() {
+        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", null, "de");
 
-        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "user@example.ch");
-
-        org.mockito.Mockito.verify(mailSender, org.mockito.Mockito.never()).send(any(), any());
+        verifyNoInteractions(outboxRepository);
     }
 
+    /** Blank email address also produces no outbox row. */
     @Test
-    void noEmailWhenAddressMissing() {
-        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", null);
+    void noOutboxRowWhenEmailBlank() {
+        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "  ", "de");
 
-        org.mockito.Mockito.verifyNoInteractions(smtpRelayService);
-        org.mockito.Mockito.verify(mailSender, org.mockito.Mockito.never()).send(any(), any());
+        verifyNoInteractions(outboxRepository);
     }
 
-    /** A mail failure is swallowed — the in-app notification (and the decision) stand. */
+    /** Null locale falls back to "de" (lead language, avoids tenant-module dep). */
     @Test
-    void mailFailureDoesNotPropagate() {
-        when(smtpRelayService.get()).thenReturn(relay(true));
-        org.mockito.Mockito.doThrow(new RuntimeException("smtp down")).when(mailSender).send(any(), any());
+    void localeFallsBackToDeWhenNull() {
+        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "user@example.ch", null);
 
-        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "user@example.ch");
-
-        org.mockito.Mockito.verify(repository).save(any());   // in-app notification still saved
+        ArgumentCaptor<EmailOutbox> captor = ArgumentCaptor.forClass(EmailOutbox.class);
+        verify(outboxRepository).save(captor.capture());
+        assertThat(captor.getValue().getLocale()).isEqualTo("de");
     }
+
+    /** Blank locale also falls back to "de". */
+    @Test
+    void localeFallsBackToDeWhenBlank() {
+        service.notifyAntragDecided(SUBJECT, UUID.randomUUID(), "APPROVED", "user@example.ch", "  ");
+
+        ArgumentCaptor<EmailOutbox> captor = ArgumentCaptor.forClass(EmailOutbox.class);
+        verify(outboxRepository).save(captor.capture());
+        assertThat(captor.getValue().getLocale()).isEqualTo("de");
+    }
+
+    // ---- markRead ------------------------------------------------------------
 
     @Test
     void markReadOfOwnNotificationSetsReadAt() {
         Notification n = new Notification(UUID.randomUUID(), TENANT, SUBJECT,
                 NotificationType.ANTRAG_DECIDED, UUID.randomUUID(), Map.of("status", "APPROVED"));
-        when(repository.findById(n.getId())).thenReturn(Optional.of(n));
+        lenient().when(repository.findById(n.getId())).thenReturn(Optional.of(n));
 
         service.markRead(n.getId(), SUBJECT);
 
@@ -124,7 +139,7 @@ class NotificationServiceTest {
     void markReadOfForeignNotificationIsNotFound() {
         Notification n = new Notification(UUID.randomUUID(), TENANT, OTHER,
                 NotificationType.ANTRAG_DECIDED, UUID.randomUUID(), Map.of());
-        when(repository.findById(n.getId())).thenReturn(Optional.of(n));
+        lenient().when(repository.findById(n.getId())).thenReturn(Optional.of(n));
 
         assertThatThrownBy(() -> service.markRead(n.getId(), SUBJECT))
                 .isInstanceOf(NotificationExceptions.NotFound.class);
@@ -137,7 +152,7 @@ class NotificationServiceTest {
                 NotificationType.ANTRAG_DECIDED, UUID.randomUUID(), Map.of());
         Notification b = new Notification(UUID.randomUUID(), TENANT, SUBJECT,
                 NotificationType.ANTRAG_DECIDED, UUID.randomUUID(), Map.of());
-        when(repository.findByRecipientSubjectOrderByCreatedAtDesc(SUBJECT)).thenReturn(List.of(a, b));
+        lenient().when(repository.findByRecipientSubjectOrderByCreatedAtDesc(SUBJECT)).thenReturn(List.of(a, b));
 
         service.markAllRead(SUBJECT);
 
